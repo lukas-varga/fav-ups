@@ -38,7 +38,7 @@ def main():
     clock = p.time.Clock()
     screen.fill(p.Color("white"))
     # Game state
-    gs = onitama_engine.game_state()
+    gs = onitama_engine.GameState()
     # Change icon and title
     program_icon = p.image.load('images/bN.png')
     p.display.set_icon(program_icon)
@@ -47,10 +47,32 @@ def main():
     # Only once before loop
     load_images()
     running = True
+    # No square selected, last click of user (row, col)
+    sq_selected = ()
+    # All the player clicks two tuple [(4,5), (2,2)]
+    player_clicks = []
     while running:
         for e in p.event.get():
             if e.type == p.QUIT:
                 running = False
+            elif e.type == p.MOUSEBUTTONDOWN:
+                # x,y location of mopuse
+                location = p.mouse.get_pos()
+                col = location[0] // SQ_SIZE
+                row = location[1] // SQ_SIZE
+                # User clicked at the same square twice
+                if sq_selected == (row, col):
+                    sq_selected = ()
+                    player_clicks = []
+                else:
+                    sq_selected = (row, col)
+                    # Append fst and snd click
+                    player_clicks.append(sq_selected)
+
+                # Snd click
+                if len(player_clicks) == 2:
+                    pass
+
         draw_game_state(screen, gs)
         clock.tick(MAX_FPS)
         p.display.flip()
