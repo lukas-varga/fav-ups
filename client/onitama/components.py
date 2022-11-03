@@ -33,10 +33,4 @@ Board is 5x5 2D list where each element has two chars
 Fst char represents color and snd char represents type (Pawn/King)
 Symbol -- represents empty board
 """
-BOARD = [
-    ["bP", "bP", "bK", "bP", "bP"],
-    ["--", "--", "--", "--", "--"],
-    ["--", "--", "--", "--", "--"],
-    ["--", "--", "--", "--", "--"],
-    ["wP", "wP", "wK", "wP", "wP"]
-]
+

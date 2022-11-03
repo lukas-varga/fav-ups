@@ -1,20 +1,34 @@
 import random
 
 import numpy as np
-from onitama.components import CARDS, BOARD, ID_TO_CARD
+from onitama.components import CARDS, ID_TO_CARD
 
 """
 Information about current game
 """
 class GameState:
     def __init__(self):
-        self.board = BOARD
+        self.board = [
+            ["bP", "bP", "bK", "bP", "bP"],
+            ["--", "--", "--", "--", "--"],
+            ["--", "--", "--", "--", "--"],
+            ["--", "--", "--", "--", "--"],
+            ["wP", "wP", "wK", "wP", "wP"]
+        ]
         self.cards = CARDS
         self.selected_cards = self.pick_five_cards()
+
+        # Move to server C++
+        self.white_cards = (self.selected_cards[0], self.selected_cards[1])
+        self.spare_card = self.selected_cards[2]
+        self.black_cards = (self.selected_cards[3], self.selected_cards[4])
 
         self.white_to_move = True
         self.move_log = []
 
+    """
+    Pick randomly five cards at the beginning
+    """
     def pick_five_cards(self):
         selected_ids = list(np.random.permutation(len(self.cards))[:5])
 
@@ -47,6 +61,16 @@ class GameState:
             self.board[move.end_row][move.end_col] = move.piece_captured
             self.white_to_move = not self.white_to_move
 
+    def get_valid_moves(self):
+        return self.get_all_possible_moves()
+
+    def get_all_possible_moves(self):
+        moves = []
+        for r in range(len(self.board)):
+            for c in range(len(self.board[r])):
+                turn = self.board[r][c][0]
+                if (turn == 'w' and self.white_to_move) and (turn == 'b' and not self.white_to_move):
+                    get
 
 """
 Class for handling input moves from user
