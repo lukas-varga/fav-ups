@@ -5,6 +5,7 @@ This is main driver file for the game
 import pygame
 
 from onitama import onitama_engine
+from onitama.network import Network
 
 # Colors
 LIGHT_COLOR = "antiquewhite1"

@@ -1,13 +1,18 @@
-import random
+"""
+Game engine with all the info about the game
+"""
 
 import numpy as np
 from onitama.components import CARDS, ID_TO_CARD
+from onitama.network import Network
 
 """
 Information about current game
 """
 class GameState:
     def __init__(self):
+        # Network socket
+        self.net = Network()
         self.board = [
             ["bP", "bP", "bK", "bP", "bP"],
             ["--", "--", "--", "--", "--"],
