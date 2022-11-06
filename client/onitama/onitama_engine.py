@@ -12,7 +12,7 @@ Information about current game
 class GameState:
     def __init__(self):
         # Network socket
-        self.net = Network()
+        # self.net = Network()
         self.board = [
             ["bP", "bP", "bK", "bP", "bP"],
             ["--", "--", "--", "--", "--"],
@@ -21,12 +21,12 @@ class GameState:
             ["wP", "wP", "wK", "wP", "wP"]
         ]
         self.cards = CARDS
-        self.selected_cards = self.pick_five_cards()
 
         # Move to server C++
-        self.white_cards = (self.selected_cards[0], self.selected_cards[1])
-        self.spare_card = self.selected_cards[2]
-        self.black_cards = (self.selected_cards[3], self.selected_cards[4])
+        # 0 and 1 are white
+        # 2 is spare
+        # 3 and 4 are black
+        self.selected_cards = self.pick_five_cards()
 
         self.white_to_move = True
         self.move_log = []
@@ -66,16 +66,24 @@ class GameState:
             self.board[move.end_row][move.end_col] = move.piece_captured
             self.white_to_move = not self.white_to_move
 
-    def get_valid_moves(self):
-        return self.get_all_possible_moves()
-
-    def get_all_possible_moves(self):
+    def get_valid_moves(self, card):
         moves = []
         for r in range(len(self.board)):
             for c in range(len(self.board[r])):
                 turn = self.board[r][c][0]
-                if (turn == 'w' and self.white_to_move) and (turn == 'b' and not self.white_to_move):
-                    get
+                if (turn == 'w' and self.white_to_move) or (turn == 'b' and not self.white_to_move):
+                    piece = self.board[r][c][1]
+                    if piece != "--":
+                        self.get_move(r, c, card, moves)
+
+        return moves
+
+    def get_move(self, r, c, card, moves):
+        matrix = self.cards[card]
+        for vec in matrix:
+            if r + vec[0] in range(0, 5) and c + vec[1] in range(0, 5):
+                moves.append(Move((r, c), (r + vec[0], c + vec[1]), self.board))
+        # moves.append(Move(,,self.board));
 
 """
 Class for handling input moves from user

@@ -1,5 +1,5 @@
 """
-All components
+Component class for cards definition
 """
 
 """

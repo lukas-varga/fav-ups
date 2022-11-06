@@ -5,7 +5,6 @@ This is main driver file for the game
 import pygame
 
 from onitama import onitama_engine
-from onitama.network import Network
 
 # Colors
 LIGHT_COLOR = "antiquewhite1"
@@ -24,7 +23,7 @@ DIMENSION = 5
 SQ_SIZE = HEIGHT // DIMENSION
 
 # Card size
-COEFFICIENT = 1/125
+COEFFICIENT = 1 / 125
 CARD_SIZE = (COEFFICIENT * (300 * SQ_SIZE), COEFFICIENT * (174 * SQ_SIZE))
 
 # Card positions
@@ -44,6 +43,8 @@ CARD_IMAGES = {}
 """
 Global dictionary of pieces
 """
+
+
 def load_images(gs):
     # Assigning pieces using dictionary PIECE_IMAGES["wP"] = pieces/wP.png
     pieces = ["wP", "wK", "bP", "bK"]
@@ -60,6 +61,8 @@ def load_images(gs):
 """
 Handle user input and update graphics
 """
+
+
 def main():
     pygame.init()
     clock = pygame.time.Clock()
@@ -82,8 +85,8 @@ def main():
     # All the player clicks two tuple [(4,5), (2,2)]
     player_clicks = []
 
-    # Valid moves generated
-    valid_moves = gs.get_valid_moves()
+    # Valid moves
+    valid_moves = []
     # If user selected card
     is_card_selected = False
 
@@ -94,13 +97,13 @@ def main():
 
             # Mouse handler
             elif e.type == pygame.MOUSEBUTTONDOWN:
-                # x,y location of mouse
-                location = pygame.mouse.get_pos()
+                # x,y loc of mouse
+                loc = pygame.mouse.get_pos()
 
                 # Clicking on the board
-                if is_card_selected and (location[0] <= WIDTH // 2 and location[1] <= HEIGHT):
-                    col = location[0] // SQ_SIZE
-                    row = location[1] // SQ_SIZE
+                if is_card_selected and (loc[0] <= WIDTH // 2 and loc[1] <= HEIGHT):
+                    col = loc[0] // SQ_SIZE
+                    row = loc[1] // SQ_SIZE
 
                     # User clicked at the same square twice
                     if sq_selected == (row, col):
@@ -123,11 +126,14 @@ def main():
                         player_clicks = []
 
                 # Clicking cards on the right side
-                elif not is_card_selected:
-                    pass
-
                 else:
-                    print("error moving")
+                    for i, card in enumerate(gs.selected_cards):
+                        x, y, w, h = (CARD_POS[i][0], CARD_POS[i][1], CARD_SIZE[0], CARD_SIZE[1])
+                        if x < loc[0] < x + w and y < loc[1] < y + h:
+                            valid_moves = gs.get_valid_moves(card)
+                            is_card_selected = True
+                            print("Selected: " + card)
+                            break
 
             # Keyboard handler
             elif e.type == pygame.KEYDOWN:
@@ -136,9 +142,6 @@ def main():
                     gs.undo_move()
                     is_card_selected = False
 
-        if is_card_selected:
-            valid_moves = gs.get_valid_moves()
-            is_card_selected = False
         draw_game_state(screen, gs, valid_moves, sq_selected)
         clock.tick(MAX_FPS)
         pygame.display.flip()
@@ -147,6 +150,8 @@ def main():
 """
 Responsible for all graphics within current game state
 """
+
+
 def draw_game_state(screen, gs, valid_moves, sq_selected):
     # Draw squares of board
     draw_board(screen)
@@ -161,6 +166,8 @@ def draw_game_state(screen, gs, valid_moves, sq_selected):
 """
 Highlight square and moves for piece
 """
+
+
 def highlight_square(screen, gs, valid_moves, sq_selected):
     if sq_selected != ():
         r, c = sq_selected
@@ -183,6 +190,8 @@ def highlight_square(screen, gs, valid_moves, sq_selected):
 """
 Draw squares of board
 """
+
+
 def draw_board(screen):
     colors = [pygame.Color(LIGHT_COLOR), pygame.Color(DARK_COLOR)]
     for r in range(DIMENSION):
@@ -194,6 +203,8 @@ def draw_board(screen):
 """
 Draw pieces on the top of board
 """
+
+
 def draw_pieces(screen, board):
     for r in range(DIMENSION):
         for c in range(DIMENSION):
@@ -206,11 +217,12 @@ def draw_pieces(screen, board):
 """
 Draw cards
 """
+
+
 def draw_card_holders(screen, gs):
-    for i in range(0, 5):
-        name = gs.selected_cards[i]
+    for i, card in enumerate(gs.selected_cards):
         x, y, w, h = (CARD_POS[i][0], CARD_POS[i][1], CARD_SIZE[0], CARD_SIZE[1])
-        screen.blit(CARD_IMAGES[name], pygame.Rect(x, y, w, h))
+        screen.blit(CARD_IMAGES[card], pygame.Rect(x, y, w, h))
         pygame.draw.rect(screen, pygame.Color(BORDER_COLOR), pygame.Rect(x, y, w, h), width=1)
 
 
