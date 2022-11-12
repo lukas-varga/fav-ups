@@ -80,10 +80,11 @@ class GameState:
 
     def get_move(self, r, c, card, moves):
         matrix = self.cards[card]
-        for vec in matrix:
+        for raw_vec in matrix:
+            vec = (0 - raw_vec[0], 0 - raw_vec[1]) if not self.white_to_move else raw_vec
             if r + vec[0] in range(0, 5) and c + vec[1] in range(0, 5):
                 moves.append(Move((r, c), (r + vec[0], c + vec[1]), self.board))
-        # moves.append(Move(,,self.board));
+
 
 """
 Class for handling input moves from user

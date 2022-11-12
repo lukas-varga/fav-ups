@@ -43,8 +43,6 @@ CARD_IMAGES = {}
 """
 Global dictionary of pieces
 """
-
-
 def load_images(gs):
     # Assigning pieces using dictionary PIECE_IMAGES["wP"] = pieces/wP.png
     pieces = ["wP", "wK", "bP", "bK"]
@@ -61,8 +59,6 @@ def load_images(gs):
 """
 Handle user input and update graphics
 """
-
-
 def main():
     pygame.init()
     clock = pygame.time.Clock()
@@ -89,6 +85,8 @@ def main():
     valid_moves = []
     # If user selected card
     is_card_selected = False
+    # Game over
+    game_over = False
 
     while running:
         for e in pygame.event.get():
@@ -107,6 +105,7 @@ def main():
 
                     # User clicked at the same square twice
                     if sq_selected == (row, col):
+                        # Reset user clicks
                         sq_selected = ()
                         player_clicks = []
                     else:
@@ -117,16 +116,38 @@ def main():
                     # Snd click
                     if len(player_clicks) == 2:
                         move = onitama_engine.Move(player_clicks[0], player_clicks[1], gs.board)
-                        print(move.get_chess_like_notation())
-                        if move in valid_moves:
-                            gs.make_move(move)
-                            is_card_selected = True
+
+                        #TODO delete
+
+                        print([m.get_chess_like_notation() for m in valid_moves])
+                        print("MY", move.get_chess_like_notation())
+
+                        # Move made
+                        #if not move in valid_moves:
+                        gs.make_move(move)
+                        gs.white_to_move = not gs.white_to_move
+
+                        # Reset card
+                        is_card_selected = False
+                        valid_moves = []
                         # Reset user clicks
                         sq_selected = ()
                         player_clicks = []
 
+                        # Animate
+                        animate_move(gs.move_log[-1], screen, gs.board, clock)
+
+                        print("Move made")
+
                 # Clicking cards on the right side
                 else:
+                    # Reset card
+                    is_card_selected = False
+                    valid_moves = []
+                    # Reset user clicks
+                    sq_selected = ()
+                    player_clicks = []
+
                     for i, card in enumerate(gs.selected_cards):
                         x, y, w, h = (CARD_POS[i][0], CARD_POS[i][1], CARD_SIZE[0], CARD_SIZE[1])
                         if x < loc[0] < x + w and y < loc[1] < y + h:
@@ -135,12 +156,27 @@ def main():
                             print("Selected: " + card)
                             break
 
+            # Undo with Z TODO delete on release
             # Keyboard handler
             elif e.type == pygame.KEYDOWN:
-                # Undo with Z TODO delete on release
                 if e.key == pygame.K_z:
                     gs.undo_move()
+
+                    # Reset card
                     is_card_selected = False
+                    valid_moves = []
+                    # Reset user clicks
+                    sq_selected = ()
+                    player_clicks = []
+                if e.key == pygame.K_r:
+                    gs = onitama_engine.GameState()
+
+                    # Reset card
+                    is_card_selected = False
+                    valid_moves = []
+                    # Reset user clicks
+                    sq_selected = ()
+                    player_clicks = []
 
         draw_game_state(screen, gs, valid_moves, sq_selected)
         clock.tick(MAX_FPS)
@@ -150,8 +186,6 @@ def main():
 """
 Responsible for all graphics within current game state
 """
-
-
 def draw_game_state(screen, gs, valid_moves, sq_selected):
     # Draw squares of board
     draw_board(screen)
@@ -166,8 +200,6 @@ def draw_game_state(screen, gs, valid_moves, sq_selected):
 """
 Highlight square and moves for piece
 """
-
-
 def highlight_square(screen, gs, valid_moves, sq_selected):
     if sq_selected != ():
         r, c = sq_selected
@@ -190,9 +222,8 @@ def highlight_square(screen, gs, valid_moves, sq_selected):
 """
 Draw squares of board
 """
-
-
 def draw_board(screen):
+    global colors
     colors = [pygame.Color(LIGHT_COLOR), pygame.Color(DARK_COLOR)]
     for r in range(DIMENSION):
         for c in range(DIMENSION):
@@ -203,8 +234,6 @@ def draw_board(screen):
 """
 Draw pieces on the top of board
 """
-
-
 def draw_pieces(screen, board):
     for r in range(DIMENSION):
         for c in range(DIMENSION):
@@ -217,13 +246,41 @@ def draw_pieces(screen, board):
 """
 Draw cards
 """
-
-
 def draw_card_holders(screen, gs):
     for i, card in enumerate(gs.selected_cards):
         x, y, w, h = (CARD_POS[i][0], CARD_POS[i][1], CARD_SIZE[0], CARD_SIZE[1])
         screen.blit(CARD_IMAGES[card], pygame.Rect(x, y, w, h))
         pygame.draw.rect(screen, pygame.Color(BORDER_COLOR), pygame.Rect(x, y, w, h), width=1)
+
+
+"""
+Animate move    
+"""
+def animate_move(move, screen, board, clock):
+    global colors
+    d_r = move.end_row - move.start_row
+    d_c = move.end_col - move.start_col
+    frames_per_square = 10
+    frame_count = (abs(d_r) + abs(d_c)) * frames_per_square
+
+    for frame in range(frame_count + 1):
+        r, c = (move.start_row + d_r*frame/frame_count, move.start_col + d_c*frame/frame_count)
+        draw_board(screen)
+        draw_pieces(screen, board)
+
+        # Erase
+        color = colors[(move.end_row + move.end_col) % 2]
+        end_square = pygame.Rect(move.end_col*SQ_SIZE, move.end_row*SQ_SIZE, SQ_SIZE, SQ_SIZE)
+        pygame.draw.rect(screen, color, end_square)
+
+        # Draw captured pieces
+        if move.piece_captured != "--":
+            screen.blit(PIECE_IMAGES[move.piece_captured], end_square)
+
+        # Draw moving piece
+        screen.blit(PIECE_IMAGES[move.piece_moved], pygame.Rect(c*SQ_SIZE, r*SQ_SIZE, SQ_SIZE, SQ_SIZE))
+        pygame.display.flip()
+        clock.tick(60)
 
 
 """
