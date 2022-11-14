@@ -27,10 +27,3 @@ CARDS = {
 
 CARD_TO_ID = {card: i for i, card in enumerate(CARDS, 0)}
 ID_TO_CARD = {i: card for card, i in CARD_TO_ID.items()}
-
-"""
-Board is 5x5 2D list where each element has two chars
-Fst char represents color and snd char represents type (Pawn/King)
-Symbol -- represents empty board
-"""
-

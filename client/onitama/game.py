@@ -28,9 +28,12 @@ CARD_SIZE = (COEFFICIENT * (300 * SQ_SIZE), COEFFICIENT * (174 * SQ_SIZE))
 
 # Card positions
 CARD_POS = [
-    (WIDTH // 2, 0),
-    (WIDTH - CARD_SIZE[0], 0),
+    # Black player's cards
+    (WIDTH // 2, 1),
+    (WIDTH - CARD_SIZE[0], 1),
+    # Spare card
     (0.5 * CARD_SIZE[0] + WIDTH // 2, HEIGHT // 2 - CARD_SIZE[1] // 2),
+    # White player's cards
     (WIDTH // 2, HEIGHT - CARD_SIZE[1]),
     (WIDTH - CARD_SIZE[0], HEIGHT - CARD_SIZE[1]),
 ]
@@ -76,17 +79,17 @@ def main():
     # Only once before loop
     load_images(gs)
     running = True
+
+    global is_card_selected, which_card, valid_moves, sq_selected, player_clicks
     # No square selected, last click of user (row, col)
     sq_selected = ()
     # All the player clicks two tuple [(4,5), (2,2)]
     player_clicks = []
-
     # Valid moves
     valid_moves = []
     # If user selected card
     is_card_selected = False
-    # Game over
-    game_over = False
+    which_card = None
 
     while running:
         for e in pygame.event.get():
@@ -97,7 +100,6 @@ def main():
             elif e.type == pygame.MOUSEBUTTONDOWN:
                 # x,y loc of mouse
                 loc = pygame.mouse.get_pos()
-
                 # Clicking on the board
                 if is_card_selected and (loc[0] <= WIDTH // 2 and loc[1] <= HEIGHT):
                     col = loc[0] // SQ_SIZE
@@ -116,43 +118,32 @@ def main():
                     # Snd click
                     if len(player_clicks) == 2:
                         move = onitama_engine.Move(player_clicks[0], player_clicks[1], gs.board)
+                        if move in valid_moves:
+                            gs.make_move(move)
+                            if gs.move_log:
+                                animate_move(gs.move_log[-1], screen, gs.board, clock)
 
-                        #TODO delete
-
-                        print([m.get_chess_like_notation() for m in valid_moves])
-                        print("MY", move.get_chess_like_notation())
-
-                        # Move made
-                        #if not move in valid_moves:
-                        gs.make_move(move)
-                        gs.white_to_move = not gs.white_to_move
-
-                        # Reset card
-                        is_card_selected = False
-                        valid_moves = []
-                        # Reset user clicks
-                        sq_selected = ()
-                        player_clicks = []
-
-                        # Animate
-                        animate_move(gs.move_log[-1], screen, gs.board, clock)
-
-                        print("Move made")
+                            print("Move made:" + move.get_chess_like_notation())
+                            clear_selection()
+                        else:
+                            clear_selection()
 
                 # Clicking cards on the right side
                 else:
-                    # Reset card
-                    is_card_selected = False
-                    valid_moves = []
-                    # Reset user clicks
-                    sq_selected = ()
-                    player_clicks = []
-
+                    clear_selection()
                     for i, card in enumerate(gs.selected_cards):
+                        if gs.white_to_move and (i == 0 or i == 1):
+                            continue
+                        elif i == 2:
+                            continue
+                        elif not gs.white_to_move and (i == 3 or i == 4):
+                            continue
+
                         x, y, w, h = (CARD_POS[i][0], CARD_POS[i][1], CARD_SIZE[0], CARD_SIZE[1])
                         if x < loc[0] < x + w and y < loc[1] < y + h:
                             valid_moves = gs.get_valid_moves(card)
                             is_card_selected = True
+                            which_card = card
                             print("Selected: " + card)
                             break
 
@@ -161,32 +152,34 @@ def main():
             elif e.type == pygame.KEYDOWN:
                 if e.key == pygame.K_z:
                     gs.undo_move()
-
-                    # Reset card
-                    is_card_selected = False
-                    valid_moves = []
-                    # Reset user clicks
-                    sq_selected = ()
-                    player_clicks = []
+                    clear_selection()
                 if e.key == pygame.K_r:
                     gs = onitama_engine.GameState()
+                    clear_selection()
 
-                    # Reset card
-                    is_card_selected = False
-                    valid_moves = []
-                    # Reset user clicks
-                    sq_selected = ()
-                    player_clicks = []
-
-        draw_game_state(screen, gs, valid_moves, sq_selected)
+        draw_game_state(screen, gs, valid_moves, sq_selected, which_card)
         clock.tick(MAX_FPS)
         pygame.display.flip()
 
 
 """
+Clear player selection
+"""
+def clear_selection():
+    global is_card_selected, which_card, valid_moves, sq_selected, player_clicks
+    # Reset card
+    is_card_selected = False
+    which_card = None
+    valid_moves = []
+    # Reset user clicks
+    sq_selected = ()
+    player_clicks = []
+
+
+"""
 Responsible for all graphics within current game state
 """
-def draw_game_state(screen, gs, valid_moves, sq_selected):
+def draw_game_state(screen, gs, valid_moves, sq_selected, which_card):
     # Draw squares of board
     draw_board(screen)
     # Highlight
@@ -195,6 +188,8 @@ def draw_game_state(screen, gs, valid_moves, sq_selected):
     draw_pieces(screen, gs.board)
     # Draw holders for cards
     draw_card_holders(screen, gs)
+    # Selected card highlight
+    draw_card_highlight(screen, gs, which_card)
 
 
 """
@@ -211,12 +206,12 @@ def highlight_square(screen, gs, valid_moves, sq_selected):
             s.set_alpha(100)
             s.fill(pygame.Color(HIGHLIGHT_COLOR_1))
             screen.blit(s, (c * SQ_SIZE, r * SQ_SIZE))
+
             # Highlight moves
             s.fill(pygame.Color(HIGHLIGHT_COLOR_2))
-
             for move in valid_moves:
                 if move.start_row == r and move.start_col == c:
-                    screen.blit(s, (move.end_row * SQ_SIZE, move.end_col * SQ_SIZE))
+                    screen.blit(s, (move.end_col * SQ_SIZE, move.end_row * SQ_SIZE))
 
 
 """
@@ -249,9 +244,21 @@ Draw cards
 def draw_card_holders(screen, gs):
     for i, card in enumerate(gs.selected_cards):
         x, y, w, h = (CARD_POS[i][0], CARD_POS[i][1], CARD_SIZE[0], CARD_SIZE[1])
-        screen.blit(CARD_IMAGES[card], pygame.Rect(x, y, w, h))
+        # Rotate 180 degrees to face player
+        # image = pygame.transform.rotate(CARD_IMAGES[card], 180) if not gs.white_to_move else CARD_IMAGES[card]
+        image = CARD_IMAGES[card]
+        screen.blit(image, pygame.Rect(x, y, w, h))
         pygame.draw.rect(screen, pygame.Color(BORDER_COLOR), pygame.Rect(x, y, w, h), width=1)
 
+
+"""
+Possible highlight for selected card
+"""
+def draw_card_highlight(screen, gs, which_card):
+    if which_card is not None:
+        i = gs.get_id_by_card(which_card)
+        x, y, w, h = (CARD_POS[i][0], CARD_POS[i][1], CARD_SIZE[0], CARD_SIZE[1])
+        pygame.draw.rect(screen, pygame.Color(HIGHLIGHT_COLOR_2), pygame.Rect(x, y, w, h), width=5)
 
 """
 Animate move    

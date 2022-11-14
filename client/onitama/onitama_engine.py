@@ -13,6 +13,12 @@ class GameState:
     def __init__(self):
         # Network socket
         # self.net = Network()
+
+        """
+        Board is 5x5 2D list where each element has two chars
+        Fst char represents color and snd char represents type (Pawn/King)
+        Symbol -- represents empty board
+        """
         self.board = [
             ["bP", "bP", "bK", "bP", "bP"],
             ["--", "--", "--", "--", "--"],
@@ -35,14 +41,30 @@ class GameState:
     Pick randomly five cards at the beginning
     """
     def pick_five_cards(self):
-        selected_ids = list(np.random.permutation(len(self.cards))[:5])
+        random_ids = list(np.random.permutation(len(self.cards))[:5])
 
         selected_cards = []
-        for x in selected_ids:
+        for x in random_ids:
             name = ID_TO_CARD.get(x)
             selected_cards.append(name)
 
         return selected_cards
+
+    """
+    Get selected card by id
+    """
+    def get_card_by_id(self, card_id):
+        for i, c in enumerate(self.selected_cards):
+            if card_id == i:
+                return c
+
+    """
+    Get id by selected card
+    """
+    def get_id_by_card(self, card_name):
+        for i, c in enumerate(self.selected_cards):
+            if card_name == c:
+                return i
 
     """
     Takes move as parameter and executes it
@@ -66,25 +88,48 @@ class GameState:
             self.board[move.end_row][move.end_col] = move.piece_captured
             self.white_to_move = not self.white_to_move
 
+    """
+    Get list of all valid moves for given card.
+    White or black on turn - will distinguish
+    """
     def get_valid_moves(self, card):
         moves = []
         for r in range(len(self.board)):
             for c in range(len(self.board[r])):
                 turn = self.board[r][c][0]
-                if (turn == 'w' and self.white_to_move) or (turn == 'b' and not self.white_to_move):
-                    piece = self.board[r][c][1]
-                    if piece != "--":
-                        self.get_move(r, c, card, moves)
+                piece = self.board[r][c][1]
+
+                if piece != "--":
+                    # White
+                    if turn == 'w' and self.white_to_move:
+                        self.get_move(r, c, card, moves, turn)
+                    # Black
+                    elif turn == 'b' and not self.white_to_move:
+                        self.get_move(r, c, card, moves, turn)
 
         return moves
 
-    def get_move(self, r, c, card, moves):
+    """
+    Calculate mvoes for one piece
+    """
+    def get_move(self, r, c, card, moves, turn):
         matrix = self.cards[card]
         for raw_vec in matrix:
+            # Invert for black player
             vec = (0 - raw_vec[0], 0 - raw_vec[1]) if not self.white_to_move else raw_vec
-            if r + vec[0] in range(0, 5) and c + vec[1] in range(0, 5):
-                moves.append(Move((r, c), (r + vec[0], c + vec[1]), self.board))
 
+            # Transform x,y system to board system
+            x = vec[0]
+            y = vec[1]
+            new_r = r - y
+            new_c = c + x
+
+            # In range of board and not capturing our own
+            if new_r in range(0, 5) and new_c in range(0, 5):
+                new_move = Move((r, c), (new_r, new_c), self.board)
+                symbol = new_move.piece_captured[0]
+                if symbol != turn:
+                    moves.append(new_move)
 
 """
 Class for handling input moves from user
@@ -104,13 +149,23 @@ class Move:
         self.end_col = end_sq[1]
         self.piece_moved = board[self.start_row][self.start_col]
         self.piece_captured = board[self.end_row][self.end_col]
+        self.move_id = self.start_row * 1000 + self.start_col * 100 + self.end_row * 10 + self.end_col
+
+    """
+    Overriding equal method
+    """
+    def __eq__(self, other):
+        if isinstance(other, Move):
+            return self.move_id == other.move_id
+        return False
 
     """
     Method for toString like printing
     """
     def get_chess_like_notation(self):
-        return self.get_rank_file(self.start_col, self.start_col) + " -> " + self.get_rank_file(self.end_col,
-                                                                                                self.end_row)
+        source = self.get_rank_file(self.start_row, self.start_col)
+        target = self.get_rank_file(self.end_row, self.end_col)
+        return source + " -> " + target
 
     """
     Get rows and cols using chess description
