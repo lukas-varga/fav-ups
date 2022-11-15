@@ -32,15 +32,16 @@ class GameState:
         # 0 and 1 are white
         # 2 is spare
         # 3 and 4 are black
-        self.selected_cards = self.pick_five_cards()
+        self.selected_cards = self.generate_five_cards()
 
         self.white_to_move = True
         self.move_log = []
+        self.is_winner_white = None
 
     """
     Pick randomly five cards at the beginning
     """
-    def pick_five_cards(self):
+    def generate_five_cards(self):
         random_ids = list(np.random.permutation(len(self.cards))[:5])
 
         selected_cards = []
@@ -69,13 +70,43 @@ class GameState:
     """
     Takes move as parameter and executes it
     """
-    def make_move(self, move):
+    def make_move(self, move, card_picked):
         self.board[move.start_row][move.start_col] = "--"
         self.board[move.end_row][move.end_col] = move.piece_moved
         # Log the move
         self.move_log.append(move)
-        # Swap players
-        self.white_to_move = not self.white_to_move
+
+        # Check check-mate or king on enemy base
+        if self.is_game_over(move):
+            self.is_winner_white = self.white_to_move
+        # Shuffle cards and swap players
+        else:
+            self.shuffle_cards(card_picked)
+            self.white_to_move = not self.white_to_move
+
+    """
+    Return true if game over otherwise false
+    """
+    def is_game_over(self, move):
+        # Checkmate
+        if move.piece_captured[1] == 'K':
+            return True
+        # Enemy base for white
+        elif self.board[0][2] == "wK":
+            return True
+        # Enemy base for black
+        elif self.board[4][2] == "bK":
+            return True
+        return False
+
+    """
+    Shuffle card, which was played right away and give player spare card
+    """
+    def shuffle_cards(self, card_picked):
+        card_id = self.get_id_by_card(card_picked)
+        temp = self.selected_cards[2]
+        self.selected_cards[2] = card_picked
+        self.selected_cards[card_id] = temp
 
     """
     Undo last move
@@ -86,6 +117,7 @@ class GameState:
             move = self.move_log.pop()
             self.board[move.start_row][move.start_col] = move.piece_moved
             self.board[move.end_row][move.end_col] = move.piece_captured
+            self.is_winner_white = None
             self.white_to_move = not self.white_to_move
 
     """
@@ -102,17 +134,17 @@ class GameState:
                 if piece != "--":
                     # White
                     if turn == 'w' and self.white_to_move:
-                        self.get_move(r, c, card, moves, turn)
+                        self.one_valid_move(r, c, card, moves, turn)
                     # Black
                     elif turn == 'b' and not self.white_to_move:
-                        self.get_move(r, c, card, moves, turn)
+                        self.one_valid_move(r, c, card, moves, turn)
 
         return moves
 
     """
     Calculate mvoes for one piece
     """
-    def get_move(self, r, c, card, moves, turn):
+    def one_valid_move(self, r, c, card, moves, turn):
         matrix = self.cards[card]
         for raw_vec in matrix:
             # Invert for black player
@@ -130,6 +162,7 @@ class GameState:
                 symbol = new_move.piece_captured[0]
                 if symbol != turn:
                     moves.append(new_move)
+
 
 """
 Class for handling input moves from user

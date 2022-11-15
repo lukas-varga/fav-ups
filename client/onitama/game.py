@@ -80,7 +80,7 @@ def main():
     load_images(gs)
     running = True
 
-    global is_card_selected, which_card, valid_moves, sq_selected, player_clicks
+    global card_picked, valid_moves, sq_selected, player_clicks
     # No square selected, last click of user (row, col)
     sq_selected = ()
     # All the player clicks two tuple [(4,5), (2,2)]
@@ -88,8 +88,7 @@ def main():
     # Valid moves
     valid_moves = []
     # If user selected card
-    is_card_selected = False
-    which_card = None
+    card_picked = None
 
     while running:
         for e in pygame.event.get():
@@ -97,11 +96,11 @@ def main():
                 running = False
 
             # Mouse handler
-            elif e.type == pygame.MOUSEBUTTONDOWN:
+            elif e.type == pygame.MOUSEBUTTONDOWN and gs.is_winner_white is None:
                 # x,y loc of mouse
                 loc = pygame.mouse.get_pos()
                 # Clicking on the board
-                if is_card_selected and (loc[0] <= WIDTH // 2 and loc[1] <= HEIGHT):
+                if card_picked is not None and (loc[0] <= WIDTH // 2 and loc[1] <= HEIGHT):
                     col = loc[0] // SQ_SIZE
                     row = loc[1] // SQ_SIZE
 
@@ -119,17 +118,16 @@ def main():
                     if len(player_clicks) == 2:
                         move = onitama_engine.Move(player_clicks[0], player_clicks[1], gs.board)
                         if move in valid_moves:
-                            gs.make_move(move)
+                            # Move
+                            gs.make_move(move, card_picked)
                             if gs.move_log:
                                 animate_move(gs.move_log[-1], screen, gs.board, clock)
-
                             print("Move made:" + move.get_chess_like_notation())
                             clear_selection()
                         else:
                             clear_selection()
-
                 # Clicking cards on the right side
-                else:
+                elif card_picked is None:
                     clear_selection()
                     for i, card in enumerate(gs.selected_cards):
                         if gs.white_to_move and (i == 0 or i == 1):
@@ -142,10 +140,11 @@ def main():
                         x, y, w, h = (CARD_POS[i][0], CARD_POS[i][1], CARD_SIZE[0], CARD_SIZE[1])
                         if x < loc[0] < x + w and y < loc[1] < y + h:
                             valid_moves = gs.get_valid_moves(card)
-                            is_card_selected = True
-                            which_card = card
+                            card_picked = card
                             print("Selected: " + card)
                             break
+                else:
+                    print("Unexpected behavior")
 
             # Undo with Z TODO delete on release
             # Keyboard handler
@@ -157,19 +156,23 @@ def main():
                     gs = onitama_engine.GameState()
                     clear_selection()
 
-        draw_game_state(screen, gs, valid_moves, sq_selected, which_card)
+        draw_game_state(screen, gs, valid_moves, sq_selected, card_picked)
         clock.tick(MAX_FPS)
         pygame.display.flip()
+
+        if gs.is_winner_white is not None:
+            win_text = "White Won" if gs.is_winner_white else "Black Won"
+            pygame.display.set_caption(win_text)
 
 
 """
 Clear player selection
 """
 def clear_selection():
-    global is_card_selected, which_card, valid_moves, sq_selected, player_clicks
+    global card_picked, valid_moves, sq_selected, player_clicks
     # Reset card
-    is_card_selected = False
-    which_card = None
+    card_picked = None
+    # Reset valid moves
     valid_moves = []
     # Reset user clicks
     sq_selected = ()
@@ -239,7 +242,7 @@ def draw_pieces(screen, board):
 
 
 """
-Draw cards
+Draw card holders
 """
 def draw_card_holders(screen, gs):
     for i, card in enumerate(gs.selected_cards):
