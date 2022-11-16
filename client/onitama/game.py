@@ -4,7 +4,7 @@ This is main driver file for the game
 
 import pygame
 
-from onitama import onitama_engine
+import onitama_engine
 
 # Colors
 LIGHT_COLOR = "antiquewhite1"

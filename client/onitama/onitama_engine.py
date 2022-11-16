@@ -4,8 +4,8 @@ Game engine with all the info about the game
 
 import numpy as np
 
-from onitama.components import ID_TO_CARD, CARDS
-from onitama.network import Network
+from components import ID_TO_CARD, CARDS
+from network import Network
 
 """
 Information about current game
