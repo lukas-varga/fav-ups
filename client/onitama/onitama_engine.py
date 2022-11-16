@@ -3,7 +3,8 @@ Game engine with all the info about the game
 """
 
 import numpy as np
-from onitama.components import CARDS, ID_TO_CARD
+
+from onitama.components import ID_TO_CARD, CARDS
 from onitama.network import Network
 
 """
@@ -12,7 +13,7 @@ Information about current game
 class GameState:
     def __init__(self):
         # Network socket
-        # self.net = Network()
+        self.net = Network()
 
         """
         Board is 5x5 2D list where each element has two chars

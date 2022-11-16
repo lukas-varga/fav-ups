@@ -127,7 +127,7 @@ def main():
                         else:
                             clear_selection()
                 # Clicking cards on the right side
-                elif card_picked is None:
+                else:
                     clear_selection()
                     for i, card in enumerate(gs.selected_cards):
                         if gs.white_to_move and (i == 0 or i == 1):
@@ -143,8 +143,6 @@ def main():
                             card_picked = card
                             print("Selected: " + card)
                             break
-                else:
-                    print("Unexpected behavior")
 
             # Undo with Z TODO delete on release
             # Keyboard handler
