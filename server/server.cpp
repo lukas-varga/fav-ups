@@ -1,11 +1,10 @@
-#include <stdio.h>
+#include <cstdio>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <unistd.h>
 #include <netinet/in.h>
 #include <stdlib.h>
-// kvuli iotctl
 #include <sys/ioctl.h>
 
 int main (void){
@@ -14,9 +13,9 @@ int main (void){
 	int client_socket, fd;
 	int return_value;
 	char cbuf;
-	int len_addr;
+    socklen_t len_addr;
 	int a2read;
-	struct sockaddr_in my_addr, peer_addr;
+	struct sockaddr_in my_addr{}, peer_addr{};
 	fd_set client_socks, tests;
 
 	server_socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -27,8 +26,7 @@ int main (void){
 	my_addr.sin_port = htons(10000);
 	my_addr.sin_addr.s_addr = INADDR_ANY;
 
-	return_value = bind(server_socket, (struct sockaddr *) &my_addr, \
-		sizeof(struct sockaddr_in));
+	return_value = bind(server_socket, (struct sockaddr *) &my_addr, sizeof(struct sockaddr_in));
 
 	if (return_value == 0) 
 		printf("Bind - OK\n");
@@ -52,7 +50,7 @@ int main (void){
 
 		tests = client_socks;
 		// sada deskriptoru je po kazdem volani select prepsana sadou deskriptoru kde se neco delo
-		return_value = select( FD_SETSIZE, &tests, ( fd_set *)0, ( fd_set *)0, ( struct timeval *)0 );
+		return_value = select( FD_SETSIZE, &tests, ( fd_set *)nullptr, ( fd_set *)nullptr, ( struct timeval *)nullptr );
 
 		if (return_value < 0) {
 			printf("Select - ERR\n");
@@ -62,14 +60,15 @@ int main (void){
 		for( fd = 3; fd < FD_SETSIZE; fd++ ){
 			// je dany socket v sade fd ze kterych lze cist ?
 			if( FD_ISSET( fd, &tests ) ){
-			// je to server socket ? prijmeme nove spojeni
-				if (fd = server_socket){
+			    // je to server socket ? prijmeme nove spojeni
+                fd = server_socket;
+                if (fd){
 					client_socket = accept(server_socket, (struct sockaddr *) &peer_addr, &len_addr);
 					FD_SET( client_socket, &client_socks );
 					printf("Pripojen novy klient a pridan do sady socketu\n");
-				}
+                }
 				// je to klientsky socket ? prijmem data
-				else {
+                else {
 					// pocet bajtu co je pripraveno ke cteni
 					ioctl( fd, FIONREAD, &a2read );
 					// mame co cist
