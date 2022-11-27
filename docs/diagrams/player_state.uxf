@@ -4,8 +4,8 @@
   <element>
     <id>UMLUseCase</id>
     <coordinates>
-      <x>310</x>
-      <y>230</y>
+      <x>300</x>
+      <y>240</y>
       <w>120</w>
       <h>40</h>
     </coordinates>
@@ -15,21 +15,20 @@
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>360</x>
-      <y>150</y>
-      <w>100</w>
+      <x>350</x>
+      <y>160</y>
+      <w>80</w>
       <h>100</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;-
-Establish
-Connection</panel_attributes>
+Connect</panel_attributes>
     <additional_attributes>10.0;80.0;10.0;10.0</additional_attributes>
   </element>
   <element>
     <id>UMLActor</id>
     <coordinates>
-      <x>340</x>
-      <y>60</y>
+      <x>330</x>
+      <y>70</y>
       <w>60</w>
       <h>110</h>
     </coordinates>
@@ -39,67 +38,54 @@ Connection</panel_attributes>
   <element>
     <id>UMLUseCase</id>
     <coordinates>
-      <x>220</x>
-      <y>420</y>
+      <x>210</x>
+      <y>430</y>
       <w>120</w>
       <h>40</h>
     </coordinates>
-    <panel_attributes>Waiting</panel_attributes>
+    <panel_attributes>Waiting 0/2</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>270</x>
-      <y>340</y>
-      <w>90</w>
-      <h>100</h>
-    </coordinates>
-    <panel_attributes>lt=&lt;&lt;&lt;-
-Create
-Game</panel_attributes>
-    <additional_attributes>10.0;80.0;50.0;10.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>410</x>
-      <y>340</y>
+      <x>260</x>
+      <y>350</y>
       <w>80</w>
       <h>100</h>
     </coordinates>
-    <panel_attributes>lt=-&gt;&gt;&gt;
-Join</panel_attributes>
-    <additional_attributes>10.0;10.0;60.0;80.0</additional_attributes>
+    <panel_attributes>lt=&lt;&lt;&lt;-
+Enter</panel_attributes>
+    <additional_attributes>10.0;80.0;50.0;10.0</additional_attributes>
   </element>
   <element>
     <id>UMLUseCase</id>
     <coordinates>
-      <x>410</x>
-      <y>420</y>
+      <x>400</x>
+      <y>430</y>
       <w>120</w>
       <h>40</h>
     </coordinates>
-    <panel_attributes>InGame</panel_attributes>
+    <panel_attributes>Playing 2/2</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>330</x>
-      <y>420</y>
+      <x>320</x>
+      <y>430</y>
       <w>100</w>
       <h>40</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;-
-Join</panel_attributes>
+Start</panel_attributes>
     <additional_attributes>80.0;20.0;10.0;20.0</additional_attributes>
   </element>
   <element>
     <id>UMLUseCase</id>
     <coordinates>
-      <x>310</x>
-      <y>520</y>
+      <x>300</x>
+      <y>530</y>
       <w>120</w>
       <h>40</h>
     </coordinates>
@@ -109,45 +95,44 @@ Join</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>170</x>
-      <y>240</y>
+      <x>160</x>
+      <y>250</y>
       <w>160</w>
       <h>320</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;-
-Error</panel_attributes>
+Disconnect</panel_attributes>
     <additional_attributes>140.0;300.0;10.0;300.0;10.0;10.0;140.0;10.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>360</x>
-      <y>550</y>
-      <w>100</w>
-      <h>90</h>
+      <x>350</x>
+      <y>250</y>
+      <w>380</w>
+      <h>380</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;-
-Close
-Connection</panel_attributes>
-    <additional_attributes>10.0;70.0;10.0;10.0</additional_attributes>
+Reconnect
+</panel_attributes>
+    <additional_attributes>70.0;10.0;290.0;10.0;290.0;360.0;10.0;360.0;10.0;320.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>420</x>
-      <y>430</y>
-      <w>190</w>
-      <h>130</h>
+      <x>510</x>
+      <y>440</y>
+      <w>70</w>
+      <h>30</h>
     </coordinates>
-    <panel_attributes>lt=-&gt;&gt;&gt;
-Error</panel_attributes>
-    <additional_attributes>110.0;10.0;140.0;10.0;140.0;110.0;10.0;110.0</additional_attributes>
+    <panel_attributes>lt=-&gt;&gt;&gt;</panel_attributes>
+    <additional_attributes>10.0;10.0;50.0;10.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>170</x>
-      <y>430</y>
+      <x>160</x>
+      <y>440</y>
       <w>70</w>
       <h>30</h>
     </coordinates>
@@ -155,46 +140,10 @@ Error</panel_attributes>
     <additional_attributes>10.0;10.0;50.0;10.0</additional_attributes>
   </element>
   <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>320</x>
-      <y>440</y>
-      <w>120</w>
-      <h>80</h>
-    </coordinates>
-    <panel_attributes>lt=&lt;&lt;&lt;-
-Pause</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;60.0;100.0;60.0;100.0;10.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>460</x>
-      <y>440</y>
-      <w>80</w>
-      <h>80</h>
-    </coordinates>
-    <panel_attributes>lt=&lt;&lt;&lt;-
-Play</panel_attributes>
-    <additional_attributes>60.0;10.0;60.0;60.0;10.0;60.0;10.0;20.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>220</x>
-      <y>440</y>
-      <w>80</w>
-      <h>80</h>
-    </coordinates>
-    <panel_attributes>lt=&lt;&lt;&lt;-
-Wait</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;60.0;60.0;60.0;60.0;20.0</additional_attributes>
-  </element>
-  <element>
     <id>UMLUseCase</id>
     <coordinates>
-      <x>310</x>
-      <y>320</y>
+      <x>300</x>
+      <y>330</y>
       <w>120</w>
       <h>40</h>
     </coordinates>
@@ -204,61 +153,49 @@ Wait</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>420</x>
-      <y>330</y>
-      <w>160</w>
-      <h>130</h>
-    </coordinates>
-    <panel_attributes>lt=-</panel_attributes>
-    <additional_attributes>10.0;10.0;140.0;10.0;140.0;110.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>360</x>
-      <y>350</y>
-      <w>80</w>
-      <h>100</h>
+      <x>410</x>
+      <y>340</y>
+      <w>240</w>
+      <h>230</h>
     </coordinates>
     <panel_attributes>lt=-&gt;&gt;&gt;
-End</panel_attributes>
-    <additional_attributes>60.0;80.0;10.0;10.0</additional_attributes>
+Disconnect</panel_attributes>
+    <additional_attributes>10.0;10.0;150.0;10.0;150.0;210.0;10.0;210.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>310</x>
-      <y>250</y>
-      <w>50</w>
+      <x>350</x>
+      <y>270</y>
+      <w>60</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;-
+Login</panel_attributes>
+    <additional_attributes>10.0;60.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>250</x>
+      <y>460</y>
+      <w>230</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;-
+Game Over</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;40.0;210.0;40.0;210.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>400</x>
+      <y>350</y>
+      <w>120</w>
       <h>100</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;-
-Log
-In</panel_attributes>
-    <additional_attributes>10.0;80.0;10.0;10.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>410</x>
-      <y>250</y>
-      <w>50</w>
-      <h>100</h>
-    </coordinates>
-    <panel_attributes>lt=-&gt;&gt;&gt;
-Log
-Out</panel_attributes>
-    <additional_attributes>10.0;80.0;10.0;10.0</additional_attributes>
-  </element>
-  <element>
-    <id>UMLInterface</id>
-    <coordinates>
-      <x>360</x>
-      <y>610</y>
-      <w>20</w>
-      <h>70</h>
-    </coordinates>
-    <panel_attributes/>
-    <additional_attributes/>
+Reconnect</panel_attributes>
+    <additional_attributes>60.0;80.0;10.0;10.0</additional_attributes>
   </element>
 </diagram>
