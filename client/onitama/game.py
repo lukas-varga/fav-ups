@@ -246,7 +246,7 @@ def draw_card_holders(screen, gs):
     for i, card in enumerate(gs.selected_cards):
         x, y, w, h = (CARD_POS[i][0], CARD_POS[i][1], CARD_SIZE[0], CARD_SIZE[1])
         # Rotate 180 degrees to face player
-        # image = pygame.transform.rotate(CARD_IMAGES[card], 180) if not gs.white_to_move else CARD_IMAGES[card]
+        #image = pygame.transform.rotate(CARD_IMAGES[card], 180) if not gs.white_to_move else CARD_IMAGES[card]
         image = CARD_IMAGES[card]
         screen.blit(image, pygame.Rect(x, y, w, h))
         pygame.draw.rect(screen, pygame.Color(BORDER_COLOR), pygame.Rect(x, y, w, h), width=1)
