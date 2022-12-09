@@ -2,9 +2,12 @@
 This is main driver file for the game
 """
 
+import sys
+import select
 import pygame
 
 import onitama_engine
+import network
 
 # Colors
 LIGHT_COLOR = "antiquewhite1"
@@ -63,6 +66,14 @@ def load_images(gs):
 Handle user input and update graphics
 """
 def main():
+    if len(sys.argv) != 3:
+        print("Please enter arguments: <ip> <port>")
+        exit()
+
+    ip = str(sys.argv[1])
+    port = int(sys.argv[2])
+    net = network.Network(ip, port)
+
     pygame.init()
     clock = pygame.time.Clock()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -91,6 +102,20 @@ def main():
     card_picked = None
 
     while running:
+        sockets_list = [sys.stdin, net.client]
+        read_sockets, write_socket, error_socket = select.select(sockets_list, [], [])
+
+        for socks in read_sockets:
+            # Receiving data from other users
+            if socks == net.client:
+                message = net.recv_data()
+                print(message)
+            # Localhost wrote something and wants to send to others
+            else:
+                message = input()
+                net.send_data(message)
+                print(f"<You> {message}")
+
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
                 running = False
@@ -162,6 +187,7 @@ def main():
             win_text = "White Won" if gs.is_winner_white else "Black Won"
             pygame.display.set_caption(win_text)
 
+    net.close_connection()
 
 """
 Clear player selection

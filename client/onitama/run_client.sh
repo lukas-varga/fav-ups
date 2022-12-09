@@ -1,3 +1,3 @@
 #!/bin/bash
 
-../venv/bin/python3 game.py
+../venv/bin/python3 game.py 127.0.0.1 8888

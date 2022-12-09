@@ -1,3 +1,3 @@
 #!/bin/bash
 
-./server
+./server 8888

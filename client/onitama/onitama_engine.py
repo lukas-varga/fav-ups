@@ -3,18 +3,13 @@ Game engine with all the info about the game
 """
 
 import numpy as np
-
-from components import ID_TO_CARD, CARDS
-from network import Network
+import components
 
 """
 Information about current game
 """
 class GameState:
     def __init__(self):
-        # Network socket
-        self.net = Network()
-
         """
         Board is 5x5 2D list where each element has two chars
         Fst char represents color and snd char represents type (Pawn/King)
@@ -27,7 +22,7 @@ class GameState:
             ["--", "--", "--", "--", "--"],
             ["wP", "wP", "wK", "wP", "wP"]
         ]
-        self.cards = CARDS
+        self.cards = components.CARDS
 
         # Move to server C++
         # 0 and 1 are white
@@ -47,7 +42,7 @@ class GameState:
 
         selected_cards = []
         for x in random_ids:
-            name = ID_TO_CARD.get(x)
+            name = components.ID_TO_CARD.get(x)
             selected_cards.append(name)
 
         return selected_cards

@@ -1,19 +1,20 @@
 """
-Server socket for TCP communication with C server
+Network class which encapsulate socket communication
 """
 import socket
 
 """
 Socket operating class for communication with server
 """
-class Network:
-    def __init__(self):
+class Network(object):
+    def __init__(self, ip, port):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # For this to work on your machine this must be equal to the ipv4 address of the machine running the server
         # You can find this address by typing ipconfig in CMD and copying the ipv4 address. Again this must be the
         # servers ipv4 address. This field will be the same for all your clients.
-        self.host = "localhost"
-        self.port = 10000
+        self.MAX_BUFF = 1024
+        self.host = ip
+        self.port = port
         self.addr = (self.host, self.port)
         self.id = self.connect()
 
@@ -23,23 +24,43 @@ class Network:
     def connect(self):
         try:
             self.client.connect(self.addr)
-            print("Connected!")
+            hand_shake = self.recv_data()
+            print(hand_shake)
             return 0
         except socket.error as e:
             print(e)
             return -1
 
     """
-    Send data to server and wait for reply (FREEZE)
+    Close the connection to server
     """
-    def send(self, data):
-        """
-        :param data: str
-        :return: str
-        """
+    def close_connection(self):
         try:
-            self.client.send(str.encode(data))
-            reply = self.client.recv(2048).decode()
-            return reply
+            self.client.close()
         except socket.error as e:
-            return str(e)
+            print(e)
+            return -1
+
+    """
+    Send data to server
+    """
+    def send_data(self, data):
+        try:
+            message = data.encode('utf-8')
+            self.client.send(message)
+            return 0
+        except socket.error as e:
+            print(e)
+            return -1
+
+    """
+    Receive data from server while waiting
+    :return str data
+    """
+    def recv_data(self):
+        try:
+            b_mess = self.client.recv(self.MAX_BUFF)
+            return b_mess.decode("utf-8")
+        except socket.error as e:
+            print(e)
+            return -1
