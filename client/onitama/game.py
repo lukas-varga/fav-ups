@@ -46,48 +46,47 @@ MAX_FPS = 15
 PIECE_IMAGES = {}
 CARD_IMAGES = {}
 
-"""
-Global dictionary of pieces
-"""
-def load_images(gs):
-    # Assigning pieces using dictionary PIECE_IMAGES["wP"] = pieces/wP.png
-    pieces = ["wP", "wK", "bP", "bK"]
-    for piece in pieces:
-        # Scale image using resolution
-        PIECE_IMAGES[piece] = pygame.transform.scale(pygame.image.load("pieces/" + piece + ".png"), (SQ_SIZE, SQ_SIZE))
+def main():
+    if len(sys.argv) != 3:
+        print("Please enter arguments: <ip> <port>")
+        exit()
+    ip = str(sys.argv[1])
+    port = int(sys.argv[2])
 
-    # Load all playing card images using dictionary CARD_IMAGES["wP"] = pieces/wP.png
-    card_names = list(gs.cards.keys())
-    for card in card_names:
-        CARD_IMAGES[card] = pygame.transform.scale(pygame.image.load("cards/" + card + ".jpg"), CARD_SIZE)
+    net = login(ip, port)
+    game(net)
+
+
+def login(ip, port):
+    running = True
+    while running:
+        # TODO Tkinter
+        net = network.Network(ip, port)
+        return net
+
+    print("Closed while login")
+    exit()
 
 
 """
 Handle user input and update graphics
 """
-def main():
-    if len(sys.argv) != 3:
-        print("Please enter arguments: <ip> <port>")
-        exit()
-
-    ip = str(sys.argv[1])
-    port = int(sys.argv[2])
-    net = network.Network(ip, port)
-
+def game(net):
+    # Init pygame library
     pygame.init()
     clock = pygame.time.Clock()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
-    screen.fill(pygame.Color(BACKGROUND_COLOR))
-
-    # Game state
-    gs = onitama_engine.GameState()
 
     # Change icon and title
     program_icon = pygame.image.load('pieces/bN.png')
     pygame.display.set_icon(program_icon)
     pygame.display.set_caption('Onitama')
 
+    # Game state
+    gs = onitama_engine.GameState()
+
     # Only once before loop
+    screen.fill(pygame.Color(BACKGROUND_COLOR))
     load_images(gs)
     running = True
 
@@ -102,22 +101,23 @@ def main():
     card_picked = None
 
     while running:
-        sockets_list = [sys.stdin, net.client]
-        read_sockets, write_socket, error_socket = select.select(sockets_list, [], [])
-
-        for socks in read_sockets:
-            # Receiving data from other users
-            if socks == net.client:
-                message = net.recv_data()
-                print(message)
-            # Localhost wrote something and wants to send to others
-            else:
-                message = input()
-                net.send_data(message)
-                print(f"<You> {message}")
+        # sockets_list = [sys.stdin, net.client]
+        # read_sockets, write_socket, error_socket = select.select(sockets_list, [], [])
+        #
+        # for socks in read_sockets:
+        #     # Receiving data from other users
+        #     if socks == net.client:
+        #         message = net.recv_data()
+        #         print(message)
+        #     # Localhost wrote something and wants to send to others
+        #     else:
+        #         message = input()
+        #         net.send_data(message)
+        #         print(f"<You> {message}")
 
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
+                net.close_connection()
                 running = False
 
             # Mouse handler
@@ -188,6 +188,24 @@ def main():
             pygame.display.set_caption(win_text)
 
     net.close_connection()
+    pygame.quit()
+    print("Game closed")
+    exit()
+
+"""
+Global dictionary of pieces
+"""
+def load_images(gs):
+    # Assigning pieces using dictionary PIECE_IMAGES["wP"] = pieces/wP.png
+    pieces = ["wP", "wK", "bP", "bK"]
+    for piece in pieces:
+        # Scale image using resolution
+        PIECE_IMAGES[piece] = pygame.transform.scale(pygame.image.load("pieces/" + piece + ".png"), (SQ_SIZE, SQ_SIZE))
+
+    # Load all playing card images using dictionary CARD_IMAGES["wP"] = pieces/wP.png
+    card_names = list(gs.cards.keys())
+    for card in card_names:
+        CARD_IMAGES[card] = pygame.transform.scale(pygame.image.load("cards/" + card + ".jpg"), CARD_SIZE)
 
 """
 Clear player selection

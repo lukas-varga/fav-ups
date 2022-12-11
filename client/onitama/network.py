@@ -24,8 +24,8 @@ class Network(object):
     def connect(self):
         try:
             self.client.connect(self.addr)
-            hand_shake = self.recv_data()
-            print(hand_shake)
+            # hand_shake = self.recv_data()
+            # print(hand_shake)
             return 0
         except socket.error as e:
             print(e)
