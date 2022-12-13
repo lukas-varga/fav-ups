@@ -16,12 +16,12 @@ class Network(object):
         self.host = ip
         self.port = port
         self.addr = (self.host, self.port)
-        self.id = self.connect()
+        self.id = self.create_connection()
 
     """
     Connect to server
     """
-    def connect(self):
+    def create_connection(self):
         try:
             self.client.connect(self.addr)
             # hand_shake = self.recv_data()

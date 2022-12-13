@@ -2,12 +2,9 @@
 This is main driver file for the game
 """
 
-import sys
-import select
 import pygame
-
 import onitama_engine
-import network
+
 
 # Colors
 LIGHT_COLOR = "antiquewhite1"
@@ -16,6 +13,7 @@ BACKGROUND_COLOR = "antiquewhite2"
 BORDER_COLOR = "black"
 HIGHLIGHT_COLOR_1 = "blue"
 HIGHLIGHT_COLOR_2 = "yellow"
+FONT = 'calibri'
 
 # Resolution
 WIDTH = 1024
@@ -46,32 +44,11 @@ MAX_FPS = 15
 PIECE_IMAGES = {}
 CARD_IMAGES = {}
 
-def main():
-    if len(sys.argv) != 3:
-        print("Please enter arguments: <ip> <port>")
-        exit()
-    ip = str(sys.argv[1])
-    port = int(sys.argv[2])
-
-    net = login(ip, port)
-    game(net)
-
-
-def login(ip, port):
-    running = True
-    while running:
-        # TODO Tkinter
-        net = network.Network(ip, port)
-        return net
-
-    print("Closed while login")
-    exit()
-
 
 """
 Handle user input and update graphics
 """
-def game(net):
+def play(net):
     # Init pygame library
     pygame.init()
     clock = pygame.time.Clock()
@@ -88,7 +65,6 @@ def game(net):
     # Only once before loop
     screen.fill(pygame.Color(BACKGROUND_COLOR))
     load_images(gs)
-    running = True
 
     global card_picked, valid_moves, sq_selected, player_clicks
     # No square selected, last click of user (row, col)
@@ -100,21 +76,8 @@ def game(net):
     # If user selected card
     card_picked = None
 
+    running = True
     while running:
-        # sockets_list = [sys.stdin, net.client]
-        # read_sockets, write_socket, error_socket = select.select(sockets_list, [], [])
-        #
-        # for socks in read_sockets:
-        #     # Receiving data from other users
-        #     if socks == net.client:
-        #         message = net.recv_data()
-        #         print(message)
-        #     # Localhost wrote something and wants to send to others
-        #     else:
-        #         message = input()
-        #         net.send_data(message)
-        #         print(f"<You> {message}")
-
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
                 net.close_connection()
@@ -334,9 +297,3 @@ def animate_move(move, screen, board, clock):
         pygame.display.flip()
         clock.tick(60)
 
-
-"""
- Main
-"""
-if __name__ == "__main__":
-    main()
