@@ -1,2 +1,2 @@
 #!/bin/bash
-../venv/bin/python main.py $1 $2
+../venv_linux/bin/python main.py $1 $2
