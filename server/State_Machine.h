@@ -1,7 +1,9 @@
+#pragma once
+
 #ifndef SERVER_STATE_MACHINE_H
 #define SERVER_STATE_MACHINE_H
 
-#pragma once
+
 #include "map"
 
 using namespace std;

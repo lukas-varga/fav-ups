@@ -1,6 +1,5 @@
 from enum import Enum
 
-# class syntax
 class Commands(Enum):
     # Client side
     LOGIN = "LOGIN"

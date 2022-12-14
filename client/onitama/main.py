@@ -1,7 +1,3 @@
-"""
-Main class for running the client
-"""
-
 import sys
 
 import intro

@@ -1,11 +1,6 @@
-"""
-Class for login screen
-"""
-
 from tkinter import *
 from tkinter import messagebox
 from functools import partial
-import select
 
 import game
 import parser
@@ -71,19 +66,11 @@ def login(net):
 
         # Waiting for the game
         if logged:
-            while True:
-                sockets_list = [net.client]
-                read_sockets, write_socket, error_socket = select.select(sockets_list, [], [])
-                for socks in read_sockets:
-                    if socks == net.client:
-                        rcv = net.recv_data()
-                        rcv_arr = parser.parse(rcv)
-
-                        print(rcv_arr)
-                        print("Game started")
-
-                        login_scr.destroy()
-                        return
+            rcv = net.recv_data()
+            rcv_arr = parser.parse(rcv)
+            print(rcv_arr)
+            print("Game started")
+            return
 
 
 """

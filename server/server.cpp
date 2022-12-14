@@ -197,14 +197,14 @@ int main (int argc, char** argv){
                                     cout << "fd: " << fd << " -> " << Command::WAITING << " " << user_login << endl;
 
                                     // TODO Wait for second player
-//                                    snd = snd.append(Command::START)
-//                                            .append(SPL)
-//                                            .append(user_login)
-//                                            .append(SPL)
-//                                            .append(user_login)
-//                                            .append(END);
-//                                    send(fd, snd.data(), snd.size(), 0);
-//                                    cout << "fd: " << fd << " -> " << Command::START << " " << user_login << " " << user_login << endl;
+                                    snd = snd.append(Command::START)
+                                            .append(SPL)
+                                            .append(user_login)
+                                            .append(SPL)
+                                            .append(user_login)
+                                            .append(END);
+                                    send(fd, snd.data(), snd.size(), 0);
+                                    cout << "fd: " << fd << " -> " << Command::START << " " << user_login << " " << user_login << endl;
                                 }
                             }
                         }

@@ -14,32 +14,19 @@
       <config projectName="server" targetName="server" />
     </generated>
   </component>
-  <component name="CMakeSettings">
+  <component name="CMakeSettings" AUTO_RELOAD="true">
     <configurations>
       <configuration PROFILE_NAME="Debug" ENABLED="true" CONFIG_NAME="Debug" />
     </configurations>
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b8ed92a8-e9d2-457f-9a81-ceb035a0f772" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/../client/onitama/intro.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../client/onitama/main.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../client/onitama/parser.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Command.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Command.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Game.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Game.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Player.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Player.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/State_Machine.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/State_Machine.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/onitama/game.py" beforeDir="false" afterPath="$PROJECT_DIR$/../client/onitama/game.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/onitama/network.py" beforeDir="false" afterPath="$PROJECT_DIR$/../client/onitama/network.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/discord.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/discord.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/server.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/server.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/.idea/client.iml" beforeDir="false" afterPath="$PROJECT_DIR$/../client/.idea/client.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/onitama/intro.py" beforeDir="false" afterPath="$PROJECT_DIR$/../client/onitama/intro.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/Makefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/State_Machine.h" beforeDir="false" afterPath="$PROJECT_DIR$/State_Machine.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server" beforeDir="false" afterPath="$PROJECT_DIR$/server" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/server.cpp" afterDir="false" />
     </list>
@@ -78,6 +65,7 @@
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
@@ -87,11 +75,6 @@
     </key>
   </component>
   <component name="RunManager" selected="CMake Application.server">
-    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
-      <method v="2">
-        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="server" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="127.0.0.1 8888" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="server" TARGET_NAME="server" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="server" RUN_TARGET_NAME="server">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -103,13 +86,37 @@
       </makefile>
       <method v="2" />
     </configuration>
+    <configuration name="all" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile" temporary="true">
+      <makefile filename="$PROJECT_DIR$/Makefile" target="all" workingDirectory="" arguments="">
+        <envs />
+      </makefile>
+      <method v="2" />
+    </configuration>
+    <configuration name="clean" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile" temporary="true">
+      <makefile filename="$PROJECT_DIR$/Makefile" target="clean" workingDirectory="" arguments="">
+        <envs />
+      </makefile>
+      <method v="2" />
+    </configuration>
+    <configuration name="server" type="MAKEFILE_TARGET_RUN_CONFIGURATION" factoryName="Makefile" temporary="true">
+      <makefile filename="$PROJECT_DIR$/Makefile" target="server" workingDirectory="" arguments="">
+        <envs />
+      </makefile>
+      <method v="2" />
+    </configuration>
     <list>
       <item itemvalue="CMake Application.server" />
+      <item itemvalue="Makefile Target.all" />
+      <item itemvalue="Makefile Target.clean" />
+      <item itemvalue="Makefile Target.server" />
       <item itemvalue="Makefile Target.Makefile" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Makefile Target.Makefile" />
+        <item itemvalue="Makefile Target.server" />
+        <item itemvalue="Makefile Target.clean" />
+        <item itemvalue="Makefile Target.all" />
       </list>
     </recent_temporary>
   </component>
@@ -123,7 +130,9 @@
       <updated>1670944242508</updated>
       <workItem from="1670944243900" duration="10140000" />
       <workItem from="1670958926615" duration="5759000" />
-      <workItem from="1670967737888" duration="4000" />
+      <workItem from="1670967737888" duration="573000" />
+      <workItem from="1671012842592" duration="2310000" />
+      <workItem from="1671030036360" duration="1250000" />
     </task>
     <servers />
   </component>

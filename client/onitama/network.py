@@ -1,6 +1,3 @@
-"""
-Network class which encapsulate socket communication
-"""
 import socket
 
 """

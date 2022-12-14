@@ -1,7 +1,3 @@
-"""
-This is main driver file for the game
-"""
-
 import pygame
 import onitama_engine
 
