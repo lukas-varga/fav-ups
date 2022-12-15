@@ -1,12 +1,12 @@
-#ifndef SERVER_COMMAND_H
-#define SERVER_COMMAND_H
-
+#ifndef SERVER_CMD_H
+#define SERVER_CMD_H
 
 #include <string>
 
+
 using namespace std;
 
-class Command{
+class Cmd{
 public:
     // Client side
     static const string LOGIN;
@@ -25,4 +25,5 @@ public:
 };
 
 
-#endif //SERVER_COMMAND_H
+
+#endif //SERVER_CMD_H

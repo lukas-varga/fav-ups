@@ -11,18 +11,16 @@
 #include <sys/ioctl.h>
 #include <sstream>
 #include <vector>
+#include "string"
 
 #include "Game.h"
 #include "Player.h"
-#include "Command.h"
+#include "Cmd.h"
+#include "Help.h"
+#include "State.h"
+
 
 using namespace std;
-
-// A quick way to parse strings separated via any character delimiter
-vector<string> parse(const string& msg, char del);
-
-const string SPL = "|";
-const string END = "\0";
 
 int main (int argc, char** argv){
     if (argc != 3){
@@ -36,6 +34,9 @@ int main (int argc, char** argv){
     const int MAX_BUFF = 1024;
     char buff[MAX_BUFF];
     const char SPL_CHR = '|';
+
+    Game game_arr[MAX_CLIENTS / 2];
+    Game game = Game();
 
     Player player_arr[MAX_CLIENTS];
     int server_socket;
@@ -84,6 +85,7 @@ int main (int argc, char** argv){
         memset(buff, 0, MAX_BUFF);
         string rcv, snd;
         Player p;
+        State trans;
 
         tests = client_socks;
         printf("Server is waiting...\n");
@@ -107,15 +109,15 @@ int main (int argc, char** argv){
                     printf("New connection - socket fd is %d\n", client_socket );
 
                     // send new connection greeting welcome_msg
-                    string welcome_msg = "Welcome to Onitama server!";
-                    welcome_msg = welcome_msg.append(END);
-                    send(client_socket, welcome_msg.data(), welcome_msg.size(), 0) ;
-                    printf("Welcome message sent successfully\n");
+                    snd = "";
+                    snd = snd.append("Welcome to Onitama server!");
+                    snd = snd.append(Help::END);
+                    Help::send_data(client_socket, snd);
 
                     for (int i = 0; i < MAX_CLIENTS; i++)
                     {
                         p = player_arr[i];
-                        if(p.socket == 0 )
+                        if(p.socket == 0)
                         {
                             p.socket = client_socket;
                             printf("Adding to list of sockets as %d\n" , i);
@@ -127,6 +129,8 @@ int main (int argc, char** argv){
                 else {
                     val_read = recv(fd, buff, sizeof(buff), 0);
                     rcv.append(buff);
+                    cout << "Receiving from fd " << fd << ": " << buff << endl;
+
                     // na socketu se stalo neco spatneho
                     if (val_read == 0){
                         for (int i = 0; i < MAX_CLIENTS; i++){
@@ -143,73 +147,89 @@ int main (int argc, char** argv){
                         FD_CLR(fd, &client_socks);
                         printf("Removing client on fd %d\n", fd);
                     }
+
                     // mame co cist
                     else {
-                        vector<string> rcv_arr = parse(rcv, SPL_CHR);
+                        vector<string> rcv_arr = Help::parse(rcv, SPL_CHR);
                         string cmd = rcv_arr.at(0);
-                        string user_login = rcv_arr.at(1);
+                        string username = rcv_arr.at(1);
 
                         // login come to server
-                        if (cmd == Command::LOGIN){
+                        if (cmd == Cmd::LOGIN){
                             bool name_found = false;
                             for (int i = 0; i < MAX_CLIENTS; i++) {
                                 p = player_arr[i];
-                                if (p.username == user_login){
+                                if (p.username == username){
                                     name_found = true;
                                     // Reconnect attempt
                                     if(!p.disconnected){
-                                        snd = snd.append(Command::FAILED_LOGIN)
-                                                .append(SPL)
-                                                .append(user_login)
-                                                .append(END);
-                                        send(fd, snd.data(), snd.size(), 0);
-                                        cout << "fd: " << fd << " -> " << Command::FAILED_LOGIN << endl;
+                                        snd = "";
+                                        snd = snd.append(Cmd::FAILED_LOGIN)
+                                                .append(Help::SPL)
+                                                .append(username)
+                                                .append(Help::END);
+                                        Help::send_data(fd, snd);
                                     }
                                     // Name already in use
                                     else{
-                                        snd = snd.append(Command::RECONNECT)
-                                                .append(SPL)
-                                                .append(user_login)
-                                                .append(END);
-                                        send(fd, snd.data(), snd.size(), 0);
-                                        cout << "fd: " << fd << " -> " << Command::RECONNECT << endl;
+                                        snd = "";
+                                        snd = snd.append(Cmd::RECONNECT)
+                                                .append(Help::SPL)
+                                                .append(username)
+                                                .append(Help::END);
+                                        Help::send_data(fd, snd);
                                     }
                                     break;
                                 }
                             }
                             if (!name_found){
                                 // Name not too long
-                                if (user_login.size() > 20 || user_login.empty()){
-                                    snd = snd.append(Command::FAILED_LOGIN)
-                                            .append(SPL)
-                                            .append(user_login)
-                                            .append(END);
-                                    send(fd, rcv.data(), rcv.size(), 0);
-                                    cout << "fd: " << fd << " -> " << Command::FAILED_LOGIN << endl;
+                                if (username.size() > 20 || username.empty()){
+                                    snd = "";
+                                    snd = snd.append(Cmd::FAILED_LOGIN)
+                                            .append(Help::SPL)
+                                            .append(username)
+                                            .append(Help::END);
+                                    Help::send_data(fd, snd);
                                 }
                                 // Correct name
                                 else {
-                                    snd = snd.append(Command::WAITING)
-                                            .append(SPL)
-                                            .append(user_login)
-                                            .append(END);
-                                    send(fd, snd.data(), snd.size(), 0);
-                                    cout << "fd: " << fd << " -> " << Command::WAITING << " " << user_login << endl;
+                                    trans = StateMachine::allowed_transition(p.state, Event::EV_LOGIN);
+                                    if (trans == State::ST_WAITING){
+                                        p.state = trans;
 
-                                    // TODO Wait for second player
-                                    snd = snd.append(Command::START)
-                                            .append(SPL)
-                                            .append(user_login)
-                                            .append(SPL)
-                                            .append(user_login)
-                                            .append(END);
-                                    send(fd, snd.data(), snd.size(), 0);
-                                    cout << "fd: " << fd << " -> " << Command::START << " " << user_login << " " << user_login << endl;
+                                        snd = "";
+                                        snd = snd.append(Cmd::WAITING)
+                                                .append(Help::SPL)
+                                                .append(username)
+                                                .append(Help::END);
+                                        Help::send_data(fd, snd);
+
+                                        if (game.p1.username.empty()){
+                                            game.p1 = p;
+                                        }
+                                        else if (game.p2.username.empty()){
+                                            game.p2 = p;
+                                            // MAX game_id = 9
+                                            if (game.game_id < MAX_CLIENTS / 2){
+                                                game_arr[game.game_id] = game;
+                                                game.start_game();
+                                                // New game
+                                                game = Game();
+                                            }
+                                            else{
+                                                cout << "All lobby are full!" << endl;
+                                            }
+                                        }
+                                    }
+                                    else{
+                                        cout << "Unhandled error while creating lobby!" << endl;
+                                    }
                                 }
                             }
                         }
                         else{
-                            cout << "Unknown error" << endl;
+                            cout << "Not defined message received in server: " << buff << endl;
                         }
                     }
                 }
@@ -221,17 +241,4 @@ int main (int argc, char** argv){
     close(server_socket);
     close(client_socket);
     exit(0);
-}
-
-vector<string> parse(const string& msg, char del) {
-    stringstream ss(msg);
-    string word;
-    vector<string> args {};
-
-    while (!ss.eof()) {
-        getline(ss, word, del);
-        args.push_back(word);
-    }
-
-    return args;
 }

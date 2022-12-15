@@ -21,8 +21,8 @@ class Network(object):
     def create_connection(self):
         try:
             self.client.connect(self.addr)
-            # hand_shake = self.recv_data()
-            # print(hand_shake)
+            welcome_rcv = self.recv_data()
+            print(welcome_rcv)
             return 0
         except socket.error as e:
             print(e)
@@ -34,6 +34,7 @@ class Network(object):
     def close_connection(self):
         try:
             self.client.close()
+            return 0
         except socket.error as e:
             print(e)
             return -1
@@ -43,6 +44,7 @@ class Network(object):
     """
     def send_data(self, data):
         try:
+            print(f"Sending to server: {data}")
             message = data.encode('utf-8')
             self.client.send(message)
             return 0
@@ -57,7 +59,9 @@ class Network(object):
     def recv_data(self):
         try:
             b_mess = self.client.recv(self.MAX_BUFF)
-            return b_mess.decode("utf-8")
+            mess = b_mess.decode("utf-8")
+            print(f"Receiving from server: {mess}")
+            return mess
         except socket.error as e:
             print(e)
             return -1

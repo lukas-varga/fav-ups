@@ -3,6 +3,7 @@ import sys
 import intro
 import game
 import network
+from parser import Cmd
 
 """
 Implementation of main method
@@ -16,11 +17,17 @@ def main():
 
     # Handshake
     net = network.Network(ip, port)
-    welcome_rcv = net.recv_data()
-    print(welcome_rcv)
+    code = intro.login(net)
 
-    intro.login(net)
-    game.play(net)
+    if code[0] == Cmd.START:
+        print("Game started!")
+        game.play(net)
+    elif code[0] == "EXIT":
+        print("User quit login!")
+        exit()
+    else:
+        print("Unexpected behaviour in main!")
+        exit()
 
 
 """

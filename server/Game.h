@@ -1,10 +1,10 @@
 #ifndef SERVER_GAME_H
 #define SERVER_GAME_H
 
-
 #include "Player.h"
 
 using namespace std;
+
 
 class Game{
 public:
@@ -14,7 +14,7 @@ public:
     Player p2;
 
     Game();
-    Game(Player p1, Player p2);
+    void start_game() const;
 };
 
 

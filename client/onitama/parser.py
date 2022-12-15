@@ -1,6 +1,6 @@
 from enum import Enum
 
-class Commands(Enum):
+class Cmd(Enum):
     # Client side
     LOGIN = "LOGIN"
     MAKE_MOVE = "MAKE_MOVE"
@@ -24,11 +24,11 @@ def parse(msg: str):
 
 
 def login(username):
-    return f"{Commands.LOGIN.value}{SPL}{username}{END}"
+    return f"{Cmd.LOGIN.value}{SPL}{username}{END}"
 
 def make_move(card, start_pos, end_pos):
-    return f"{Commands.MAKE_MOVE.value}{SPL}{card}{SPL}{start_pos}{SPL}{end_pos}{END}"
+    return f"{Cmd.MAKE_MOVE.value}{SPL}{card}{SPL}{start_pos}{SPL}{end_pos}{END}"
 
 def stalemate(card_to_swap):
-    return f"{Commands.MAKE_MOVE.value}{SPL}{card_to_swap}{END}"
+    return f"{Cmd.MAKE_MOVE.value}{SPL}{card_to_swap}{END}"
 
