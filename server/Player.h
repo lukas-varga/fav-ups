@@ -11,8 +11,8 @@ class Player{
 public:
     int socket;
     string username;
-    bool disconnected = false;
-    State state = State::ST_INIT;
+    State state;
+    bool disconnected;
 
     Player();
     Player(int socket, string username);

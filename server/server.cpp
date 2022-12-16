@@ -15,41 +15,48 @@
 
 #include "Game.h"
 #include "Player.h"
-#include "Cmd.h"
+#include "Command.h"
 #include "Help.h"
 #include "State.h"
 
 
 using namespace std;
 
+static int server_socket;
+static int client_socket;
+
+void close_connections();
+
 int main (int argc, char** argv){
+    atexit(close_connections);
     if (argc != 2){
-        cout << "Please enter arguments: <port>" << "\n";
+        cout << "Please enter arguments: <port>" << endl;
         exit(0);
     }
     int port = atoi(argv[1]);
 
-    const int MAX_CLIENTS = 20;
-    const int MAX_BUFF = 1024;
+    const int CLIENT_NUM = 20;
+    const int GAME_NUM = CLIENT_NUM / 2;
+    const int MAX_BUFF = 2048;
     char buff[MAX_BUFF];
     const char SPL_CHR = '|';
 
-    Game game_arr[MAX_CLIENTS / 2];
-    Game game = Game();
-
-    Player player_arr[MAX_CLIENTS];
-    int server_socket;
-    int client_socket;
     int ret_val, val_read;
     int fd, sd;
-
     socklen_t client_len, server_len;
     struct sockaddr_in my_addr, peer_addr;
     fd_set client_socks, tests;
 
-    for (int i = 0; i < MAX_CLIENTS; i++)
-    {
-        player_arr[i] = Player(0, "");
+    Game * game_arr[GAME_NUM];
+    Player * player_arr[CLIENT_NUM];
+
+    for (int i = 0; i < CLIENT_NUM; i++){
+        player_arr[i] = new Player(0, "");
+    }
+    for (int i = 0; i < GAME_NUM; i++){
+//        Player * p1 = player_arr[i * 2];
+//        Player * p2 = player_arr[(i * 2)+ 1];
+        game_arr[i] = new Game();
     }
 
     server_socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -67,8 +74,8 @@ int main (int argc, char** argv){
         return -1;
     }
 
-    // MAX_CLIENTS devices connected to chat
-    ret_val = listen(server_socket, MAX_CLIENTS);
+    // CLIENT_NUM devices connected to chat
+    ret_val = listen(server_socket, CLIENT_NUM);
     if (ret_val == 0){
         printf("Listen - OK\n");
     } else {
@@ -83,7 +90,8 @@ int main (int argc, char** argv){
     while(true) {
         memset(buff, 0, MAX_BUFF);
         string rcv, snd;
-        Player p;
+        Game * game;
+        bool lobby_entered, name_in_use;
         State trans;
 
         tests = client_socks;
@@ -111,14 +119,14 @@ int main (int argc, char** argv){
                     snd = "";
                     snd = snd.append("Welcome to Onitama server!");
                     snd = snd.append(Help::END);
-                    Help::send_data(client_socket, snd);
+                    send(client_socket, snd.data(), snd.size(), 0);
+                    Help::send_log(fd, snd);
 
-                    for (int i = 0; i < MAX_CLIENTS; i++)
-                    {
-                        p = player_arr[i];
-                        if(p.socket == 0)
+                    for (int i = 0; i < CLIENT_NUM; i++){
+                        Player * p = player_arr[i];
+                        if(p->socket == 0 && p->username.empty())
                         {
-                            p.socket = client_socket;
+                            p->socket = client_socket;
                             printf("Adding to list of sockets as %d\n" , i);
                             break;
                         }
@@ -126,17 +134,23 @@ int main (int argc, char** argv){
                 }
                 // je to klientsky socket ? prijmem rcv
                 else {
+                    rcv = "";
                     val_read = recv(fd, buff, sizeof(buff), 0);
                     rcv.append(buff);
-                    cout << "Receiving from fd " << fd << ": " << buff << endl;
+                    Help::recv_log(fd,rcv);
 
                     // na socketu se stalo neco spatneho
                     if (val_read == 0){
-                        for (int i = 0; i < MAX_CLIENTS; i++){
-                            p = player_arr[i];
-                            if(p.socket == fd){
-                                p.socket = 0;
-                                p.username = "";
+                        for (int i = 0; i < CLIENT_NUM; i++){
+                            Player * p = player_arr[i];
+                            if(p->socket == fd){
+                                // TODO make reconnect logic
+//                                p->socket = 0;
+//                                p->username = "";
+
+                                p->state = StateMachine::allowed_transition(p->state, Event::EV_DISC);
+                                p->disconnected = true;
+
                                 break;
                             }
                         }
@@ -149,95 +163,128 @@ int main (int argc, char** argv){
 
                     // mame co cist
                     else {
-                        vector<string> rcv_arr = Help::parse(rcv, SPL_CHR);
-                        string cmd = rcv_arr.at(0);
-                        string username = rcv_arr.at(1);
+                        Player * player = nullptr;
+                        for (int i = 0; i < CLIENT_NUM; i++) {
+                            if (fd == player_arr[i]->socket){
+                                player = player_arr[i];
+                                break;
+                            }
+                        }
 
-                        // login come to server
-                        if (cmd == Cmd::LOGIN){
-                            bool name_found = false;
-                            for (int i = 0; i < MAX_CLIENTS; i++) {
-                                p = player_arr[i];
-                                if (p.username == username){
-                                    name_found = true;
-                                    // Reconnect attempt
-                                    if(!p.disconnected){
-                                        snd = "";
-                                        snd = snd.append(Cmd::FAILED_LOGIN)
-                                                .append(Help::SPL)
-                                                .append(username)
-                                                .append(Help::END);
-                                        Help::send_data(fd, snd);
+                        // Player found in arr
+                        if (player != nullptr){
+                            // Parsing
+                            vector<string> rcv_arr = Help::parse(rcv, SPL_CHR);
+                            string cmd = rcv_arr.at(0);
+
+                            // Cmd::WRONG_DATE
+                            if (cmd == Command::name(Cmd::WRONG_DATA)){
+                                snd = "";
+                                snd = snd.append(Command::name(Cmd::WRONG_DATA))
+                                        .append(Help::END);
+                                send(fd, snd.data(), snd.size(), 0);
+                                Help::send_log(fd, snd);
+                            }
+                            // login come to server
+                            else if (cmd == Command::name(Cmd::LOGIN)){
+                                string client_username = rcv_arr.at(1);
+                                name_in_use = false;
+                                for (int i = 0; i < CLIENT_NUM; i++) {
+                                    Player * p = player_arr[i];
+                                    if (p->username == client_username){
+                                        name_in_use = true;
+                                        // Reconnect attempt
+                                        if(p->disconnected){
+                                            p->state = StateMachine::allowed_transition(p->state, Event::EV_RECON);
+                                            p->disconnected = false;
+                                            // TODO make reconnect logic
+
+                                            snd = "";
+                                            snd = snd.append(Command::name(Cmd::RECONNECT))
+                                                    .append(Help::SPL)
+                                                    .append(client_username)
+                                                    .append(Help::END);
+                                            send(fd, snd.data(), snd.size(), 0);
+                                            Help::send_log(fd, snd);
+                                        }
+                                        // Name already in use
+                                        else{
+                                            snd = "";
+                                            snd = snd.append(Command::name(Cmd::FAILED_LOGIN))
+                                                    .append(Help::SPL)
+                                                    .append(client_username)
+                                                    .append(Help::END);
+                                            send(fd, snd.data(), snd.size(), 0);
+                                            Help::send_log(fd, snd);
+                                        }
+                                        break;
                                     }
-                                    // Name already in use
-                                    else{
+                                }
+                                // Original name detected
+                                if (!name_in_use){
+                                    // Name not too long
+                                    if (client_username.size() > 20 || client_username.empty()){
                                         snd = "";
-                                        snd = snd.append(Cmd::RECONNECT)
+                                        snd = snd.append(Command::name(Cmd::FAILED_LOGIN))
                                                 .append(Help::SPL)
-                                                .append(username)
+                                                .append(client_username)
                                                 .append(Help::END);
-                                        Help::send_data(fd, snd);
+                                        send(fd, snd.data(), snd.size(), 0);
+                                        Help::send_log(fd, snd);
                                     }
-                                    break;
+                                    // Correct name --> Enter lobby
+                                    else {
+                                        // Enter lobby or/and start game
+                                        lobby_entered = false;
+                                        for (int i = 0; i < GAME_NUM; i++){
+                                            game = game_arr[i];
+                                            if(!game->is_active){
+                                                // Create player finally and login
+                                                player->username = client_username;
+                                                player->state = StateMachine::allowed_transition(player->state, Event::EV_LOGIN);
+                                                player->disconnected = false;
+
+                                                // Cmd::WAITING
+                                                // Cmd::PLAY
+                                                game->enter_lobby(player);
+                                                lobby_entered = true;
+                                                cout << "Player logged correctly!" << endl;
+                                                break;
+                                            }
+                                        }
+                                        // No more available lobby
+                                        if (!lobby_entered){
+                                            snd = "";
+                                            snd = snd.append(Command::name(Cmd::FAILED_LOGIN))
+                                                    .append(Help::SPL)
+                                                    .append(client_username)
+                                                    .append(Help::END);
+                                            send(fd, snd.data(), snd.size(), 0);
+                                            Help::send_log(fd, snd);
+                                            cout << "All lobby are full!" << endl;
+                                        }
+                                    }
+                                }
+                                else{
+                                    cout << "ERR: Even though original name detected!" << endl;
                                 }
                             }
-                            if (!name_found){
-                                // Name not too long
-                                if (username.size() > 20 || username.empty()){
-                                    snd = "";
-                                    snd = snd.append(Cmd::FAILED_LOGIN)
-                                            .append(Help::SPL)
-                                            .append(username)
-                                            .append(Help::END);
-                                    Help::send_data(fd, snd);
-                                }
-                                // Correct name
-                                else {
-                                    trans = StateMachine::allowed_transition(p.state, Event::EV_LOGIN);
-                                    if (trans == State::ST_WAITING){
-                                        p.state = trans;
+                            else if (cmd == Command::name(Cmd::MAKE_MOVE)){
 
-                                        snd = "";
-                                        snd = snd.append(Cmd::WAITING)
-                                                .append(Help::SPL)
-                                                .append(username)
-                                                .append(Help::END);
-                                        Help::send_data(fd, snd);
-
-                                        if (game.p1.username.empty()){
-                                            game.p1 = p;
-                                        }
-                                        else if (game.p2.username.empty()){
-                                            game.p2 = p;
-                                            // MAX game_id = 9
-                                            if (game.game_id < MAX_CLIENTS / 2){
-                                                game_arr[game.game_id] = game;
-                                                game.start_game();
-                                                // New game
-                                                game = Game();
-                                            }
-                                            else{
-                                                cout << "All lobby are full!" << endl;
-                                            }
-                                        }
-                                    }
-                                    else{
-                                        cout << "Unhandled error while creating lobby!" << endl;
-                                    }
-                                }
                             }
                         }
                         else{
-                            cout << "Not defined message received in server: " << buff << endl;
+                            cout << "ERR: Player connected but not found in array of players!" << endl;
                         }
                     }
                 }
             }
         }
-
     }
+}
 
+void close_connections() {
+    cout << "Closing previous connections!" << endl;
     close(server_socket);
     close(client_socket);
-    exit(0);
 }

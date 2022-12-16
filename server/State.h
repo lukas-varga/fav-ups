@@ -10,7 +10,7 @@ enum class State {
     ST_NOT_ALLOWED = 0,
     ST_INIT = 1,
     ST_WAITING = 2,
-    ST_PLAYING = 3
+    ST_PLAYING = 3,
 };
 
 enum class Event {
@@ -18,6 +18,8 @@ enum class Event {
     EV_PLAY = 1,
     EV_MOVE = 2,
     EV_WRONG = 3,
+    EV_DISC = 4,
+    EV_RECON = 5,
 };
 
 class StateMachine{
