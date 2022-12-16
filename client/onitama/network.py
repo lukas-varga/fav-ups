@@ -13,7 +13,6 @@ class Network(object):
         self.host = ip
         self.port = port
         self.addr = (self.host, self.port)
-        self.id = self.create_connection()
 
     """
     Connect to server
@@ -22,7 +21,7 @@ class Network(object):
         try:
             self.client.connect(self.addr)
             welcome_rcv = self.recv_data()
-            print(welcome_rcv)
+            # print(welcome_rcv)
             return 0
         except socket.error as e:
             print(e)
@@ -34,6 +33,7 @@ class Network(object):
     def close_connection(self):
         try:
             self.client.close()
+            print("Disconnecting from server!")
             return 0
         except socket.error as e:
             print(e)
@@ -44,9 +44,9 @@ class Network(object):
     """
     def send_data(self, data):
         try:
-            print(f"Sending to server: {data}")
-            message = data.encode('utf-8')
-            self.client.send(message)
+            print(f"Sending: {data}")
+            byte_mess = data.encode('utf-8')
+            self.client.send(byte_mess)
             return 0
         except socket.error as e:
             print(e)
@@ -58,10 +58,10 @@ class Network(object):
     """
     def recv_data(self):
         try:
-            b_mess = self.client.recv(self.MAX_BUFF)
-            mess = b_mess.decode("utf-8")
-            print(f"Receiving from server: {mess}")
-            return mess
+            byte_mess = self.client.recv(self.MAX_BUFF)
+            data = byte_mess.decode("utf-8")
+            print(f"Receiving: {data}")
+            return data
         except socket.error as e:
             print(e)
             return -1

@@ -1,5 +1,5 @@
 import pygame
-import onitama_engine
+import engine
 
 
 # Colors

@@ -80,6 +80,8 @@ def login(net: Network):
 Play button pressed
 """
 def login_btn_pressed(net: Network):
+    net.create_connection()
+
     usr = str(username.get())
     snd = parser.login(usr)
     net.send_data(snd)

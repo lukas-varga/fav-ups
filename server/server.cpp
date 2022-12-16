@@ -23,12 +23,11 @@
 using namespace std;
 
 int main (int argc, char** argv){
-    if (argc != 3){
-        cout << "Please enter arguments: <ip> <port>" << "\n";
+    if (argc != 2){
+        cout << "Please enter arguments: <port>" << "\n";
         exit(0);
     }
-    char* ip = argv[1];
-    int port = atoi(argv[2]);
+    int port = atoi(argv[1]);
 
     const int MAX_CLIENTS = 20;
     const int MAX_BUFF = 1024;
@@ -57,7 +56,7 @@ int main (int argc, char** argv){
     memset(&my_addr, 0, sizeof(struct sockaddr_in));
     my_addr.sin_family = AF_INET;
     my_addr.sin_port = htons(port);
-    my_addr.sin_addr.s_addr = inet_addr(ip);
+    my_addr.sin_addr.s_addr = INADDR_ANY;
 
     server_len = sizeof(my_addr);
     ret_val = bind(server_socket, (struct sockaddr *) &my_addr, server_len);
