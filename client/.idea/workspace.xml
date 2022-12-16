@@ -5,29 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7ed4caa7-b1dd-4fb1-b7fb-f959700d601e" name="Changes" comment="Add source link to cards and docs folder">
-      <change afterPath="$PROJECT_DIR$/../server/Cmd.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../server/Help.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../server/Help.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../server/State.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../server/State.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/install.bat" beforeDir="false" afterPath="$PROJECT_DIR$/install.bat" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/install.sh" beforeDir="false" afterPath="$PROJECT_DIR$/install.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/onitama/intro.py" beforeDir="false" afterPath="$PROJECT_DIR$/onitama/intro.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/onitama/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/onitama/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/onitama/network.py" beforeDir="false" afterPath="$PROJECT_DIR$/onitama/network.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/onitama/parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/onitama/parser.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../server/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../server/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../server/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../server/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../server/Command.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../server/Command.h" beforeDir="false" afterPath="$PROJECT_DIR$/../server/Cmd.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../server/Game.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../server/Game.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../server/Game.h" beforeDir="false" afterPath="$PROJECT_DIR$/../server/Game.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../server/Player.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../server/Player.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../server/Player.h" beforeDir="false" afterPath="$PROJECT_DIR$/../server/Player.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../server/State_Machine.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../server/State_Machine.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/../server/Makefile" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../server/server" beforeDir="false" afterPath="$PROJECT_DIR$/../server/server" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../server/server.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../server/server.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -53,20 +36,20 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/lukas/Documents/GitHub/fav-ups/client&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settings.ide.settings.new.ui&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "last_opened_file_path": "/home/lukas/Documents/GitHub/fav-ups/client",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PythonContentEntriesConfigurable",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$" />
@@ -172,6 +155,7 @@
       <workItem from="1671114375680" duration="14000" />
       <workItem from="1671114399234" duration="1373000" />
       <workItem from="1671117871814" duration="1340000" />
+      <workItem from="1671200376505" duration="1794000" />
     </task>
     <task id="LOCAL-00001" summary="Everything is working offline on one machinie yupii, needs to verify winning still">
       <created>1668450646046</created>
