@@ -23,7 +23,7 @@ vector<string> Help::parse(const string& msg, char del) {
             throw exception();
         }
         string cmd = args.at(0);
-        if (Command::is_enum(cmd)){
+        if (!Command::is_enum(cmd)){
             cout << "Command not found!" << endl;
             throw exception();
         }

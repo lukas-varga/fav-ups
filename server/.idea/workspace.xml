@@ -21,8 +21,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b8ed92a8-e9d2-457f-9a81-ceb035a0f772" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/../client/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../client/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Help.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Help.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/Makefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/server.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -73,6 +77,11 @@
     </key>
   </component>
   <component name="RunManager" selected="CMake Application.server">
+    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="server" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="60000" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="server" TARGET_NAME="server" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="server" RUN_TARGET_NAME="server">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -139,7 +148,9 @@
       <workItem from="1671117945517" duration="3666000" />
       <workItem from="1671200492283" duration="1759000" />
       <workItem from="1671206324930" duration="15855000" />
-      <workItem from="1671222247353" duration="13000" />
+      <workItem from="1671222247353" duration="41000" />
+      <workItem from="1671234344029" duration="248000" />
+      <workItem from="1671291936753" duration="2190000" />
     </task>
     <servers />
   </component>
@@ -155,9 +166,9 @@
           <option name="timeStamp" value="2" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/Help.cpp</url>
-          <line>14</line>
-          <option name="timeStamp" value="8" />
+          <url>file://$PROJECT_DIR$/Command.cpp</url>
+          <line>29</line>
+          <option name="timeStamp" value="9" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

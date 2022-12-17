@@ -3,4 +3,4 @@ project(server)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(server server.cpp Game.cpp Game.h Player.cpp Player.h Command.cpp Command.h State.cpp Help.cpp Help.h)
+add_executable(server server.cpp Game.cpp Game.h Player.cpp Player.h Command.cpp Command.h State.cpp State.h Help.cpp Help.h)

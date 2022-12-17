@@ -56,7 +56,7 @@ def play(net):
     pygame.display.set_caption('Onitama')
 
     # Game state
-    gs = onitama_engine.GameState()
+    gs = engine.GameState()
 
     # Only once before loop
     screen.fill(pygame.Color(BACKGROUND_COLOR))
@@ -76,7 +76,6 @@ def play(net):
     while running:
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
-                net.close_connection()
                 running = False
 
             # Mouse handler
@@ -100,7 +99,7 @@ def play(net):
 
                     # Snd click
                     if len(player_clicks) == 2:
-                        move = onitama_engine.Move(player_clicks[0], player_clicks[1], gs.board)
+                        move = engine.Move(player_clicks[0], player_clicks[1], gs.board)
                         if move in valid_moves:
                             # Move
                             gs.make_move(move, card_picked)
@@ -135,7 +134,7 @@ def play(net):
                     gs.undo_move()
                     clear_selection()
                 if e.key == pygame.K_r:
-                    gs = onitama_engine.GameState()
+                    gs = engine.GameState()
                     clear_selection()
 
         draw_game_state(screen, gs, valid_moves, sq_selected, card_picked)
@@ -146,10 +145,10 @@ def play(net):
             win_text = "White Won" if gs.is_winner_white else "Black Won"
             pygame.display.set_caption(win_text)
 
-    net.close_connection()
+
+    print("Game finished")
     pygame.quit()
-    print("Game closed")
-    exit()
+    return
 
 """
 Global dictionary of pieces

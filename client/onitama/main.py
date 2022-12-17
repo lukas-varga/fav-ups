@@ -14,20 +14,19 @@ def main():
         exit()
     ip = str(sys.argv[1])
     port = int(sys.argv[2])
-
-    # Handshake
     net = network.Network(ip, port)
-    code = intro.login(net)
 
-    if code[0] == Cmd.START:
+    # Login screen
+    code = intro.login(net)
+    if code[0] == Cmd.START.value:
         print("Game started!")
         game.play(net)
     elif code[0] == "EXIT":
         print("User quit login!")
-        exit()
     else:
         print("Unexpected behaviour in main!")
-        exit()
+    net.close_connection()
+    exit()
 
 
 """

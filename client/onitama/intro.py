@@ -72,16 +72,13 @@ def login(net: Network):
             rcv_arr = parser.parse(rcv)
             return rcv_arr
         if exiting:
-            lst = ["EXIT"]
-            return lst
+            return ["EXIT"]
 
 
 """
 Play button pressed
 """
 def login_btn_pressed(net: Network):
-    net.create_connection()
-
     usr = str(username.get())
     snd = parser.login(usr)
     net.send_data(snd)
@@ -89,6 +86,7 @@ def login_btn_pressed(net: Network):
     rcv = net.recv_data()
     rcv_arr = parser.parse(rcv)
     cmd = rcv_arr[0]
+    fst_param = rcv_arr[1]
 
     if cmd == Cmd.WAITING.value:
         play_btn['state'] = DISABLED
@@ -105,17 +103,16 @@ def login_btn_pressed(net: Network):
         waiting_label = Label(tk_wait, text="Waiting for player...", font=(FONT, 12), bg=BG_COLOR)
         waiting_label.pack(pady=5)
 
-        print("Logged successfully")
+        print("In waiting room")
 
         global waiting
         waiting = True
 
     elif cmd == Cmd.FAILED_LOGIN.value:
         # Waiting label
-        messagebox.showinfo("Login Failed", "Username must be shorter than 30 chars and not empty!",)
-
+        messagebox.showinfo("Login Failed", fst_param)
     elif cmd == Cmd.RECONNECT.value:
-        print("Reconnecting...")
+        messagebox.showinfo("Reconnecting...", fst_param)
         # TODO reconnect
     else:
         # Waiting label

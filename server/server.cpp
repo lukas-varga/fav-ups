@@ -23,17 +23,15 @@
 using namespace std;
 
 static int server_socket;
-static int client_socket;
-
 void close_connections();
 
 int main (int argc, char** argv){
-    atexit(close_connections);
     if (argc != 2){
         cout << "Please enter arguments: <port>" << endl;
         exit(0);
     }
     int port = atoi(argv[1]);
+    atexit(close_connections);
 
     const int CLIENT_NUM = 20;
     const int GAME_NUM = CLIENT_NUM / 2;
@@ -41,6 +39,7 @@ int main (int argc, char** argv){
     char buff[MAX_BUFF];
     const char SPL_CHR = '|';
 
+    int client_socket;
     int ret_val, val_read;
     int fd, sd;
     socklen_t client_len, server_len;
@@ -92,7 +91,6 @@ int main (int argc, char** argv){
         string rcv, snd;
         Game * game;
         bool lobby_entered, name_in_use;
-        State trans;
 
         tests = client_socks;
         printf("Server is waiting...\n");
@@ -202,17 +200,18 @@ int main (int argc, char** argv){
                                             snd = "";
                                             snd = snd.append(Command::name(Cmd::RECONNECT))
                                                     .append(Help::SPL)
-                                                    .append(client_username)
+                                                    .append("Reconnecting: "+client_username)
                                                     .append(Help::END);
                                             send(fd, snd.data(), snd.size(), 0);
                                             Help::send_log(fd, snd);
+                                            cout << "Reconnect attempt!" << endl;
                                         }
                                         // Name already in use
                                         else{
                                             snd = "";
                                             snd = snd.append(Command::name(Cmd::FAILED_LOGIN))
                                                     .append(Help::SPL)
-                                                    .append(client_username)
+                                                    .append("Name already in use!")
                                                     .append(Help::END);
                                             send(fd, snd.data(), snd.size(), 0);
                                             Help::send_log(fd, snd);
@@ -227,7 +226,7 @@ int main (int argc, char** argv){
                                         snd = "";
                                         snd = snd.append(Command::name(Cmd::FAILED_LOGIN))
                                                 .append(Help::SPL)
-                                                .append(client_username)
+                                                .append("Name is too long!")
                                                 .append(Help::END);
                                         send(fd, snd.data(), snd.size(), 0);
                                         Help::send_log(fd, snd);
@@ -257,16 +256,12 @@ int main (int argc, char** argv){
                                             snd = "";
                                             snd = snd.append(Command::name(Cmd::FAILED_LOGIN))
                                                     .append(Help::SPL)
-                                                    .append(client_username)
+                                                    .append("All lobby are full!")
                                                     .append(Help::END);
                                             send(fd, snd.data(), snd.size(), 0);
                                             Help::send_log(fd, snd);
-                                            cout << "All lobby are full!" << endl;
                                         }
                                     }
-                                }
-                                else{
-                                    cout << "ERR: Even though original name detected!" << endl;
                                 }
                             }
                             else if (cmd == Command::name(Cmd::MAKE_MOVE)){
@@ -283,8 +278,6 @@ int main (int argc, char** argv){
     }
 }
 
-void close_connections() {
-    cout << "Closing previous connections!" << endl;
+void close_connections(){
     close(server_socket);
-    close(client_socket);
 }
