@@ -21,7 +21,7 @@ void Game::enter_lobby(Player * player){
         this->p1 = player;
 
         string snd = "";
-        snd = snd.append(Command::name(Cmd::WAITING))
+        snd.append(Command::name(Cmd::WAITING))
                 .append(Help::SPL)
                 .append(player->username)
                 .append(Help::END);
@@ -32,7 +32,7 @@ void Game::enter_lobby(Player * player){
         this->p2 = player;
 
         string snd = "";
-        snd = snd.append(Command::name(Cmd::WAITING))
+        snd.append(Command::name(Cmd::WAITING))
                 .append(Help::SPL)
                 .append(player->username)
                 .append(Help::END);
@@ -49,7 +49,7 @@ void Game::start_game(){
     is_active = true;
 
     string snd = "";
-    snd = snd.append(Command::name(Cmd::START))
+    snd.append(Command::name(Cmd::START))
             .append(Help::SPL)
             .append(p1->username)
             .append(Help::SPL)

@@ -21,8 +21,11 @@ class Network(object):
     def create_connection(self):
         try:
             self.client.connect(self.addr)
+            print("Connected!")
+
             welcome_rcv = self.recv_data()
             # print(welcome_rcv)
+
             return 0
         except socket.error as e:
             print(e)

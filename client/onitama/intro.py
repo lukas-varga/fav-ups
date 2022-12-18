@@ -62,6 +62,12 @@ def login(net: Network):
     close_btn = Button(win, text="Close", width=10, height=1, bg=BTN_COLOR, font=(FONT, 12), command=close_win)
     close_btn.pack(pady=10)
 
+
+    # Not corectly connected
+    if net.id == -1:
+        play_btn['state'] = DISABLED
+        messagebox.showinfo("Server error", "Connection refused!")
+
     while True:
         win.update()
         win.update_idletasks()

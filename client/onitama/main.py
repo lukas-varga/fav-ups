@@ -25,6 +25,7 @@ def main():
         print("User quit login!")
     else:
         print("Unexpected behaviour in main!")
+
     net.close_connection()
     exit()
 

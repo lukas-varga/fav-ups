@@ -22,19 +22,12 @@
 
 using namespace std;
 
-static int server_socket;
-
-void close_connections(){
-    close(server_socket);
-}
-
 int main (int argc, char** argv){
     if (argc != 2){
         cout << "Please enter arguments: <port>" << endl;
         exit(0);
     }
     int port = atoi(argv[1]);
-    atexit(close_connections);
 
     const int CLIENT_NUM = 20;
     const int GAME_NUM = CLIENT_NUM / 2;
@@ -43,8 +36,9 @@ int main (int argc, char** argv){
     const char SPL_CHR = '|';
 
     int client_socket;
+    int server_socket;
     int ret_val, val_read;
-    int fd, sd;
+    int fd;
     socklen_t client_len, server_len;
     struct sockaddr_in my_addr, peer_addr;
     fd_set client_socks, tests;
@@ -123,8 +117,8 @@ int main (int argc, char** argv){
 
                     // send new connection greeting welcome_msg
                     snd = "";
-                    snd = snd.append("Welcome to Onitama server!");
-                    snd = snd.append(Help::END);
+                    snd.append("Welcome to Onitama server!");
+                    snd.append(Help::END);
                     send(client_socket, snd.data(), snd.size(), 0);
                     Help::send_log(fd, snd);
 
@@ -185,7 +179,7 @@ int main (int argc, char** argv){
                             // Cmd::WRONG_DATE
                             if (cmd == Command::name(Cmd::WRONG_DATA)){
                                 snd = "";
-                                snd = snd.append(Command::name(Cmd::WRONG_DATA))
+                                snd.append(Command::name(Cmd::WRONG_DATA))
                                         .append(Help::END);
                                 send(fd, snd.data(), snd.size(), 0);
                                 Help::send_log(fd, snd);
@@ -205,7 +199,7 @@ int main (int argc, char** argv){
                                             // TODO make reconnect logic
 
                                             snd = "";
-                                            snd = snd.append(Command::name(Cmd::RECONNECT))
+                                            snd.append(Command::name(Cmd::RECONNECT))
                                                     .append(Help::SPL)
                                                     .append("Reconnecting: " + login_name)
                                                     .append(Help::END);
@@ -216,7 +210,7 @@ int main (int argc, char** argv){
                                         // Name already in use
                                         else{
                                             snd = "";
-                                            snd = snd.append(Command::name(Cmd::FAILED_LOGIN))
+                                            snd.append(Command::name(Cmd::FAILED_LOGIN))
                                                     .append(Help::SPL)
                                                     .append("Name is already in use!")
                                                     .append(Help::END);
@@ -231,7 +225,7 @@ int main (int argc, char** argv){
                                     // Name not too long
                                     if (login_name.size() > 20 || login_name.empty()){
                                         snd = "";
-                                        snd = snd.append(Command::name(Cmd::FAILED_LOGIN))
+                                        snd.append(Command::name(Cmd::FAILED_LOGIN))
                                                 .append(Help::SPL)
                                                 .append("Name is too long!")
                                                 .append(Help::END);
@@ -260,7 +254,7 @@ int main (int argc, char** argv){
                                         // No more available lobby
                                         if (!lobby_entered){
                                             snd = "";
-                                            snd = snd.append(Command::name(Cmd::FAILED_LOGIN))
+                                            snd.append(Command::name(Cmd::FAILED_LOGIN))
                                                     .append(Help::SPL)
                                                     .append("All lobby are full!")
                                                     .append(Help::END);
@@ -271,10 +265,10 @@ int main (int argc, char** argv){
                                 }
                             }
                             else if (cmd == Command::name(Cmd::MAKE_MOVE)){
-
+                                cout << "Entering: " << Command::name(Cmd::MAKE_MOVE) << endl;
                             }
                             else if (cmd == Command::name(Cmd::STALEMATE)){
-
+                                cout << "Entering: " << Command::name(Cmd::STALEMATE) << endl;
                             }
                             else {
                                 cout << "ERR: Encountered unknown command in main!" << endl;
