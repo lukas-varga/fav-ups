@@ -6,13 +6,13 @@
   <component name="ChangeListManager">
     <list default="true" id="7ed4caa7-b1dd-4fb1-b7fb-f959700d601e" name="Changes" comment="Add source link to cards and docs folder">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/onitama/game.py" beforeDir="false" afterPath="$PROJECT_DIR$/onitama/game.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/onitama/intro.py" beforeDir="false" afterPath="$PROJECT_DIR$/onitama/intro.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/onitama/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/onitama/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/onitama/network.py" beforeDir="false" afterPath="$PROJECT_DIR$/onitama/network.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../server/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../server/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../server/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../server/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../server/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/../server/Makefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server/Command.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../server/Command.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server/Help.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../server/Help.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server/State.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../server/State.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server/State.h" beforeDir="false" afterPath="$PROJECT_DIR$/../server/State.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server/server.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../server/server.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -161,6 +161,7 @@
       <workItem from="1671206325552" duration="8029000" />
       <workItem from="1671234343839" duration="252000" />
       <workItem from="1671291935696" duration="2371000" />
+      <workItem from="1671363429573" duration="2430000" />
     </task>
     <task id="LOCAL-00001" summary="Everything is working offline on one machinie yupii, needs to verify winning still">
       <created>1668450646046</created>
@@ -217,19 +218,8 @@
     <MESSAGE value="Add source link to cards and docs folder" />
     <option name="LAST_COMMIT_MESSAGE" value="Add source link to cards and docs folder" />
   </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/onitama/intro.py</url>
-          <line>71</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
-  </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/client$main.coverage" NAME="main Coverage Results" MODIFIED="1671294190191" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/onitama" />
+    <SUITE FILE_PATH="coverage/client$main.coverage" NAME="main Coverage Results" MODIFIED="1671365946341" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/onitama" />
     <SUITE FILE_PATH="coverage/client$run.coverage" NAME="run Coverage Results" MODIFIED="1668633945893" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/client$game.coverage" NAME="game Coverage Results" MODIFIED="1669626589396" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/onitama" />
     <SUITE FILE_PATH="coverage/client$onitama_main.coverage" NAME="onitama_main Coverage Results" MODIFIED="1667492761832" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/onitama" />

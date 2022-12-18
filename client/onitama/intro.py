@@ -19,7 +19,6 @@ def login(net: Network):
     # Wait for playing
     global waiting
     waiting = False
-
     global exiting
     exiting = False
 
@@ -86,7 +85,7 @@ def login_btn_pressed(net: Network):
     rcv = net.recv_data()
     rcv_arr = parser.parse(rcv)
     cmd = rcv_arr[0]
-    fst_param = rcv_arr[1]
+    param_1 = rcv_arr[1]
 
     if cmd == Cmd.WAITING.value:
         play_btn['state'] = DISABLED
@@ -109,14 +108,13 @@ def login_btn_pressed(net: Network):
         waiting = True
 
     elif cmd == Cmd.FAILED_LOGIN.value:
-        # Waiting label
-        messagebox.showinfo("Login Failed", fst_param)
+        messagebox.showinfo("Login Failed", param_1)
     elif cmd == Cmd.RECONNECT.value:
-        messagebox.showinfo("Reconnecting...", fst_param)
+        messagebox.showinfo("Reconnecting...", param_1)
         # TODO reconnect
     else:
         # Waiting label
-        messagebox.showinfo("Error", "Unknown error")
+        messagebox.showinfo("Error", "Unknown error!")
 
 
 """

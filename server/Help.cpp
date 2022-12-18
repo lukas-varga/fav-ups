@@ -38,11 +38,9 @@ vector<string> Help::parse(const string& msg, char del) {
 }
 
 void Help::send_log(int fd, const string& snd){
-
     cout << "Sending to fd(" << fd << "): "  << snd << endl;
 }
 
 void Help::recv_log(int fd, const string& snd) {
     cout << "Receiving from fd(" << fd << "): " << snd << endl;
-
 }

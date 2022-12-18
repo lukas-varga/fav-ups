@@ -24,9 +24,9 @@ string Command::name(Cmd cmd) {
 }
 
 bool Command::is_enum(const string& name) {
-    for (int fooInt = Cmd::LOGIN; fooInt != Cmd::GAME_OVER; fooInt++ ) {
-        Cmd foo = static_cast<Cmd>(fooInt);
-        if (Command::name(foo) == name){
+    for (int i = Cmd::LOGIN; i != Cmd::GAME_OVER; i++ ) {
+        Cmd cmd = static_cast<Cmd>(i);
+        if (Command::name(cmd) == name){
             return true;
         }
     }

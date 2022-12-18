@@ -7,7 +7,7 @@
  * @param event Událost, která se děje
  * @return Vrací hodnotu mez 0-5
  */
-State StateMachine::allowed_transition(State state, Event event) {
+State State_Machine::allowed_transition(State state, Event event) {
     map<tuple<State,Event>, State> transition = {
         // Login and play
         {tuple<State, Event>(State::ST_INIT,Event::EV_LOGIN),     State::ST_WAITING},

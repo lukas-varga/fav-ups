@@ -23,7 +23,10 @@
 using namespace std;
 
 static int server_socket;
-void close_connections();
+
+void close_connections(){
+    close(server_socket);
+}
 
 int main (int argc, char** argv){
     if (argc != 2){
@@ -89,6 +92,11 @@ int main (int argc, char** argv){
     while(true) {
         memset(buff, 0, MAX_BUFF);
         string rcv, snd;
+
+        vector<string> rcv_arr;
+        string cmd, login_name;
+
+        Player * p;
         Game * game;
         bool lobby_entered, name_in_use;
 
@@ -121,11 +129,11 @@ int main (int argc, char** argv){
                     Help::send_log(fd, snd);
 
                     for (int i = 0; i < CLIENT_NUM; i++){
-                        Player * p = player_arr[i];
+                        p = player_arr[i];
                         if(p->socket == 0 && p->username.empty())
                         {
                             p->socket = client_socket;
-                            printf("Adding to list of sockets as %d\n" , i);
+                            printf("Adding to list of sockets at index %d\n" , i);
                             break;
                         }
                     }
@@ -140,13 +148,12 @@ int main (int argc, char** argv){
                     // na socketu se stalo neco spatneho
                     if (val_read == 0){
                         for (int i = 0; i < CLIENT_NUM; i++){
-                            Player * p = player_arr[i];
+                            p = player_arr[i];
                             if(p->socket == fd){
-                                // TODO make reconnect logic
-//                                p->socket = 0;
-//                                p->username = "";
-
-                                p->state = StateMachine::allowed_transition(p->state, Event::EV_DISC);
+//                                TODO make reconnect logic
+//                              p->socket = 0;
+//                              p->username = "";
+                                p->state = State_Machine::allowed_transition(p->state, Event::EV_DISC);
                                 p->disconnected = true;
 
                                 break;
@@ -172,8 +179,8 @@ int main (int argc, char** argv){
                         // Player found in arr
                         if (player != nullptr){
                             // Parsing
-                            vector<string> rcv_arr = Help::parse(rcv, SPL_CHR);
-                            string cmd = rcv_arr.at(0);
+                            rcv_arr = Help::parse(rcv, SPL_CHR);
+                            cmd = rcv_arr.at(0);
 
                             // Cmd::WRONG_DATE
                             if (cmd == Command::name(Cmd::WRONG_DATA)){
@@ -185,22 +192,22 @@ int main (int argc, char** argv){
                             }
                             // login come to server
                             else if (cmd == Command::name(Cmd::LOGIN)){
-                                string client_username = rcv_arr.at(1);
+                                login_name = rcv_arr.at(1);
                                 name_in_use = false;
                                 for (int i = 0; i < CLIENT_NUM; i++) {
-                                    Player * p = player_arr[i];
-                                    if (p->username == client_username){
+                                    p = player_arr[i];
+                                    if (p->username == login_name){
                                         name_in_use = true;
                                         // Reconnect attempt
                                         if(p->disconnected){
-                                            p->state = StateMachine::allowed_transition(p->state, Event::EV_RECON);
+                                            p->state = State_Machine::allowed_transition(p->state, Event::EV_RECON);
                                             p->disconnected = false;
                                             // TODO make reconnect logic
 
                                             snd = "";
                                             snd = snd.append(Command::name(Cmd::RECONNECT))
                                                     .append(Help::SPL)
-                                                    .append("Reconnecting: "+client_username)
+                                                    .append("Reconnecting: " + login_name)
                                                     .append(Help::END);
                                             send(fd, snd.data(), snd.size(), 0);
                                             Help::send_log(fd, snd);
@@ -211,7 +218,7 @@ int main (int argc, char** argv){
                                             snd = "";
                                             snd = snd.append(Command::name(Cmd::FAILED_LOGIN))
                                                     .append(Help::SPL)
-                                                    .append("Name already in use!")
+                                                    .append("Name is already in use!")
                                                     .append(Help::END);
                                             send(fd, snd.data(), snd.size(), 0);
                                             Help::send_log(fd, snd);
@@ -222,7 +229,7 @@ int main (int argc, char** argv){
                                 // Original name detected
                                 if (!name_in_use){
                                     // Name not too long
-                                    if (client_username.size() > 20 || client_username.empty()){
+                                    if (login_name.size() > 20 || login_name.empty()){
                                         snd = "";
                                         snd = snd.append(Command::name(Cmd::FAILED_LOGIN))
                                                 .append(Help::SPL)
@@ -239,15 +246,14 @@ int main (int argc, char** argv){
                                             game = game_arr[i];
                                             if(!game->is_active){
                                                 // Create player finally and login
-                                                player->username = client_username;
-                                                player->state = StateMachine::allowed_transition(player->state, Event::EV_LOGIN);
+                                                player->username = login_name;
+                                                player->state = State_Machine::allowed_transition(player->state, Event::EV_LOGIN);
                                                 player->disconnected = false;
 
                                                 // Cmd::WAITING
                                                 // Cmd::PLAY
                                                 game->enter_lobby(player);
                                                 lobby_entered = true;
-                                                cout << "Player logged correctly!" << endl;
                                                 break;
                                             }
                                         }
@@ -267,6 +273,12 @@ int main (int argc, char** argv){
                             else if (cmd == Command::name(Cmd::MAKE_MOVE)){
 
                             }
+                            else if (cmd == Command::name(Cmd::STALEMATE)){
+
+                            }
+                            else {
+                                cout << "ERR: Encountered unknown command in main!" << endl;
+                            }
                         }
                         else{
                             cout << "ERR: Player connected but not found in array of players!" << endl;
@@ -276,8 +288,4 @@ int main (int argc, char** argv){
             }
         }
     }
-}
-
-void close_connections(){
-    close(server_socket);
 }

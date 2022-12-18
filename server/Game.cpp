@@ -46,7 +46,6 @@ void Game::enter_lobby(Player * player){
 }
 
 void Game::start_game(){
-    cout << "Game started with id: " << game_id << endl;
     is_active = true;
 
     string snd = "";
@@ -61,6 +60,7 @@ void Game::start_game(){
     send(p2->socket, snd.data(), snd.size(), 0);
     Help::send_log(p2->socket, snd);
 
+    cout << "Game started with id: " << game_id << endl;
     // TODO start game implement...
 }
 

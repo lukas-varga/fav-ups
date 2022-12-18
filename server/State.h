@@ -22,7 +22,7 @@ enum class Event {
     EV_RECON = 5,
 };
 
-class StateMachine{
+class State_Machine{
 public:
     /**
      * Vrací hodnotu v matici, výsledek
