@@ -44,7 +44,7 @@ CARD_IMAGES = {}
 """
 Handle user input and update graphics
 """
-def play(net):
+def play(net, start, username):
     # Init pygame library
     pygame.init()
     clock = pygame.time.Clock()
@@ -56,6 +56,7 @@ def play(net):
     pygame.display.set_caption('Onitama')
 
     # Game state
+
     gs = engine.GameState()
 
     # Only once before loop

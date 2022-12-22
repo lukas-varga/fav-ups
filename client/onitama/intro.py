@@ -21,6 +21,8 @@ def login(net: Network):
     waiting = False
     global exiting
     exiting = False
+    global username
+    username = ""
 
     # Init
     global win
@@ -40,15 +42,15 @@ def login(net: Network):
     welcome_label.pack(pady=15)
 
     # Set text variables
-    global username
-    username = StringVar()
+    global username_str_var
+    username_str_var = StringVar()
 
     # Set username label
     username_label = Label(win, text="Username", font=(FONT, 12), bg=BG_COLOR)
     username_label.pack(pady=5)
 
     # Set username entry
-    username_entry = Entry(win, textvariable=username)
+    username_entry = Entry(win, textvariable=username_str_var)
     username_entry.pack(pady=15)
 
     # Set play button
@@ -73,18 +75,20 @@ def login(net: Network):
         win.update_idletasks()
 
         if waiting:
+            # START | P1 | P2
             rcv = net.recv_data()
             rcv_arr = parser.parse(rcv)
-            return rcv_arr
+
+            return rcv_arr, username
         if exiting:
-            return ["EXIT"]
+            return  None, None
 
 
 """
 Play button pressed
 """
 def login_btn_pressed(net: Network):
-    usr = str(username.get())
+    usr = str(username_str_var.get())
     snd = parser.login(usr)
     net.send_data(snd)
 
@@ -108,6 +112,8 @@ def login_btn_pressed(net: Network):
         waiting_label = Label(tk_wait, text="Waiting for player...", font=(FONT, 12), bg=BG_COLOR)
         waiting_label.pack(pady=5)
 
+        global username
+        username = param_1
         print("In waiting room")
 
         global waiting

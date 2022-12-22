@@ -39,6 +39,7 @@ int main (int argc, char** argv){
     int server_socket;
     int ret_val, val_read;
     int fd;
+    int i;
     socklen_t client_len, server_len;
     struct sockaddr_in my_addr, peer_addr;
     fd_set client_socks, tests;
@@ -46,10 +47,10 @@ int main (int argc, char** argv){
     Game * game_arr[GAME_NUM];
     Player * player_arr[CLIENT_NUM];
 
-    for (int i = 0; i < CLIENT_NUM; i++){
+    for (i = 0; i < CLIENT_NUM; i++){
         player_arr[i] = new Player(0, "");
     }
-    for (int i = 0; i < GAME_NUM; i++){
+    for (i = 0; i < GAME_NUM; i++){
 //        Player * p1 = player_arr[i * 2];
 //        Player * p2 = player_arr[(i * 2)+ 1];
         game_arr[i] = new Game();
@@ -92,6 +93,7 @@ int main (int argc, char** argv){
 
         Player * p;
         Game * game;
+        Player * player;
         bool lobby_entered, name_in_use;
 
         tests = client_socks;
@@ -122,7 +124,7 @@ int main (int argc, char** argv){
                     send(client_socket, snd.data(), snd.size(), 0);
                     Help::send_log(fd, snd);
 
-                    for (int i = 0; i < CLIENT_NUM; i++){
+                    for (i = 0; i < CLIENT_NUM; i++){
                         p = player_arr[i];
                         if(p->socket == 0 && p->username.empty())
                         {
@@ -141,7 +143,7 @@ int main (int argc, char** argv){
 
                     // na socketu se stalo neco spatneho
                     if (val_read == 0){
-                        for (int i = 0; i < CLIENT_NUM; i++){
+                        for (i = 0; i < CLIENT_NUM; i++){
                             p = player_arr[i];
                             if(p->socket == fd){
 //                                TODO make reconnect logic
@@ -162,8 +164,8 @@ int main (int argc, char** argv){
 
                     // mame co cist
                     else {
-                        Player * player = nullptr;
-                        for (int i = 0; i < CLIENT_NUM; i++) {
+                        player = nullptr;
+                        for (i = 0; i < CLIENT_NUM; i++) {
                             if (fd == player_arr[i]->socket){
                                 player = player_arr[i];
                                 break;
@@ -188,7 +190,7 @@ int main (int argc, char** argv){
                             else if (cmd == Command::name(Cmd::LOGIN)){
                                 login_name = rcv_arr.at(1);
                                 name_in_use = false;
-                                for (int i = 0; i < CLIENT_NUM; i++) {
+                                for (i = 0; i < CLIENT_NUM; i++) {
                                     p = player_arr[i];
                                     if (p->username == login_name){
                                         name_in_use = true;

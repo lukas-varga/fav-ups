@@ -19,7 +19,7 @@ vector<string> Help::parse(const string& msg, char del) {
     // Check validity of message
     try{
         if (args.size() < 2){
-            cout << "Command is does not parsed!" << endl;
+            cout << "Command is does not parsable!" << endl;
             throw exception();
         }
         string cmd = args.at(0);

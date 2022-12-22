@@ -27,6 +27,8 @@ enum Cmd {
 
 class Command{
 public:
+    static map<Cmd,string> enum_map;
+
     static string name(Cmd cmd);
     static bool is_enum(const string& name);
 };

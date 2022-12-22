@@ -1,6 +1,7 @@
 #ifndef SERVER_GAME_H
 #define SERVER_GAME_H
 
+#include <vector>
 #include "Player.h"
 
 
@@ -19,7 +20,6 @@ public:
 
     void enter_lobby(Player * player);
     void start_game();
-
 
 };
 
