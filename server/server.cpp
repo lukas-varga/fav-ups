@@ -1,3 +1,9 @@
+#include "Game.h"
+#include "Player.h"
+#include "Command.h"
+#include "Help.h"
+#include "State.h"
+
 #include <cstdio>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -13,12 +19,6 @@
 #include <vector>
 #include "string"
 
-#include "Game.h"
-#include "Player.h"
-#include "Command.h"
-#include "Help.h"
-#include "State.h"
-
 
 using namespace std;
 
@@ -29,6 +29,7 @@ int main (int argc, char** argv){
     }
     int port = atoi(argv[1]);
 
+    const int NAME_LENGTH = 10;
     const int CLIENT_NUM = 20;
     const int GAME_NUM = CLIENT_NUM / 2;
     const int MAX_BUFF = 2048;
@@ -225,11 +226,11 @@ int main (int argc, char** argv){
                                 // Original name detected
                                 if (!name_in_use){
                                     // Name not too long
-                                    if (login_name.size() > 20 || login_name.empty()){
+                                    if (login_name.size() > NAME_LENGTH || login_name.empty()){
                                         snd = "";
                                         snd.append(Command::name(Cmd::FAILED_LOGIN))
                                                 .append(Help::SPL)
-                                                .append("Name is too long!")
+                                                .append("Name is too long (>"+ to_string(NAME_LENGTH) +")!")
                                                 .append(Help::END);
                                         send(fd, snd.data(), snd.size(), 0);
                                         Help::send_log(fd, snd);

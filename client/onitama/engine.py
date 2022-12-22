@@ -1,15 +1,16 @@
-"""
-Game engine with all the info about the game
-"""
+import parser
+from parser import Cmd
+from network import Network
+import components
 
 import numpy as np
-import components
+
 
 """
 Information about current game
 """
 class GameState:
-    def __init__(self):
+    def __init__(self, net, start_arr, username):
         """
         Board is 5x5 2D list where each element has two chars
         Fst char represents color and snd char represents type (Pawn/King)
@@ -22,30 +23,29 @@ class GameState:
             ["--", "--", "--", "--", "--"],
             ["wP", "wP", "wK", "wP", "wP"]
         ]
-        self.cards = components.CARDS
-
-        # Move to server C++
-        # 0 and 1 are white
-        # 2 is spare
-        # 3 and 4 are black
-        self.selected_cards = self.generate_five_cards()
-
         self.white_to_move = True
         self.move_log = []
         self.is_winner_white = None
 
-    """
-    Pick randomly five cards at the beginning
-    """
-    def generate_five_cards(self):
-        random_ids = list(np.random.permutation(len(self.cards))[:5])
+        # START | P1 (white) | P1 (black) | 5x cards
+        self.white_name = start_arr[1]
+        self.black_name = start_arr[2]
+        if self.white_name == username:
+            self.my_login = self.white_name
+            self.enemy_login = self.black_name
+            self.player_is_white = True
+        else:
+            self.player_is_white = False
+            self.my_login = self.black_name
+            self.enemy_login = self.white_name
 
-        selected_cards = []
-        for x in random_ids:
-            name = components.ID_TO_CARD.get(x)
-            selected_cards.append(name)
+        # Generating in sever
+        # 0 and 1 are white
+        # 2 is spare
+        # 3 and 4 are black
+        self.cards = components.CARDS
+        self.selected_cards = start_arr[3:]
 
-        return selected_cards
 
     """
     Get selected card by id

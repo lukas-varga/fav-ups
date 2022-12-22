@@ -1,11 +1,14 @@
-from tkinter import *
-from tkinter import messagebox
-from functools import partial
-
 import game
 import parser
 from parser import Cmd
 from network import Network
+
+#TODO delete
+import random
+#TODO delete
+from tkinter import *
+from tkinter import messagebox
+from functools import partial
 
 
 BG_COLOR = game.BACKGROUND_COLOR
@@ -17,8 +20,8 @@ HEIGHT_LOGIN = 256
 
 def login(net: Network):
     # Wait for playing
-    global waiting
-    waiting = False
+    global is_waiting
+    is_waiting = False
     global exiting
     exiting = False
     global username
@@ -38,7 +41,7 @@ def login(net: Network):
     win.iconphoto(False, icon)
 
     # Set label for user's instruction
-    welcome_label = Label(win, text="Welcome to Onitama", font=(FONT, 15), bg=BG_COLOR)
+    welcome_label = Label(win, text="Welcome to Onitama", font=(FONT, 16), bg=BG_COLOR)
     welcome_label.pack(pady=15)
 
     # Set text variables
@@ -64,8 +67,11 @@ def login(net: Network):
     close_btn = Button(win, text="Close", width=10, height=1, bg=BTN_COLOR, font=(FONT, 12), command=close_win)
     close_btn.pack(pady=10)
 
+    #TODO delete on release
+    login_btn_pressed(net)
+    #TODO
 
-    # Not corectly connected
+    # Not correctly connected
     if net.id == -1:
         play_btn['state'] = DISABLED
         messagebox.showinfo("Server error", "Connection refused!")
@@ -74,12 +80,12 @@ def login(net: Network):
         win.update()
         win.update_idletasks()
 
-        if waiting:
-            # START | P1 | P2
-            rcv = net.recv_data()
-            rcv_arr = parser.parse(rcv)
+        if is_waiting:
+            # START | P1 (white) | P1 (black) | 5x cards
+            start = net.recv_data()
+            start_arr = parser.parse(start)
 
-            return rcv_arr, username
+            return start_arr, username
         if exiting:
             return  None, None
 
@@ -89,13 +95,19 @@ Play button pressed
 """
 def login_btn_pressed(net: Network):
     usr = str(username_str_var.get())
-    snd = parser.login(usr)
+
+    #TODO delete on release
+    string = "striver"
+    usr = random.choice(string) + random.choice(string) + random.choice(string) + random.choice(string) + random.choice(string) + random.choice(string)+ random.choice(string)+ random.choice(string)
+    #TODO delete on release
+
+    snd = parser.send_login(usr)
     net.send_data(snd)
 
-    rcv = net.recv_data()
-    rcv_arr = parser.parse(rcv)
-    cmd = rcv_arr[0]
-    param_1 = rcv_arr[1]
+    waiting = net.recv_data()
+    waiting_arr = parser.parse(waiting)
+    cmd = waiting_arr[0]
+    par_1 = waiting_arr[1]
 
     if cmd == Cmd.WAITING.value:
         play_btn['state'] = DISABLED
@@ -109,20 +121,20 @@ def login_btn_pressed(net: Network):
         tk_wait.protocol("WM_DELETE_WINDOW", do_nothing)
 
         # Set username label
-        waiting_label = Label(tk_wait, text="Waiting for player...", font=(FONT, 12), bg=BG_COLOR)
+        waiting_label = Label(tk_wait, text="Waiting for opponent...", font=(FONT, 12), bg=BG_COLOR)
         waiting_label.pack(pady=5)
 
         global username
-        username = param_1
+        username = par_1
         print("In waiting room")
 
-        global waiting
-        waiting = True
+        global is_waiting
+        is_waiting = True
 
     elif cmd == Cmd.FAILED_LOGIN.value:
-        messagebox.showinfo("Login Failed", param_1)
+        messagebox.showinfo("Login Failed", par_1)
     elif cmd == Cmd.RECONNECT.value:
-        messagebox.showinfo("Reconnecting...", param_1)
+        messagebox.showinfo("Reconnecting...", par_1)
         # TODO reconnect
     else:
         # Waiting label

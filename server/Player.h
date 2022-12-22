@@ -1,8 +1,9 @@
 #ifndef SERVER_PLAYER_H
 #define SERVER_PLAYER_H
 
-#include <string>
 #include "State.h"
+
+#include <string>
 
 
 using namespace std;
@@ -13,6 +14,8 @@ public:
     string username;
     State state;
     bool disconnected;
+
+
 
     Player();
     Player(int socket, string username);

@@ -1,9 +1,10 @@
-import sys
-
 import intro
 import game
 import network
 from parser import Cmd
+
+import sys
+
 
 """
 Implementation of main method
@@ -17,12 +18,12 @@ def main():
     net = network.Network(ip, port)
 
     # Login screen
-    start, username = intro.login(net)
-    if start is None:
+    start_arr, username = intro.login(net)
+    if start_arr is None:
         print("User pressed Close button!")
-    elif start[0] == Cmd.START.value:
+    elif start_arr[0] == Cmd.START.value:
         print("Both players connected -> Game will start!")
-        game.play(net, start, username)
+        game.play(net, start_arr, username)
     else:
         print("Unexpected behaviour in main!")
 

@@ -5,6 +5,8 @@ Player::Player() {
     this->username = "";
     this->state = State::ST_INIT;
     this->disconnected = false;
+
+
 }
 
 Player::Player(int socket, string username) {

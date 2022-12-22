@@ -1,8 +1,4 @@
 """
-Component class for cards definition
-"""
-
-"""
 Cards presented in the game using vectors from current location
 from point of view of current player (x,y), (x,y), ...
 Source: https://www.ultraboardgames.com/onitama/game-rules.php

@@ -21,15 +21,18 @@ SPL = '|'
 END = '\0'
 
 def parse(msg: str):
-    return msg.split(SPL)
+    try:
+        return msg.split(SPL)
+    except:
+        print("ERR: Could not parse the server reply!")
 
 
-def login(username):
+def send_login(username):
     return f"{Cmd.LOGIN.value}{SPL}{username}{END}"
 
-def make_move(card, start_pos, end_pos):
+def send_make_move(card, start_pos, end_pos):
     return f"{Cmd.MAKE_MOVE.value}{SPL}{card}{SPL}{start_pos}{SPL}{end_pos}{END}"
 
-def stalemate(card_to_swap):
+def send_stalemate(card_to_swap):
     return f"{Cmd.MAKE_MOVE.value}{SPL}{card_to_swap}{END}"
 

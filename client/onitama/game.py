@@ -1,5 +1,9 @@
-import pygame
 import engine
+import parser
+from parser import Cmd
+import network
+
+import pygame
 
 
 # Colors
@@ -7,9 +11,15 @@ LIGHT_COLOR = "antiquewhite1"
 DARK_COLOR = "antiquewhite3"
 BACKGROUND_COLOR = "antiquewhite2"
 BORDER_COLOR = "black"
-HIGHLIGHT_COLOR_1 = "blue"
-HIGHLIGHT_COLOR_2 = "yellow"
-FONT = 'calibri'
+SQ_HIGHLIGHT_ACTIVE = "yellow"
+SQ_HIGHLIGHT_PASSIVE = "blue"
+CARD_HIGHLIGHT_ACTIVE = "yellow2"
+CARD_HIGHLIGHT_PASSIVE = "steelblue3"
+BLACK = "black"
+WHITE = "white"
+
+# Font
+FONT = "consolas"
 
 # Resolution
 WIDTH = 1024
@@ -17,23 +27,35 @@ HEIGHT = 512
 # Dimension of board
 DIMENSION = 5
 # Square size
+# (x, y)
 SQ_SIZE = HEIGHT // DIMENSION
 
 # Card size
 COEFFICIENT = 1 / 125
+# (x, y)
 CARD_SIZE = (COEFFICIENT * (300 * SQ_SIZE), COEFFICIENT * (174 * SQ_SIZE))
 
 # Card positions
+# (x, y)
 CARD_POS = [
     # Black player's cards
     (WIDTH // 2, 1),
     (WIDTH - CARD_SIZE[0], 1),
     # Spare card
-    (0.5 * CARD_SIZE[0] + WIDTH // 2, HEIGHT // 2 - CARD_SIZE[1] // 2),
+    (0.55 * CARD_SIZE[0] + WIDTH // 2, HEIGHT // 2 - CARD_SIZE[1] // 2),
     # White player's cards
     (WIDTH // 2, HEIGHT - CARD_SIZE[1]),
     (WIDTH - CARD_SIZE[0], HEIGHT - CARD_SIZE[1]),
 ]
+
+# Label positions
+# (x, y)
+# Position relative to B1
+BLACK_LABEL_POS = (CARD_POS[0][0], CARD_POS[0][1] + CARD_SIZE[1])
+# Position relative to W1
+WHITE_LABEL_POS = (CARD_POS[3][0], CARD_POS[3][1] - CARD_SIZE[1] * 0.13)
+# Relative to spare card
+SPARE_LABEL_POS = (CARD_POS[2][0] + CARD_SIZE[0] * 0.25, CARD_POS[2][1] - CARD_SIZE[1] * 0.13)
 
 # Others
 MAX_FPS = 15
@@ -44,9 +66,10 @@ CARD_IMAGES = {}
 """
 Handle user input and update graphics
 """
-def play(net, start, username):
+def play(net, start_arr, username):
     # Init pygame library
     pygame.init()
+    my_font = pygame.font.SysFont(FONT, 18)
     clock = pygame.time.Clock()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
@@ -56,8 +79,7 @@ def play(net, start, username):
     pygame.display.set_caption('Onitama')
 
     # Game state
-
-    gs = engine.GameState()
+    gs = engine.GameState(net, start_arr, username)
 
     # Only once before loop
     screen.fill(pygame.Color(BACKGROUND_COLOR))
@@ -135,10 +157,10 @@ def play(net, start, username):
                     gs.undo_move()
                     clear_selection()
                 if e.key == pygame.K_r:
-                    gs = engine.GameState()
+                    gs = engine.GameState(net, start_arr, username)
                     clear_selection()
 
-        draw_game_state(screen, gs, valid_moves, sq_selected, card_picked)
+        draw_game_state(screen, gs, valid_moves, sq_selected, card_picked, my_font)
         clock.tick(MAX_FPS)
         pygame.display.flip()
 
@@ -166,6 +188,26 @@ def load_images(gs):
     for card in card_names:
         CARD_IMAGES[card] = pygame.transform.scale(pygame.image.load("cards/" + card + ".jpg"), CARD_SIZE)
 
+
+
+"""
+Responsible for all graphics within current game state
+"""
+def draw_game_state(screen, gs, valid_moves, sq_selected, which_card, my_font):
+    # Draw squares of board
+    draw_board(screen)
+    # Highlight
+    highlight_square(screen, gs, valid_moves, sq_selected)
+    # Draw pieces on the top of board
+    draw_pieces(screen, gs.board)
+    # Draw holders for cards
+    draw_card_holders(screen, gs)
+    # Selected card highlight
+    draw_card_highlight(screen, gs, which_card)
+    # Put label with person who is moving
+    draw_player_label(screen, gs, my_font)
+
+
 """
 Clear player selection
 """
@@ -181,22 +223,6 @@ def clear_selection():
 
 
 """
-Responsible for all graphics within current game state
-"""
-def draw_game_state(screen, gs, valid_moves, sq_selected, which_card):
-    # Draw squares of board
-    draw_board(screen)
-    # Highlight
-    highlight_square(screen, gs, valid_moves, sq_selected)
-    # Draw pieces on the top of board
-    draw_pieces(screen, gs.board)
-    # Draw holders for cards
-    draw_card_holders(screen, gs)
-    # Selected card highlight
-    draw_card_highlight(screen, gs, which_card)
-
-
-"""
 Highlight square and moves for piece
 """
 def highlight_square(screen, gs, valid_moves, sq_selected):
@@ -208,11 +234,11 @@ def highlight_square(screen, gs, valid_moves, sq_selected):
             s = pygame.Surface((SQ_SIZE, SQ_SIZE))
             # Transparency value (0 -> transparent, 255 -> opaque)
             s.set_alpha(100)
-            s.fill(pygame.Color(HIGHLIGHT_COLOR_1))
+            s.fill(pygame.Color(SQ_HIGHLIGHT_ACTIVE))
             screen.blit(s, (c * SQ_SIZE, r * SQ_SIZE))
 
             # Highlight moves
-            s.fill(pygame.Color(HIGHLIGHT_COLOR_2))
+            s.fill(pygame.Color(SQ_HIGHLIGHT_PASSIVE))
             for move in valid_moves:
                 if move.start_row == r and move.start_col == c:
                     screen.blit(s, (move.end_col * SQ_SIZE, move.end_row * SQ_SIZE))
@@ -260,9 +286,30 @@ Possible highlight for selected card
 """
 def draw_card_highlight(screen, gs, which_card):
     if which_card is not None:
+        # Actively selected card
         i = gs.get_id_by_card(which_card)
-        x, y, w, h = (CARD_POS[i][0], CARD_POS[i][1], CARD_SIZE[0], CARD_SIZE[1])
-        pygame.draw.rect(screen, pygame.Color(HIGHLIGHT_COLOR_2), pygame.Rect(x, y, w, h), width=5)
+        x, y, w, h = get_rect_tuple(i)
+        pygame.draw.rect(screen, pygame.Color(CARD_HIGHLIGHT_ACTIVE), pygame.Rect(x, y, w, h), width=5)
+    else:
+        # Blue highlight
+        if not gs.white_to_move:
+            x, y, w, h = get_rect_tuple(0)
+            pygame.draw.rect(screen, pygame.Color(CARD_HIGHLIGHT_PASSIVE), pygame.Rect(x, y, w, h), width=3)
+            x, y, w, h = get_rect_tuple(1)
+            pygame.draw.rect(screen, pygame.Color(CARD_HIGHLIGHT_PASSIVE), pygame.Rect(x, y, w, h), width=3)
+        elif gs.white_to_move:
+            x, y, w, h = get_rect_tuple(3)
+            pygame.draw.rect(screen, pygame.Color(CARD_HIGHLIGHT_PASSIVE), pygame.Rect(x, y, w, h), width=3)
+            x, y, w, h = get_rect_tuple(4)
+            pygame.draw.rect(screen, pygame.Color(CARD_HIGHLIGHT_PASSIVE), pygame.Rect(x, y, w, h), width=3)
+
+
+"""
+Return selected card for highlighting
+"""
+def get_rect_tuple(i):
+    return CARD_POS[i][0], CARD_POS[i][1], CARD_SIZE[0], CARD_SIZE[1]
+
 
 """
 Animate move    
@@ -292,4 +339,21 @@ def animate_move(move, screen, board, clock):
         screen.blit(PIECE_IMAGES[move.piece_moved], pygame.Rect(c*SQ_SIZE, r*SQ_SIZE, SQ_SIZE, SQ_SIZE))
         pygame.display.flip()
         clock.tick(60)
+
+
+"""
+Draw label to inform which player is playing
+"""
+def draw_player_label(screen, gs, my_font):
+    black_play = " (PLAYING)" if not gs.white_to_move else ""
+    white_play = " (PLAYING)" if gs.white_to_move else ""
+
+    black_label = my_font.render(f"BLACK: {gs.black_name}{black_play}", 1, BLACK)
+    screen.blit(black_label, BLACK_LABEL_POS)
+
+    white_label = my_font.render(f"WHITE: {gs.white_name}{white_play}", 1, BLACK)
+    screen.blit(white_label, WHITE_LABEL_POS)
+
+    spare_label = my_font.render(f"SPARE CARD", 1, BLACK)
+    screen.blit(spare_label, SPARE_LABEL_POS)
 
