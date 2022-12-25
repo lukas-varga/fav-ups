@@ -6,7 +6,6 @@ map<Cmd,string> Command::enum_map = map<Cmd,string>{
         {Cmd::MAKE_MOVE ,      "MAKE_MOVE"},
         {Cmd::STALEMATE ,      "STALEMATE"},
         // Server side
-        {Cmd::WRONG_DATA ,     "WRONG_DATA"},
         {Cmd::FAILED_LOGIN ,   "FAILED_LOGIN"},
         {Cmd::WAITING ,        "WAITING"},
         {Cmd::START ,          "START"},

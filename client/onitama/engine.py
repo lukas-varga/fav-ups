@@ -10,7 +10,8 @@ import numpy as np
 Information about current game
 """
 class GameState:
-    def __init__(self, net, start_arr, username):
+    def __init__(self, net: Network, start_arr, username):
+        self.net = net
         """
         Board is 5x5 2D list where each element has two chars
         Fst char represents color and snd char represents type (Pawn/King)
@@ -26,26 +27,45 @@ class GameState:
         self.white_to_move = True
         self.move_log = []
         self.is_winner_white = None
+        self.winner_name = None
 
-        # START | P1 (white) | P1 (black) | 5x cards
-        self.white_name = start_arr[1]
-        self.black_name = start_arr[2]
-        if self.white_name == username:
-            self.my_login = self.white_name
-            self.enemy_login = self.black_name
-            self.player_is_white = True
+        # START | P1 (black) | P2 (white) | 5x cards
+        self.black_name = start_arr[1]
+        self.white_name = start_arr[2]
+        self.curr_p = self.white_name
+
+        if self.black_name == username:
+            self.player_name = self.black_name
+            self.opponent_name = self.white_name
         else:
-            self.player_is_white = False
-            self.my_login = self.black_name
-            self.enemy_login = self.white_name
+            self.player_name = self.white_name
+            self.opponent_name = self.black_name
 
         # Generating in sever
-        # 0 and 1 are white
+        # 0 and 1 are black
         # 2 is spare
-        # 3 and 4 are black
+        # 3 and 4 are white
         self.cards = components.CARDS
         self.selected_cards = start_arr[3:]
 
+    """
+    Takes move as parameter and executes it
+    """
+    def make_move(self, move, card_picked: str):
+        # Make move
+        self.board[move.start_row][move.start_col] = "--"
+        self.board[move.end_row][move.end_col] = move.piece_moved
+        # Log the move
+        self.move_log.append(move)
+
+    """
+    Shuffle card, which was played right away and give player spare card
+    """
+    def shuffle_cards(self, card_picked):
+        card_id = self.get_id_by_card(card_picked)
+        temp = self.selected_cards[2]
+        self.selected_cards[2] = card_picked
+        self.selected_cards[card_id] = temp
 
     """
     Get selected card by id
@@ -64,57 +84,11 @@ class GameState:
                 return i
 
     """
-    Takes move as parameter and executes it
+    Switch player
     """
-    def make_move(self, move, card_picked):
-        self.board[move.start_row][move.start_col] = "--"
-        self.board[move.end_row][move.end_col] = move.piece_moved
-        # Log the move
-        self.move_log.append(move)
-
-        # Check check-mate or king on enemy base
-        if self.is_game_over(move):
-            self.is_winner_white = self.white_to_move
-        # Shuffle cards and swap players
-        else:
-            self.shuffle_cards(card_picked)
-            self.white_to_move = not self.white_to_move
-
-    """
-    Return true if game over otherwise false
-    """
-    def is_game_over(self, move):
-        # Checkmate
-        if move.piece_captured[1] == 'K':
-            return True
-        # Enemy base for white
-        elif self.board[0][2] == "wK":
-            return True
-        # Enemy base for black
-        elif self.board[4][2] == "bK":
-            return True
-        return False
-
-    """
-    Shuffle card, which was played right away and give player spare card
-    """
-    def shuffle_cards(self, card_picked):
-        card_id = self.get_id_by_card(card_picked)
-        temp = self.selected_cards[2]
-        self.selected_cards[2] = card_picked
-        self.selected_cards[card_id] = temp
-
-    """
-    Undo last move
-    """
-    def undo_move(self):
-        # There are some moves
-        if len(self.move_log) != 0:
-            move = self.move_log.pop()
-            self.board[move.start_row][move.start_col] = move.piece_moved
-            self.board[move.end_row][move.end_col] = move.piece_captured
-            self.is_winner_white = None
-            self.white_to_move = not self.white_to_move
+    def switch_players(self):
+        self.curr_p = self.black_name if self.white_to_move else self.white_name
+        self.white_to_move = not self.white_to_move
 
     """
     Get list of all valid moves for given card.
@@ -138,7 +112,7 @@ class GameState:
         return moves
 
     """
-    Calculate mvoes for one piece
+    Calculate moves for one piece
     """
     def one_valid_move(self, r, c, card, moves, turn):
         matrix = self.cards[card]

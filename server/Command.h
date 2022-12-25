@@ -13,7 +13,6 @@ enum Cmd {
     MAKE_MOVE,
     STALEMATE,
     // Server side
-    WRONG_DATA,
     FAILED_LOGIN,
     WAITING,
     START,

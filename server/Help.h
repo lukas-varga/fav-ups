@@ -27,8 +27,8 @@ public:
 
     // A quick way to parse strings separated via any character delimiter
     static vector<string> parse(const string& msg, char del);
-    static void send_log(int fd, const string& snd);
-    static void recv_log(int fd, const string& snd);
+    static void snd_log(int fd, const string& snd);
+    static void rcv_log(int fd, const string& snd);
 };
 
 

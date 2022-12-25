@@ -44,7 +44,14 @@ vector<string> Card::pick_five_cards() {
     return five_cards;
 }
 
-vector<tuple<int, int>> Card::get_positions(const string& card){
+vector<tuple<int, int>> Card::get_positions(const string& card, bool inverted_for_black){
+    if (inverted_for_black){
+        vector<tuple<int, int>> inverted;
+        for (tuple<int,int> raw_vec : card_map.at(card)){
+            inverted.push_back({0 - get<0>(raw_vec),0 - get<1>(raw_vec)});
+        }
+        return inverted;
+    }
     return card_map.at(card);
 }
 

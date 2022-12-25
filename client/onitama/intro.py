@@ -67,14 +67,15 @@ def login(net: Network):
     close_btn = Button(win, text="Close", width=10, height=1, bg=BTN_COLOR, font=(FONT, 12), command=close_win)
     close_btn.pack(pady=10)
 
-    #TODO delete on release
-    login_btn_pressed(net)
-    #TODO
-
     # Not correctly connected
     if net.id == -1:
+        username_entry['state'] = DISABLED
         play_btn['state'] = DISABLED
         messagebox.showinfo("Server error", "Connection refused!")
+
+    # TODO delete on release
+    login_btn_pressed(net)
+    # TODO
 
     while True:
         win.update()
@@ -87,7 +88,7 @@ def login(net: Network):
 
             return start_arr, username
         if exiting:
-            return  None, None
+            return None, None
 
 
 """
@@ -107,7 +108,7 @@ def login_btn_pressed(net: Network):
     waiting = net.recv_data()
     waiting_arr = parser.parse(waiting)
     cmd = waiting_arr[0]
-    par_1 = waiting_arr[1]
+    wait_name = waiting_arr[1]
 
     if cmd == Cmd.WAITING.value:
         play_btn['state'] = DISABLED
@@ -125,16 +126,16 @@ def login_btn_pressed(net: Network):
         waiting_label.pack(pady=5)
 
         global username
-        username = par_1
-        print("In waiting room")
+        username = wait_name
+        print("In waiting room!")
 
         global is_waiting
         is_waiting = True
 
     elif cmd == Cmd.FAILED_LOGIN.value:
-        messagebox.showinfo("Login Failed", par_1)
+        messagebox.showinfo("Login Failed", wait_name)
     elif cmd == Cmd.RECONNECT.value:
-        messagebox.showinfo("Reconnecting...", par_1)
+        messagebox.showinfo("Reconnecting...", wait_name)
         # TODO reconnect
     else:
         # Waiting label
@@ -149,6 +150,7 @@ def close_win():
 
     global exiting
     exiting = True
+
 
 """
 Not close windows on X click

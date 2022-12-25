@@ -16,7 +16,7 @@ public:
 
     static vector<string> card_names();
     static vector<string> pick_five_cards();
-    static vector<tuple<int, int>> get_positions(const string& card);
+    static vector<tuple<int, int>> get_positions(const string& card, bool inverted_for_black);
     static bool is_valid_card(const string& card);
 
 };

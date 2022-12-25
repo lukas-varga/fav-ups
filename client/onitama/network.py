@@ -5,7 +5,7 @@ Socket operating class for communication with server
 """
 class Network(object):
     def __init__(self, ip, port):
-        self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # For this to work on your machine this must be equal to the ipv4 address of the machine running the server
         # You can find this address by typing ipconfig in CMD and copying the ipv4 address. Again this must be the
         # servers ipv4 address. This field will be the same for all your clients.
@@ -20,7 +20,7 @@ class Network(object):
     """
     def create_connection(self):
         try:
-            self.client.connect(self.addr)
+            self.server.connect(self.addr)
             print("Connected!")
 
             welcome_rcv = self.recv_data()
@@ -36,7 +36,7 @@ class Network(object):
     """
     def close_connection(self):
         try:
-            self.client.close()
+            self.server.close()
             print("Disconnecting from server!")
             return 0
         except socket.error as e:
@@ -50,7 +50,7 @@ class Network(object):
         try:
             print(f"Sending: {data}")
             byte_mess = data.encode('utf-8')
-            self.client.send(byte_mess)
+            self.server.send(byte_mess)
             return 0
         except socket.error as e:
             print(e)
@@ -62,7 +62,7 @@ class Network(object):
     """
     def recv_data(self):
         try:
-            byte_mess = self.client.recv(self.MAX_BUFF)
+            byte_mess = self.server.recv(self.MAX_BUFF)
             data = byte_mess.decode("utf-8")
             print(f"Receiving: {data}")
             return data

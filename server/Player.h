@@ -10,15 +10,13 @@ using namespace std;
 
 class Player{
 public:
-    int socket;
+    int socket{};
     string username;
     State state;
     bool disconnected;
 
-
-
     Player();
-    Player(int socket, string username);
+    Player(int sock, string name);
 };
 
 

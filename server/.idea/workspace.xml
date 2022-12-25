@@ -21,10 +21,27 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b8ed92a8-e9d2-457f-9a81-ceb035a0f772" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/../docs/Pozadavky2019.pdf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/.idea/client.iml" beforeDir="false" afterPath="$PROJECT_DIR$/../client/.idea/client.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../client/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../client/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/onitama/engine.py" beforeDir="false" afterPath="$PROJECT_DIR$/../client/onitama/engine.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/onitama/game.py" beforeDir="false" afterPath="$PROJECT_DIR$/../client/onitama/game.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/onitama/intro.py" beforeDir="false" afterPath="$PROJECT_DIR$/../client/onitama/intro.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/onitama/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/../client/onitama/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/onitama/network.py" beforeDir="false" afterPath="$PROJECT_DIR$/../client/onitama/network.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/onitama/parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/../client/onitama/parser.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Card.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Card.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Card.h" beforeDir="false" afterPath="$PROJECT_DIR$/Card.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Command.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Command.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Command.h" beforeDir="false" afterPath="$PROJECT_DIR$/Command.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Game.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Game.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Game.h" beforeDir="false" afterPath="$PROJECT_DIR$/Game.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Help.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Help.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Help.h" beforeDir="false" afterPath="$PROJECT_DIR$/Help.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Player.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Player.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Player.h" beforeDir="false" afterPath="$PROJECT_DIR$/Player.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server" beforeDir="false" afterPath="$PROJECT_DIR$/server" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/server.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -66,7 +83,7 @@
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settings.ide.settings.new.ui&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
@@ -76,11 +93,6 @@
     </key>
   </component>
   <component name="RunManager" selected="CMake Application.server">
-    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
-      <method v="2">
-        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="server" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="60000" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="server" TARGET_NAME="server" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="server" RUN_TARGET_NAME="server">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -150,6 +162,15 @@
       <workItem from="1671718940876" duration="79000" />
       <workItem from="1671719340983" duration="4289000" />
       <workItem from="1671728721933" duration="6946000" />
+      <workItem from="1671785733017" duration="924000" />
+      <workItem from="1671786664125" duration="63000" />
+      <workItem from="1671786735293" duration="85000" />
+      <workItem from="1671800919393" duration="12893000" />
+      <workItem from="1671829634411" duration="3403000" />
+      <workItem from="1671833047070" duration="2150000" />
+      <workItem from="1671894733934" duration="82000" />
+      <workItem from="1671894830705" duration="4849000" />
+      <workItem from="1671999518576" duration="8964000" />
     </task>
     <servers />
   </component>
