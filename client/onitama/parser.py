@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 SPL = '|'
 END = '\0'
 
@@ -40,12 +41,12 @@ def parse(msg: str):
     return res
 
 
-def send_login(username):
+def prepare_login(username):
     return f"{Cmd.LOGIN.value}{SPL}{username}{END}"
 
-def send_make_move(card, s_row, s_col, e_row, e_col):
+def prepade_make_move(card, s_row, s_col, e_row, e_col):
     return f"{Cmd.MAKE_MOVE.value}{SPL}{card}{SPL}{s_row}{SPL}{s_col}{SPL}{e_row}{SPL}{e_col}{END}"
 
-def send_stalemate(card_to_swap):
+def prepare_stalemate(card_to_swap):
     return f"{Cmd.MAKE_MOVE.value}{SPL}{card_to_swap}{END}"
 

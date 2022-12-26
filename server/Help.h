@@ -22,13 +22,13 @@ using namespace std;
 class Help {
 public:
     // Codes for delimiter and end
-    static const string SPL;
-    static const string END;
+    static const char SPL;
+    static const char END;
 
     // A quick way to parse strings separated via any character delimiter
     static vector<string> parse(const string& msg, char del);
     static void snd_log(int fd, const string& snd);
-    static void rcv_log(int fd, const string& snd);
+    static void rcv_log(int fd, char buff[]);
 };
 
 

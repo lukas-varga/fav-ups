@@ -121,7 +121,7 @@ int main (int argc, char** argv){
                     // send new connection greeting welcome_msg
                     snd = "";
                     snd.append("Welcome to Onitama server!");
-                    snd.append(Help::END);
+                    snd.append(1, Help::END);
                     send(client_socket, snd.data(), snd.size(), 0);
                     Help::snd_log(fd, snd);
 
@@ -140,18 +140,18 @@ int main (int argc, char** argv){
                     rcv = "";
                     val_read = recv(fd, buff, sizeof(buff), 0);
                     rcv.append(buff);
-                    Help::rcv_log(fd, rcv);
+                    Help::rcv_log(fd, buff);
 
                     // na socketu se stalo neco spatneho
                     if (val_read == 0){
                         for (i = 0; i < CLIENT_NUM; i++){
                             p = player_arr[i];
                             if(p->socket == fd){
-//                                TODO make reconnect logic
-//                              p->socket = 0;
-//                              p->username = "";
-                                p->state = State_Machine::allowed_transition(p->state, Event::EV_DISC);
-                                p->disconnected = true;
+                                // TODO make reconnect logic
+                                p->socket = 0;
+                                p->username = "";
+//                                p->state = State_Machine::allowed_transition(p->state, Event::EV_DISC);
+//                                p->disconnected = true;
 
                                 break;
                             }
@@ -197,9 +197,9 @@ int main (int argc, char** argv){
 
                                                 snd = "";
                                                 snd.append(Command::name(Cmd::RECONNECT))
-                                                        .append(Help::SPL)
+                                                        .append(1, Help::SPL)
                                                         .append("Reconnecting: " + login_name)
-                                                        .append(Help::END);
+                                                        .append(1, Help::END);
                                                 send(fd, snd.data(), snd.size(), 0);
                                                 Help::snd_log(fd, snd);
                                                 cout << "Reconnect attempt!" << endl;
@@ -208,9 +208,9 @@ int main (int argc, char** argv){
                                             else {
                                                 snd = "";
                                                 snd.append(Command::name(Cmd::FAILED_LOGIN))
-                                                        .append(Help::SPL)
+                                                        .append(1, Help::SPL)
                                                         .append("Name is already in use!")
-                                                        .append(Help::END);
+                                                        .append(1, Help::END);
                                                 send(fd, snd.data(), snd.size(), 0);
                                                 Help::snd_log(fd, snd);
                                             }
@@ -223,9 +223,9 @@ int main (int argc, char** argv){
                                         if (login_name.size() > NAME_LENGTH || login_name.empty()) {
                                             snd = "";
                                             snd.append(Command::name(Cmd::FAILED_LOGIN))
-                                                    .append(Help::SPL)
+                                                    .append(1, Help::SPL)
                                                     .append("Name is too long (>" + to_string(NAME_LENGTH) + ")!")
-                                                    .append(Help::END);
+                                                    .append(1, Help::END);
                                             send(fd, snd.data(), snd.size(), 0);
                                             Help::snd_log(fd, snd);
                                         }
@@ -238,8 +238,7 @@ int main (int argc, char** argv){
                                                 if (!game->is_active) {
                                                     // Create player finally and login
                                                     player->username = login_name;
-                                                    player->state = State_Machine::allowed_transition(player->state,
-                                                                                                      Event::EV_LOGIN);
+                                                    player->state = State_Machine::allowed_transition(player->state,Event::EV_LOGIN);
                                                     player->disconnected = false;
 
                                                     // Cmd::WAITING
@@ -253,9 +252,9 @@ int main (int argc, char** argv){
                                             if (!lobby_entered) {
                                                 snd = "";
                                                 snd.append(Command::name(Cmd::FAILED_LOGIN))
-                                                        .append(Help::SPL)
+                                                        .append(1, Help::SPL)
                                                         .append("All lobby are full!")
-                                                        .append(Help::END);
+                                                        .append(1, Help::END);
                                                 send(fd, snd.data(), snd.size(), 0);
                                                 Help::snd_log(fd, snd);
                                             }
@@ -271,37 +270,34 @@ int main (int argc, char** argv){
                                     cout << "Entering: " << Command::name(Cmd::MAKE_MOVE) << endl;
                                     for (i = 0; i < GAME_NUM; i++) {
                                         game = game_arr[i];
-                                        if (game->is_active) {
-                                            if (game->curr_p == player){
-                                                try {
-                                                    string card = rcv_arr.at(1);
-                                                    int st_row = stoi(rcv_arr.at(2));
-                                                    int st_col = stoi(rcv_arr.at(3));
-                                                    int end_row = stoi(rcv_arr.at(4));
-                                                    int end_col = stoi(rcv_arr.at(5));
-                                                    bool valid_move = game->check_move(
-                                                            card,st_row, st_col, end_row, end_col);
-                                                    if (valid_move) {
-                                                        game->move_was_made(card, st_row, st_col, end_row, end_col);
-                                                        bool game_over = game->is_game_over();
-                                                        if (!game_over) {
-                                                            game->shuffle_cards(card);
-                                                            game->switch_players();
-                                                        } else {
-                                                            game->end_game();
-                                                        }
-                                                    } else {
-                                                        game->invalid_move();
+                                        if (game->is_active and game->curr_p == player) {
+                                            try {
+                                                string card = rcv_arr.at(1);
+                                                int st_row = stoi(rcv_arr.at(2));
+                                                int st_col = stoi(rcv_arr.at(3));
+                                                int end_row = stoi(rcv_arr.at(4));
+                                                int end_col = stoi(rcv_arr.at(5));
+                                                bool valid_move = game->check_move(
+                                                        card,st_row, st_col, end_row, end_col);
+                                                if (valid_move) {
+                                                    game->move_was_made(card, st_row, st_col, end_row, end_col);
+                                                    if (!game->is_game_over()) {
+                                                        game->shuffle_cards(card);
+                                                        game->switch_players();
+                                                    }
+                                                    else {
+                                                        game->end_game();
                                                     }
                                                 }
-                                                catch (const exception &exc){
-                                                    cout << "ERR: Number of row or col is not integer" << endl;
-                                                    cerr << exc.what();
+                                                else {
+                                                    game->invalid_move();
                                                 }
                                             }
-                                            else{
-                                                cout << "ERR: This player should now give MAKE_MOVE command right now!" << endl;
+                                            catch (const exception &exc){
+                                                game->move_not_parsable();
+                                                cerr << exc.what();
                                             }
+                                            break;
                                         }
                                     }
                                 }

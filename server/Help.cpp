@@ -3,8 +3,8 @@
 
 // Codes for delimiter and end
 
-const string Help::SPL = "|";
-const string Help::END = "\0";
+const char Help::SPL = '|';
+const char Help::END = '\0';
 
 vector<string> Help::parse(const string& msg, char del) {
     stringstream ss(msg);
@@ -42,6 +42,6 @@ void Help::snd_log(int fd, const string& snd){
     cout << "Sending to fd(" << fd << "): "  << snd << endl;
 }
 
-void Help::rcv_log(int fd, const string& snd) {
-    cout << "Receiving from fd(" << fd << "): " << snd << endl;
+void Help::rcv_log(int fd, char buff[]) {
+    cout << "Receiving from fd(" << fd << "): " << buff << endl;
 }

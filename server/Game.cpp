@@ -36,9 +36,9 @@ void Game::enter_lobby(Player * player){
 
         string snd = "";
         snd.append(Command::name(Cmd::WAITING))
-                .append(Help::SPL)
+                .append(1, Help::SPL)
                 .append(player->username)
-                .append(Help::END);
+                .append(1, Help::END);
         send(player->socket, snd.data(), snd.size(), 0);
         Help::snd_log(player->socket, snd);
         cout << "Player1 " << player->username << " has entered lobby!" << endl;
@@ -48,9 +48,9 @@ void Game::enter_lobby(Player * player){
 
         string snd = "";
         snd.append(Command::name(Cmd::WAITING))
-                .append(Help::SPL)
+                .append(1, Help::SPL)
                 .append(player->username)
-                .append(Help::END);
+                .append(1, Help::END);
         send(player->socket, snd.data(), snd.size(), 0);
         Help::snd_log(player->socket, snd);
         cout << "Player2 " << player->username << " has entered lobby!" << endl;
@@ -67,18 +67,18 @@ void Game::start_game(){
 
     string snd = "";
     snd.append(Command::name(Cmd::START))
-            .append(Help::SPL)
+            .append(1, Help::SPL)
             .append(black_p->username)
-            .append(Help::SPL)
+            .append(1, Help::SPL)
             .append(white_p->username)
-            .append(Help::SPL);
+            .append(1, Help::SPL);
 
     for (int i = 0; i < last_index; ++i){
         snd.append(five_cards[i])
-            .append(Help::SPL);
+            .append(1, Help::SPL);
     }
     snd.append(five_cards[last_index])
-        .append(Help::END);
+        .append(1, Help::END);
 
     // Send to both TWO players START
     send(black_p->socket, snd.data(), snd.size(), 0);
@@ -126,11 +126,11 @@ bool Game::check_move(const string& card, int st_row, int st_col, int end_row, i
                     new_c = st_col + get<0>(vec);
                     // Card and given position is right
                     if (new_r == end_row and new_c == end_col) {
-                        cout << "Move was OK!" << endl;
                         piece_moved = board[st_row][st_col];
-                        piece_captured = board[end_row][end_row];
+                        piece_captured = board[end_row][end_col];
                         board[st_row][st_col] = "--";
                         board[end_row][end_col] = piece_moved;
+                        cout << "Move was OK!" << endl;
                         return true;
                     }
                 }
@@ -145,17 +145,17 @@ bool Game::check_move(const string& card, int st_row, int st_col, int end_row, i
 void Game::move_was_made(const string& card, int st_row, int st_col, int end_row, int end_col) {
     string snd = "";
     snd.append(Command::name(Cmd::MOVE_WAS_MADE))
-            .append(Help::SPL)
+            .append(1, Help::SPL)
             .append(card)
-            .append(Help::SPL)
+            .append(1, Help::SPL)
             .append(to_string(st_row))
-            .append(Help::SPL)
+            .append(1, Help::SPL)
             .append(to_string(st_col))
-            .append(Help::SPL)
+            .append(1, Help::SPL)
             .append(to_string(end_row))
-            .append(Help::SPL)
+            .append(1, Help::SPL)
             .append(to_string(end_col))
-            .append(Help::END);
+            .append(1, Help::END);
 
     send(black_p->socket, snd.data(), snd.size(), 0);
     Help::snd_log(black_p->socket, snd);
@@ -166,9 +166,19 @@ void Game::move_was_made(const string& card, int st_row, int st_col, int end_row
 void Game::invalid_move() {
     string snd = "";
     snd.append(Command::name(Cmd::INVALID_MOVE))
-            .append(Help::SPL)
-            .append("Command was right but move was invalid!")
-            .append(Help::END);
+            .append(1, Help::SPL)
+            .append("Move is not possible!")
+            .append(1, Help::END);
+    send(curr_p->socket, snd.data(), snd.size(), 0);
+    Help::snd_log(curr_p->socket, snd);
+}
+
+void Game::move_not_parsable() {
+    string snd = "";
+    snd.append(Command::name(Cmd::INVALID_MOVE))
+            .append(1, Help::SPL)
+            .append("Number of row or col is not integer OR card is to string!")
+            .append(1, Help::END);
     send(curr_p->socket, snd.data(), snd.size(), 0);
     Help::snd_log(curr_p->socket, snd);
 }
@@ -216,14 +226,15 @@ bool Game::is_game_over() {
 void Game::end_game() {
     string snd = "";
     snd.append(Command::name(Cmd::GAME_OVER))
-            .append(Help::SPL)
+            .append(1, Help::SPL)
             .append(winner_p->username)
-            .append(Help::END);
+            .append(1, Help::END);
     send(white_p->socket, snd.data(), snd.size(), 0);
     Help::snd_log(white_p->socket, snd);
     send(black_p->socket, snd.data(), snd.size(), 0);
     Help::snd_log(black_p->socket, snd);
 
+    cout << "End of the game" << endl;
     //TODO send logout
 }
 

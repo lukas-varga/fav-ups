@@ -1,4 +1,6 @@
+import select
 import socket
+
 
 """
 Socket operating class for communication with server
@@ -24,7 +26,7 @@ class Network(object):
             print("Connected!")
 
             welcome_rcv = self.recv_data()
-            # print(welcome_rcv)
+            print(welcome_rcv)
 
             return 0
         except socket.error as e:
@@ -68,4 +70,28 @@ class Network(object):
             return data
         except socket.error as e:
             print(e)
-            return -1
+            return ""
+
+    def network_data_arrived(self, socket_buffer):
+        """ Read from the socket, stuffing data into the buffer.
+            Returns True when a full packet has been read into the buffer """
+        result = False
+        socks = [self.server]
+
+        # tiny read-timeout
+        in_, out_, exc_ = select.select(socks, [], [], 0)
+
+        # has any data arrived?
+        if in_.count(self.server) > 0:
+            with_null = self.recv_data()
+            if with_null != "":
+                # Split messages by null character
+                records = with_null.split("\x00")
+                # Without last empty record
+                records = records[:-1]
+                for record in records:
+                    socket_buffer.append(record)
+                # if len(socket_buffer) >= self.MAX_BUFF:
+                result = True
+        # No data gathered
+        return result

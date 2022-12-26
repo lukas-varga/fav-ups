@@ -1,25 +1,27 @@
-import select
-from tkinter import messagebox
-
 import engine
 import parser
 from parser import Cmd
 from network import Network
 
+from tkinter import messagebox
 import pygame
 
 
-# Colors
-LIGHT_COLOR = "antiquewhite1"
-DARK_COLOR = "antiquewhite3"
-BACKGROUND_COLOR = "antiquewhite2"
-BORDER_COLOR = "black"
+# COLORS
+# Board
+BACKGROUND_COLOR = "bisque2"
+LIGHT_COLOR = "bisque1"
+DARK_COLOR = "bisque3"
+KING_COLOR = "bisque4"
+# Text and frames
+BLACK = "black"
+WHITE = "white"
+# Highlight
 SQ_HIGHLIGHT_ACTIVE = "yellow"
 SQ_HIGHLIGHT_PASSIVE = "blue"
 CARD_HIGHLIGHT_ACTIVE = "yellow2"
 CARD_HIGHLIGHT_PASSIVE = "steelblue3"
-BLACK = "black"
-WHITE = "white"
+
 
 # Font
 FONT = "consolas"
@@ -85,9 +87,9 @@ def play(net: Network, start_arr, username):
     gs = engine.GameState(net, start_arr, username)
 
     # Only once before loop
-    screen.fill(pygame.Color(BACKGROUND_COLOR))
     load_images(gs)
 
+    # Nullable variables
     global card_picked, valid_moves, sq_selected, player_clicks
     # No square selected, last click of user (row, col)
     sq_selected = ()
@@ -131,7 +133,7 @@ def play(net: Network, start_arr, username):
                         move = engine.Move(player_clicks[0], player_clicks[1], gs.board)
                         if move in valid_moves:
                             # Send MAKE_MOVE to server -> Reply will be collected in select in next iteration
-                            make_move = parser.send_make_move(
+                            make_move = parser.prepade_make_move(
                                 str(card_picked),
                                 move.start_row,
                                 move.start_col,
@@ -159,42 +161,40 @@ def play(net: Network, start_arr, username):
 
         # Incoming message from server
         server_rx_buffer = []
-        if network_data_arrived(net, server_rx_buffer):
-            data = server_rx_buffer[0]
-            data_arr = parser.parse(data)
-            print(server_rx_buffer, data, data_arr)
+        if net.network_data_arrived(server_rx_buffer):
+            for record in server_rx_buffer:
+                data = parser.parse(record)
 
-            if data_arr[0] == Cmd.MOVE_WAS_MADE.value:
-                print(f"Move was accepted by server!")
-                try:
-                    # Move OK and switch players
-                    the_card = data_arr[1]
-                    start_tup = (int(data_arr[2]), int(data_arr[3]))
-                    end_tup = (int(data_arr[4]), int(data_arr[5]))
-                    the_move = engine.Move(start_tup, end_tup, gs.board)
+                if data[0] == Cmd.MOVE_WAS_MADE.value:
+                    print(f"Move was accepted by server!")
+                    try:
+                        # Move OK -> switch cards and move piece
+                        the_card = data[1]
+                        start_tup = (int(data[2]), int(data[3]))
+                        end_tup = (int(data[4]), int(data[5]))
+                        the_move = engine.Move(start_tup, end_tup, gs.board)
 
-                    # Make the move on the board
-                    gs.make_move(the_move, the_card)
-                    print("Move made: " + the_move.get_chess_like_notation())
-                    if gs.move_log:
-                        animate_move(gs.move_log[-1], screen, gs.board, clock)
+                        # Make the move on the board
+                        gs.make_move(the_move)
+                        if gs.move_log:
+                            animate_move(gs.move_log[-1], screen, gs.board, clock)
 
-                    # Shuffle cards and swap players
-                    gs.shuffle_cards(the_card)
-                    gs.switch_players()
-                    print("Cards was shuffled and players were switched!")
-                except Exception as e:
-                    print(e)
-            elif data_arr[0] == Cmd.INVALID_MOVE.value:
-                print("Inform current player, that it move was invalid!")
-                messagebox.showinfo(f"Game Over", "One player has won!")
-            elif data_arr[0] == Cmd.GAME_OVER.value:
-                print(f"Game over, one player won")
-                messagebox.showinfo(f"Game Over", "One player has won!")
-            elif data_arr[0] == "WRONG_DATA":
-                print(f"Wrong data -> opponent do not know how to respond -> {data_arr}")
-            else:
-                print(f"ERR: What the heck happened at client -> {data_arr}")
+                        # Shuffle cards and swap players
+                        gs.shuffle_cards(the_card)
+                        gs.switch_players()
+
+                    except Exception as e:
+                        print(e)
+                elif data[0] == Cmd.INVALID_MOVE.value:
+                    print("Inform current player, that it move was invalid!")
+                    messagebox.showinfo(f"Invalid Move", data[1])
+                elif data[0] == Cmd.GAME_OVER.value:
+                    print(f"Game over, one player won")
+                    messagebox.showinfo(f"Game Over", "One player has won!")
+                elif data[0] == "WRONG_DATA":
+                    print(f"WRONG_DATA -> opponent do not know how to respond -> {data}")
+                else:
+                    print(f"ERR: What the heck happened at client -> {data}")
 
         draw_game_state(screen, gs, valid_moves, sq_selected, card_picked, my_font)
         clock.tick(MAX_FPS)
@@ -203,22 +203,6 @@ def play(net: Network, start_arr, username):
     print("Game finished - quiting pygame!")
     pygame.quit()
     return
-
-
-def network_data_arrived(net: Network, socket_buffer):
-    """ Read from the socket, stuffing data into the buffer.
-        Returns True when a full packet has been read into the buffer """
-    result = False
-    socks = [net.server]
-
-    # tiny read-timeout
-    in_, out_, exc_ = select.select(socks, [], [], 0)
-
-    # has any data arrived?
-    if in_.count(net.server) > 0:
-        result = True
-        socket_buffer.append(net.recv_data())
-    return result
 
 
 """
@@ -241,6 +225,8 @@ def load_images(gs):
 Responsible for all graphics within current game state
 """
 def draw_game_state(screen, gs, valid_moves, sq_selected, which_card, my_font):
+    # Reset screen
+    screen.fill(pygame.Color(BACKGROUND_COLOR))
     # Draw squares of board
     draw_board(screen)
     # Highlight
@@ -270,6 +256,22 @@ def clear_selection():
 
 
 """
+Draw squares of board
+"""
+def draw_board(screen):
+    global colors
+    colors = [pygame.Color(LIGHT_COLOR), pygame.Color(DARK_COLOR)]
+    for r in range(DIMENSION):
+        for c in range(DIMENSION):
+            if (r, c) == (0, 2) or (r, c) == (4, 2):
+                pygame.draw.rect(screen, KING_COLOR, pygame.Rect(c * SQ_SIZE, r * SQ_SIZE, SQ_SIZE, SQ_SIZE))
+                continue
+            color = colors[(r + c) % 2]
+            pygame.draw.rect(screen, color, pygame.Rect(c * SQ_SIZE, r * SQ_SIZE, SQ_SIZE, SQ_SIZE))
+
+
+
+"""
 Highlight square and moves for piece
 """
 def highlight_square(screen, gs, valid_moves, sq_selected):
@@ -289,18 +291,6 @@ def highlight_square(screen, gs, valid_moves, sq_selected):
             for move in valid_moves:
                 if move.start_row == r and move.start_col == c:
                     screen.blit(s, (move.end_col * SQ_SIZE, move.end_row * SQ_SIZE))
-
-
-"""
-Draw squares of board
-"""
-def draw_board(screen):
-    global colors
-    colors = [pygame.Color(LIGHT_COLOR), pygame.Color(DARK_COLOR)]
-    for r in range(DIMENSION):
-        for c in range(DIMENSION):
-            color = colors[(r + c) % 2]
-            pygame.draw.rect(screen, color, pygame.Rect(c * SQ_SIZE, r * SQ_SIZE, SQ_SIZE, SQ_SIZE))
 
 
 """
@@ -325,7 +315,7 @@ def draw_card_holders(screen, gs):
         #image = pygame.transform.rotate(CARD_IMAGES[card], 180) if not gs.white_to_move else CARD_IMAGES[card]
         image = CARD_IMAGES[card]
         screen.blit(image, pygame.Rect(x, y, w, h))
-        pygame.draw.rect(screen, pygame.Color(BORDER_COLOR), pygame.Rect(x, y, w, h), width=1)
+        pygame.draw.rect(screen, pygame.Color(BLACK), pygame.Rect(x, y, w, h), width=1)
 
 
 """
@@ -393,14 +383,16 @@ def animate_move(move, screen, board, clock):
 Draw label to inform which player is playing
 """
 def draw_player_label(screen, gs, my_font):
-    black_play = " (PLAYING)" if not gs.white_to_move else ""
-    white_play = " (PLAYING)" if gs.white_to_move else ""
+    b_name = "YOU" if gs.player_name == gs.black_name else "OPPONENT"
+    w_name = "YOU" if gs.player_name == gs.white_name else "OPPONENT"
+    b_playing = " (PLAYING)" if not gs.white_to_move else ""
+    w_playing = " (PLAYING)" if gs.white_to_move else ""
 
-    black_label = my_font.render(f"BLACK: {gs.black_name}{black_play}", 1, BLACK)
+    black_label = my_font.render(f"{b_name}: {gs.black_name}{b_playing}", True, BLACK)
     screen.blit(black_label, BLACK_LABEL_POS)
 
-    white_label = my_font.render(f"WHITE: {gs.white_name}{white_play}", 1, BLACK)
+    white_label = my_font.render(f"{w_name}: {gs.white_name}{w_playing}", True, BLACK)
     screen.blit(white_label, WHITE_LABEL_POS)
 
-    spare_label = my_font.render(f"SPARE CARD", 1, BLACK)
+    spare_label = my_font.render(f"SPARE CARD", True, BLACK)
     screen.blit(spare_label, SPARE_LABEL_POS)

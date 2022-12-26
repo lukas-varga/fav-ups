@@ -3,8 +3,6 @@ from parser import Cmd
 from network import Network
 import components
 
-import numpy as np
-
 
 """
 Information about current game
@@ -51,12 +49,13 @@ class GameState:
     """
     Takes move as parameter and executes it
     """
-    def make_move(self, move, card_picked: str):
+    def make_move(self, move):
         # Make move
         self.board[move.start_row][move.start_col] = "--"
         self.board[move.end_row][move.end_col] = move.piece_moved
         # Log the move
         self.move_log.append(move)
+        print("Move made: " + move.get_chess_like_notation())
 
     """
     Shuffle card, which was played right away and give player spare card
@@ -66,6 +65,7 @@ class GameState:
         temp = self.selected_cards[2]
         self.selected_cards[2] = card_picked
         self.selected_cards[card_id] = temp
+        print("Cards was shuffled!")
 
     """
     Get selected card by id
@@ -89,6 +89,7 @@ class GameState:
     def switch_players(self):
         self.curr_p = self.black_name if self.white_to_move else self.white_name
         self.white_to_move = not self.white_to_move
+        print("Players were switched!")
 
     """
     Get list of all valid moves for given card.

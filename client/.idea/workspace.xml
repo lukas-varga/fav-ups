@@ -5,26 +5,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7ed4caa7-b1dd-4fb1-b7fb-f959700d601e" name="Changes" comment="Add source link to cards and docs folder">
-      <change afterPath="$PROJECT_DIR$/../docs/Pozadavky2019.pdf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/client.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/client.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/onitama/engine.py" beforeDir="false" afterPath="$PROJECT_DIR$/onitama/engine.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/onitama/game.py" beforeDir="false" afterPath="$PROJECT_DIR$/onitama/game.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/onitama/intro.py" beforeDir="false" afterPath="$PROJECT_DIR$/onitama/intro.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/onitama/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/onitama/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/onitama/network.py" beforeDir="false" afterPath="$PROJECT_DIR$/onitama/network.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/onitama/parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/onitama/parser.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../server/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../server/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../server/Card.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../server/Card.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../server/Card.h" beforeDir="false" afterPath="$PROJECT_DIR$/../server/Card.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../server/Command.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../server/Command.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../server/Command.h" beforeDir="false" afterPath="$PROJECT_DIR$/../server/Command.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../server/CMakeLists.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../server/Game.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../server/Game.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../server/Game.h" beforeDir="false" afterPath="$PROJECT_DIR$/../server/Game.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../server/Help.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../server/Help.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../server/Help.h" beforeDir="false" afterPath="$PROJECT_DIR$/../server/Help.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../server/Player.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../server/Player.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../server/Player.h" beforeDir="false" afterPath="$PROJECT_DIR$/../server/Player.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../server/server" beforeDir="false" afterPath="$PROJECT_DIR$/../server/server" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../server/server.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../server/server.cpp" afterDir="false" />
     </list>
@@ -42,6 +35,19 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">
+    <option name="selectedUrlAndAccountId">
+      <UrlAndAccount>
+        <option name="accountId" value="e8c59493-22ca-4425-8aa5-9817443cc4dc" />
+        <option name="url" value="https://github.com/lukas-varga/fav-ups.git" />
+      </UrlAndAccount>
+    </option>
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
@@ -216,6 +222,9 @@
       <workItem from="1671894809112" duration="5018000" />
       <workItem from="1671999518199" duration="3861000" />
       <workItem from="1672003387657" duration="5867000" />
+      <workItem from="1672057513509" duration="13454000" />
+      <workItem from="1672071243698" duration="1466000" />
+      <workItem from="1672077107533" duration="4356000" />
     </task>
     <task id="LOCAL-00001" summary="Everything is working offline on one machinie yupii, needs to verify winning still">
       <created>1668450646046</created>
@@ -248,6 +257,9 @@
     <option name="localTasksCounter" value="5" />
     <servers />
   </component>
+  <component name="TerminalProjectNonSharedOptionsProvider">
+    <option name="startingDirectory" value="$PROJECT_DIR$/onitama" />
+  </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
@@ -273,7 +285,7 @@
     <option name="LAST_COMMIT_MESSAGE" value="Add source link to cards and docs folder" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/client$main.coverage" NAME="main Coverage Results" MODIFIED="1672008425215" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/onitama" />
+    <SUITE FILE_PATH="coverage/client$main.coverage" NAME="main Coverage Results" MODIFIED="1672081433452" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/onitama" />
     <SUITE FILE_PATH="coverage/client$run.coverage" NAME="run Coverage Results" MODIFIED="1668633945893" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/client$game.coverage" NAME="game Coverage Results" MODIFIED="1669626589396" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/onitama" />
     <SUITE FILE_PATH="coverage/client$onitama_main.coverage" NAME="onitama_main Coverage Results" MODIFIED="1667492761832" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/onitama" />
