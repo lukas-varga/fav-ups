@@ -109,7 +109,7 @@ def play(net: Network, start_arr, username):
                 running = False
 
             # Mouse handler Only current player can play
-            if e.type == pygame.MOUSEBUTTONDOWN and gs.is_winner_white is None and gs.curr_p == gs.player_name:
+            if e.type == pygame.MOUSEBUTTONDOWN and gs.white_won is None and gs.curr_p == gs.player_name:
                 # x,y loc of mouse
                 loc = pygame.mouse.get_pos()
 
@@ -164,8 +164,9 @@ def play(net: Network, start_arr, username):
         if net.network_data_arrived(server_rx_buffer):
             for record in server_rx_buffer:
                 data = parser.parse(record)
+                cmd = data[0]
 
-                if data[0] == Cmd.MOVE_WAS_MADE.value:
+                if cmd == Cmd.MOVE_WAS_MADE.value:
                     print(f"Move was accepted by server!")
                     try:
                         # Move OK -> switch cards and move piece
@@ -185,13 +186,11 @@ def play(net: Network, start_arr, username):
 
                     except Exception as e:
                         print(e)
-                elif data[0] == Cmd.INVALID_MOVE.value:
-                    print("Inform current player, that it move was invalid!")
-                    messagebox.showinfo(f"Invalid Move", data[1])
-                elif data[0] == Cmd.GAME_OVER.value:
+                elif cmd == Cmd.INVALID_MOVE.value:
+                    print("Move was invalid!")
+                elif cmd == Cmd.GAME_OVER.value:
                     print(f"Game over, one player won")
-                    messagebox.showinfo(f"Game Over", "One player has won!")
-                elif data[0] == "WRONG_DATA":
+                elif cmd == "WRONG_DATA":
                     print(f"WRONG_DATA -> opponent do not know how to respond -> {data}")
                 else:
                     print(f"ERR: What the heck happened at client -> {data}")
@@ -385,8 +384,12 @@ Draw label to inform which player is playing
 def draw_player_label(screen, gs, my_font):
     b_name = "YOU" if gs.player_name == gs.black_name else "OPPONENT"
     w_name = "YOU" if gs.player_name == gs.white_name else "OPPONENT"
+
     b_playing = " (PLAYING)" if not gs.white_to_move else ""
     w_playing = " (PLAYING)" if gs.white_to_move else ""
+    if gs.white_won is not None:
+        b_playing = " (WON)" if not gs.white_won else " (LOST)"
+        w_playing = " (WON)" if gs.white_won else " (LOST)"
 
     black_label = my_font.render(f"{b_name}: {gs.black_name}{b_playing}", True, BLACK)
     screen.blit(black_label, BLACK_LABEL_POS)

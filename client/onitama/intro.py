@@ -10,7 +10,6 @@ from functools import partial
 import random
 #TODO delete
 
-
 BG_COLOR = game.BACKGROUND_COLOR
 BTN_COLOR = game.DARK_COLOR
 FONT = game.FONT
@@ -58,7 +57,7 @@ def login(net: Network):
     if net.id == -1:
         username_entry['state'] = DISABLED
         login_btn['state'] = DISABLED
-        messagebox.showinfo("Server error", "Connection refused!")
+        messagebox.showinfo("Server Error", "Connection refused!")
 
     #TODO delete on release
     s = "abcdefghijklmnopqrstuvwxyz"
@@ -79,33 +78,34 @@ def login(net: Network):
         if net.network_data_arrived(server_rx_buffer):
             for record in server_rx_buffer:
                 data = parser.parse(record)
+                cmd = data[0]
 
-                if data[0] == Cmd.WAITING.value:
-                    login_btn['state'] = DISABLED
+                if cmd == Cmd.WAITING.value:
                     username_entry['state'] = DISABLED
+                    login_btn['state'] = DISABLED
 
-                    tk_wait = Toplevel(win)
-                    tk_wait.geometry(f"{WIDTH_LOGIN}x{HEIGHT_LOGIN // 3}")
-                    tk_wait.title("Waiting")
-                    tk_wait.config(bg=BG_COLOR)
-                    tk_wait.resizable(width=False, height=False)
-                    tk_wait.protocol("WM_DELETE_WINDOW", do_nothing)
+                    win_wait = Toplevel(win)
+                    win_wait.geometry(f"{WIDTH_LOGIN}x{HEIGHT_LOGIN // 3}")
+                    win_wait.title("Waiting")
+                    win_wait.config(bg=BG_COLOR)
+                    win_wait.resizable(width=False, height=False)
+                    win_wait.protocol("WM_DELETE_WINDOW", do_nothing)
 
                     # Set username label
-                    waiting_label = Label(tk_wait, text="Waiting for opponent...", font=(FONT, 12), bg=BG_COLOR)
+                    waiting_label = Label(win_wait, text="Waiting for opponent...", font=(FONT, 12), bg=BG_COLOR)
                     waiting_label.pack(pady=30)
 
                     username = data[1]
                     print("Intro: Waiting!")
-                elif data[0] == Cmd.FAILED_LOGIN.value:
+                elif cmd == Cmd.FAILED_LOGIN.value:
                     messagebox.showinfo("Login Failed", data[1])
                     print("Intro: Failed login!")
-                elif data[0] == Cmd.START.value:
+                elif cmd == Cmd.START.value:
                     # START | P1 (white) | P1 (black) | 5x cards
                     print("Intro: START!")
                     win.destroy()
                     return data, username
-                elif data[0] == Cmd.RECONNECT.value:
+                elif cmd == Cmd.RECONNECT.value:
                     messagebox.showinfo("Reconnecting...", data[1])
                     print("Intro: Reconnect!")
                     # TODO reconnect
@@ -119,9 +119,9 @@ def login(net: Network):
 Play button pressed
 """
 def login_btn_pressed(net: Network, username_str_var):
+    # Send LOGIN | name
     user = str(username_str_var.get())
     data = parser.prepare_login(user)
-    # Send LOGIN | name
     net.send_data(data)
 
 

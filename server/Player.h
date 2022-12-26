@@ -10,7 +10,7 @@ using namespace std;
 
 class Player{
 public:
-    int socket{};
+    int socket;
     string username;
     State state;
     bool disconnected;

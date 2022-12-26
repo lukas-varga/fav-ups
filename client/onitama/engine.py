@@ -24,7 +24,7 @@ class GameState:
         ]
         self.white_to_move = True
         self.move_log = []
-        self.is_winner_white = None
+        self.white_won = None
         self.winner_name = None
 
         # START | P1 (black) | P2 (white) | 5x cards

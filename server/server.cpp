@@ -3,6 +3,7 @@
 #include "Command.h"
 #include "Help.h"
 #include "State.h"
+#include "Lobby.h"
 
 #include <cstdio>
 #include <sys/types.h>
@@ -89,9 +90,10 @@ int main (int argc, char** argv){
         memset(buff, 0, MAX_BUFF);
         string rcv, snd;
 
-        vector<string> rcv_arr;
+        vector<string> data;
         string cmd, login_name;
 
+        Lobby * lobby;
         Player * p;
         Game * game;
         Player * player;
@@ -152,7 +154,6 @@ int main (int argc, char** argv){
                                 p->username = "";
 //                                p->state = State_Machine::allowed_transition(p->state, Event::EV_DISC);
 //                                p->disconnected = true;
-
                                 break;
                             }
                         }
@@ -172,40 +173,36 @@ int main (int argc, char** argv){
                                 break;
                             }
                         }
-
                         // Player found in arr
                         if (player != nullptr){
                             // Parsing
-                            rcv_arr = Help::parse(rcv, SPL_CHR);
-                            cmd = rcv_arr.at(0);
-
-                            // login come to server
+                            data = Help::parse(rcv, SPL_CHR);
+                            cmd = data.at(0);
+                            lobby = new Lobby();
+                            // LOGIN | name
                             if (cmd == Command::name(Cmd::LOGIN)){
-                                if (rcv_arr.size() == 1+1) {
-                                    cout << "Entering: " << Command::name(Cmd::LOGIN) << endl;
-                                    login_name = rcv_arr.at(1);
+                                cout << "Entering: " << Command::name(Cmd::LOGIN) << endl;
+                                if (data.size() == 1 + 1) {
+                                    login_name = data.at(1);
                                     name_in_use = false;
                                     for (i = 0; i < CLIENT_NUM; i++) {
                                         p = player_arr[i];
-                                        if (p->username == login_name) {
+                                        if (login_name.empty()){
+                                            // Empty login
+                                            lobby->empty_login(fd);
                                             name_in_use = true;
-                                            // Reconnect attempt
+                                            break;
+                                        }
+                                        else if (p->username == login_name) {
                                             if (p->disconnected) {
-                                                p->state = State_Machine::allowed_transition(p->state, Event::EV_RECON);
-                                                p->disconnected = false;
+                                                // Reconnect attempt
+//                                                p->state = State_Machine::allowed_transition(p->state, Event::EV_RECON);
+//                                                p->disconnected = false;
                                                 // TODO make reconnect logic
-
-                                                snd = "";
-                                                snd.append(Command::name(Cmd::RECONNECT))
-                                                        .append(1, Help::SPL)
-                                                        .append("Reconnecting: " + login_name)
-                                                        .append(1, Help::END);
-                                                send(fd, snd.data(), snd.size(), 0);
-                                                Help::snd_log(fd, snd);
-                                                cout << "Reconnect attempt!" << endl;
+                                                lobby->reconnect(fd, login_name);
                                             }
-                                                // Name already in use
                                             else {
+                                                // Name already in use
                                                 snd = "";
                                                 snd.append(Command::name(Cmd::FAILED_LOGIN))
                                                         .append(1, Help::SPL)
@@ -214,23 +211,23 @@ int main (int argc, char** argv){
                                                 send(fd, snd.data(), snd.size(), 0);
                                                 Help::snd_log(fd, snd);
                                             }
+                                            name_in_use = true;
                                             break;
                                         }
                                     }
-                                    // Original name detected
                                     if (!name_in_use) {
-                                        // Name not too long
-                                        if (login_name.size() > NAME_LENGTH || login_name.empty()) {
-                                            snd = "";
-                                            snd.append(Command::name(Cmd::FAILED_LOGIN))
-                                                    .append(1, Help::SPL)
-                                                    .append("Name is too long (>" + to_string(NAME_LENGTH) + ")!")
-                                                    .append(1, Help::END);
-                                            send(fd, snd.data(), snd.size(), 0);
-                                            Help::snd_log(fd, snd);
+                                        // Original name detected
+                                        if (login_name.size() > NAME_LENGTH) {
+                                            // Name not too long
+                                            lobby->name_too_long(fd, NAME_LENGTH);
                                         }
-                                            // Correct name --> Enter lobby
+                                        else if (login_name.find(Help::SPL) != string::npos
+                                                or login_name.find(Help::END) != string::npos){
+                                            // Forbidden chars
+                                            lobby->forbidden_chars(fd);
+                                        }
                                         else {
+                                            // Correct name
                                             // Enter lobby or/and start game
                                             lobby_entered = false;
                                             for (i = 0; i < GAME_NUM; i++) {
@@ -240,43 +237,36 @@ int main (int argc, char** argv){
                                                     player->username = login_name;
                                                     player->state = State_Machine::allowed_transition(player->state,Event::EV_LOGIN);
                                                     player->disconnected = false;
-
-                                                    // Cmd::WAITING
-                                                    // Cmd::PLAY
+                                                    // Cmd::WAITING + Cmd::PLAY
                                                     game->enter_lobby(player);
                                                     lobby_entered = true;
                                                     break;
                                                 }
                                             }
-                                            // No more available lobby
                                             if (!lobby_entered) {
-                                                snd = "";
-                                                snd.append(Command::name(Cmd::FAILED_LOGIN))
-                                                        .append(1, Help::SPL)
-                                                        .append("All lobby are full!")
-                                                        .append(1, Help::END);
-                                                send(fd, snd.data(), snd.size(), 0);
-                                                Help::snd_log(fd, snd);
+                                                // No more available lobby
+                                                lobby->lobby_full(fd);
                                             }
                                         }
                                     }
                                 }
                                 else{
-                                    cout << "ERR: Wrong num of args in LOGIN!" << endl;
+                                    // Wrong num of parameters or |
+                                    lobby->wrong_args(fd);
                                 }
                             }
                             else if (cmd == Command::name(Cmd::MAKE_MOVE)){
-                                if (rcv_arr.size() == 5+1){
+                                if (data.size() == 5 + 1){
                                     cout << "Entering: " << Command::name(Cmd::MAKE_MOVE) << endl;
                                     for (i = 0; i < GAME_NUM; i++) {
                                         game = game_arr[i];
                                         if (game->is_active and game->curr_p == player) {
                                             try {
-                                                string card = rcv_arr.at(1);
-                                                int st_row = stoi(rcv_arr.at(2));
-                                                int st_col = stoi(rcv_arr.at(3));
-                                                int end_row = stoi(rcv_arr.at(4));
-                                                int end_col = stoi(rcv_arr.at(5));
+                                                string card = data.at(1);
+                                                int st_row = stoi(data.at(2));
+                                                int st_col = stoi(data.at(3));
+                                                int end_row = stoi(data.at(4));
+                                                int end_col = stoi(data.at(5));
                                                 bool valid_move = game->check_move(
                                                         card,st_row, st_col, end_row, end_col);
                                                 if (valid_move) {
