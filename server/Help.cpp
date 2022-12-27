@@ -30,18 +30,18 @@ vector<string> Help::parse(const string& msg, char del) {
     }
     catch (const exception &exc){
         args = {"WRONG_DATA"};
-        cout << "Not defined message received from client!" << endl;
         cerr << exc.what();
+        cout << "Not defined message received from client!" << endl;
     }
 
     // Valid message
     return args;
 }
 
-void Help::snd_log(int fd, const string& snd){
+void Help::send_log(int fd, const string& snd){
     cout << "Sending to fd(" << fd << "): "  << snd << endl;
 }
 
-void Help::rcv_log(int fd, char buff[]) {
+void Help::recv_log(int fd, char buff[]) {
     cout << "Receiving from fd(" << fd << "): " << buff << endl;
 }

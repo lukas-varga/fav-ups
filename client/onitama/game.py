@@ -1,5 +1,6 @@
 import engine
 import parser
+from components import *
 from parser import Cmd
 from network import Network
 
@@ -7,33 +8,14 @@ from tkinter import messagebox
 import pygame
 
 
-# COLORS
-# Board
-BACKGROUND_COLOR = "bisque2"
-LIGHT_COLOR = "bisque1"
-DARK_COLOR = "bisque3"
-KING_COLOR = "bisque4"
-# Text and frames
-BLACK = "black"
-WHITE = "white"
-# Highlight
-SQ_HIGHLIGHT_ACTIVE = "yellow"
-SQ_HIGHLIGHT_PASSIVE = "blue"
-CARD_HIGHLIGHT_ACTIVE = "yellow2"
-CARD_HIGHLIGHT_PASSIVE = "steelblue3"
-
-
-# Font
-FONT = "consolas"
-
 # Resolution
-WIDTH = 1024
-HEIGHT = 512
+WIDTH_PLAY = 1024
+HEIGHT_PLAY = 512
 # Dimension of board
 DIMENSION = 5
 # Square size
 # (x, y)
-SQ_SIZE = HEIGHT // DIMENSION
+SQ_SIZE = HEIGHT_PLAY // DIMENSION
 
 # Card size
 COEFFICIENT = 1 / 125
@@ -44,13 +26,13 @@ CARD_SIZE = (COEFFICIENT * (300 * SQ_SIZE), COEFFICIENT * (174 * SQ_SIZE))
 # (x, y)
 CARD_POS = [
     # Black player's cards
-    (WIDTH // 2, 1),
-    (WIDTH - CARD_SIZE[0], 1),
+    (WIDTH_PLAY // 2, 1),
+    (WIDTH_PLAY - CARD_SIZE[0], 1),
     # Spare card
-    (0.55 * CARD_SIZE[0] + WIDTH // 2, HEIGHT // 2 - CARD_SIZE[1] // 2),
+    (0.55 * CARD_SIZE[0] + WIDTH_PLAY // 2, HEIGHT_PLAY // 2 - CARD_SIZE[1] // 2),
     # White player's cards
-    (WIDTH // 2, HEIGHT - CARD_SIZE[1]),
-    (WIDTH - CARD_SIZE[0], HEIGHT - CARD_SIZE[1]),
+    (WIDTH_PLAY // 2, HEIGHT_PLAY - CARD_SIZE[1]),
+    (WIDTH_PLAY - CARD_SIZE[0], HEIGHT_PLAY - CARD_SIZE[1]),
 ]
 
 # Label positions
@@ -76,7 +58,7 @@ def play(net: Network, start_arr, username):
     pygame.init()
     my_font = pygame.font.SysFont(FONT, 18)
     clock = pygame.time.Clock()
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    screen = pygame.display.set_mode((WIDTH_PLAY, HEIGHT_PLAY))
 
     # Change icon and title
     program_icon = pygame.image.load('pieces/bN.png')
@@ -102,19 +84,23 @@ def play(net: Network, start_arr, username):
 
     running = True
     while running:
+        # True if player has no option to play, so he gives back one card by clicking twice on it and pass turn
+        pass_turn = gs.nowhere_to_go()
         # Event in pygame
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
-                # TODO make a lot of when closing window
+                # TODO logout / reconnect
+                logout = parser.prepare_logout(gs.player_name)
+                net.send_data(logout)
                 running = False
 
             # Mouse handler Only current player can play
-            if e.type == pygame.MOUSEBUTTONDOWN and gs.white_won is None and gs.curr_p == gs.player_name:
+            if e.type == pygame.MOUSEBUTTONDOWN and gs.win_white is None and gs.curr_p == gs.player_name:
                 # x,y loc of mouse
                 loc = pygame.mouse.get_pos()
 
-                # Clicking on the board
-                if card_picked is not None and (loc[0] <= WIDTH // 2 and loc[1] <= HEIGHT):
+                # Second clock Clicking on the board
+                if card_picked is not None and (loc[0] <= WIDTH_PLAY // 2 and loc[1] <= HEIGHT_PLAY):
                     col = loc[0] // SQ_SIZE
                     row = loc[1] // SQ_SIZE
 
@@ -133,7 +119,7 @@ def play(net: Network, start_arr, username):
                         move = engine.Move(player_clicks[0], player_clicks[1], gs.board)
                         if move in valid_moves:
                             # Send MAKE_MOVE to server -> Reply will be collected in select in next iteration
-                            make_move = parser.prepade_make_move(
+                            make_move = parser.prepare_make_move(
                                 str(card_picked),
                                 move.start_row,
                                 move.start_col,
@@ -141,7 +127,25 @@ def play(net: Network, start_arr, username):
                                 move.end_col)
                             net.send_data(make_move)
                         clear_selection()
-                # First clik -> Clicking cards on the right side
+                # Second click -> Confirm to exchange that card nad pass turn
+                elif card_picked is not None and pass_turn:
+                    for i, card in enumerate(gs.selected_cards):
+                        if gs.white_to_move and (i == 0 or i == 1):
+                            continue
+                        elif i == 2:
+                            continue
+                        elif not gs.white_to_move and (i == 3 or i == 4):
+                            continue
+
+                        x, y, w, h = (CARD_POS[i][0], CARD_POS[i][1], CARD_SIZE[0], CARD_SIZE[1])
+                        if x < loc[0] < x + w and y < loc[1] < y + h:
+                            if card_picked == card:
+                                make_pass = parser.prepare_make_pass(card)
+                                net.send_data(make_pass)
+                                print("Pass was made with card: " + card)
+                                break
+                    clear_selection()
+                # First click -> Clicking cards on the right side
                 else:
                     clear_selection()
                     for i, card in enumerate(gs.selected_cards):
@@ -152,6 +156,7 @@ def play(net: Network, start_arr, username):
                         elif not gs.white_to_move and (i == 3 or i == 4):
                             continue
 
+                        # Selecting one card
                         x, y, w, h = (CARD_POS[i][0], CARD_POS[i][1], CARD_SIZE[0], CARD_SIZE[1])
                         if x < loc[0] < x + w and y < loc[1] < y + h:
                             valid_moves = gs.get_valid_moves(card)
@@ -167,7 +172,6 @@ def play(net: Network, start_arr, username):
                 cmd = data[0]
 
                 if cmd == Cmd.MOVE_WAS_MADE.value:
-                    print(f"Move was accepted by server!")
                     try:
                         # Move OK -> switch cards and move piece
                         the_card = data[1]
@@ -183,17 +187,24 @@ def play(net: Network, start_arr, username):
                         # Shuffle cards and swap players
                         gs.shuffle_cards(the_card)
                         gs.switch_players()
-
+                        print(f"Move was accepted by server and made in client!")
                     except Exception as e:
                         print(e)
+                elif cmd == Cmd.PASS_WAS_MADE.value:
+                    the_card = data[1]
+                    gs.shuffle_cards(the_card)
+                    gs.switch_players()
+                    print(f"Pass was accepted by server and made in client with card {the_card}!")
                 elif cmd == Cmd.INVALID_MOVE.value:
-                    print("Move was invalid!")
+                    print(Cmd.INVALID_MOVE.value, f"{data[1]}")
                 elif cmd == Cmd.GAME_OVER.value:
-                    print(f"Game over, one player won")
+                    winner_name = data[1]
+                    gs.game_over(winner_name)
+                    print(f"Game over encountered, player {winner_name} has won!")
                 elif cmd == "WRONG_DATA":
-                    print(f"WRONG_DATA -> opponent do not know how to respond -> {data}")
+                    print("WRONG_DATA", f"Data are not parsable!")
                 else:
-                    print(f"ERR: What the heck happened at client -> {data}")
+                    print(f"ERR: Unknown message in Game!")
 
         draw_game_state(screen, gs, valid_moves, sq_selected, card_picked, my_font)
         clock.tick(MAX_FPS)
@@ -202,6 +213,20 @@ def play(net: Network, start_arr, username):
     print("Game finished - quiting pygame!")
     pygame.quit()
     return
+
+
+"""
+Clear player selection
+"""
+def clear_selection():
+    global card_picked, valid_moves, sq_selected, player_clicks
+    # Reset card
+    card_picked = None
+    # Reset valid moves
+    valid_moves = []
+    # Reset user clicks
+    sq_selected = ()
+    player_clicks = []
 
 
 """
@@ -215,7 +240,7 @@ def load_images(gs):
         PIECE_IMAGES[piece] = pygame.transform.scale(pygame.image.load("pieces/" + piece + ".png"), (SQ_SIZE, SQ_SIZE))
 
     # Load all playing card images using dictionary CARD_IMAGES["wP"] = pieces/wP.png
-    card_names = list(gs.cards.keys())
+    card_names = list(gs.all_cards.keys())
     for card in card_names:
         CARD_IMAGES[card] = pygame.transform.scale(pygame.image.load("cards/" + card + ".jpg"), CARD_SIZE)
 
@@ -238,20 +263,6 @@ def draw_game_state(screen, gs, valid_moves, sq_selected, which_card, my_font):
     draw_card_highlight(screen, gs, which_card)
     # Draw playing label
     draw_player_label(screen, gs, my_font)
-
-
-"""
-Clear player selection
-"""
-def clear_selection():
-    global card_picked, valid_moves, sq_selected, player_clicks
-    # Reset card
-    card_picked = None
-    # Reset valid moves
-    valid_moves = []
-    # Reset user clicks
-    sq_selected = ()
-    player_clicks = []
 
 
 """
@@ -322,7 +333,7 @@ Possible highlight for selected card
 """
 def draw_card_highlight(screen, gs, which_card):
     # Blue highlight
-    if gs.curr_p == gs.player_name:
+    if gs.curr_p == gs.player_name and gs.win_white is None:
         if gs.player_name == gs.black_name:
             x, y, w, h = get_rect_tuple(0)
             pygame.draw.rect(screen, pygame.Color(CARD_HIGHLIGHT_PASSIVE), pygame.Rect(x, y, w, h), width=3)
@@ -382,14 +393,14 @@ def animate_move(move, screen, board, clock):
 Draw label to inform which player is playing
 """
 def draw_player_label(screen, gs, my_font):
-    b_name = "YOU" if gs.player_name == gs.black_name else "OPPONENT"
-    w_name = "YOU" if gs.player_name == gs.white_name else "OPPONENT"
+    b_name = "You" if gs.player_name == gs.black_name else "Enemy"
+    w_name = "You" if gs.player_name == gs.white_name else "Enemy"
 
     b_playing = " (PLAYING)" if not gs.white_to_move else ""
     w_playing = " (PLAYING)" if gs.white_to_move else ""
-    if gs.white_won is not None:
-        b_playing = " (WON)" if not gs.white_won else " (LOST)"
-        w_playing = " (WON)" if gs.white_won else " (LOST)"
+    if gs.win_white is not None:
+        b_playing = " (WON)" if not gs.win_white else " (LOST)"
+        w_playing = " (WON)" if gs.win_white else " (LOST)"
 
     black_label = my_font.render(f"{b_name}: {gs.black_name}{b_playing}", True, BLACK)
     screen.blit(black_label, BLACK_LABEL_POS)
@@ -397,5 +408,5 @@ def draw_player_label(screen, gs, my_font):
     white_label = my_font.render(f"{w_name}: {gs.white_name}{w_playing}", True, BLACK)
     screen.blit(white_label, WHITE_LABEL_POS)
 
-    spare_label = my_font.render(f"SPARE CARD", True, BLACK)
+    spare_label = my_font.render(f"Spare Card", True, BLACK)
     screen.blit(spare_label, SPARE_LABEL_POS)

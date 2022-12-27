@@ -11,4 +11,5 @@ add_executable(server server.cpp
         Command.cpp Command.h
         State.cpp State.h
         Help.cpp Help.h
-        Card.cpp Card.h Lobby.cpp Lobby.h)
+        Card.cpp Card.h
+        Lobby.cpp Lobby.h)

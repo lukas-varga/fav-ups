@@ -84,14 +84,14 @@ class Network(object):
         # has any data arrived?
         if in_.count(self.server) > 0:
             with_null = self.recv_data()
-            if with_null != "":
-                # Split messages by null character
-                records = with_null.split("\x00")
-                # Without last empty record
-                records = records[:-1]
-                for record in records:
-                    socket_buffer.append(record)
-                # if len(socket_buffer) >= self.MAX_BUFF:
-                result = True
+            # Split messages by null character
+            records = with_null.split("\x00")
+            for record in records:
+                if record == "":
+                    continue
+                socket_buffer.append(record)
+                print(f"Appended to recv buffer: {record}")
+            # if len(socket_buffer) >= self.MAX_BUFF:
+            result = True
         # No data gathered
         return result

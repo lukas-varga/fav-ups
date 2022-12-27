@@ -1,5 +1,5 @@
-import game
 import parser
+from components import *
 from parser import Cmd
 from network import Network
 
@@ -10,9 +10,6 @@ from functools import partial
 import random
 #TODO delete
 
-BG_COLOR = game.BACKGROUND_COLOR
-BTN_COLOR = game.DARK_COLOR
-FONT = game.FONT
 
 WIDTH_LOGIN = 384
 HEIGHT_LOGIN = 256
@@ -22,7 +19,7 @@ def login(net: Network):
     win = Tk()
     win.geometry(f"{WIDTH_LOGIN}x{HEIGHT_LOGIN}")
     win.title("Login")
-    win.config(bg=BG_COLOR)
+    win.config(bg=BACKGROUND_COLOR)
     win.resizable(width=False, height=False)
     win.protocol("WM_DELETE_WINDOW", do_nothing)
 
@@ -31,11 +28,11 @@ def login(net: Network):
     win.iconphoto(False, icon)
 
     # Set label for user's instruction
-    welcome_label = Label(win, text="Welcome to Onitama", font=(FONT, 16), bg=BG_COLOR)
+    welcome_label = Label(win, text="Welcome to Onitama", font=(FONT, 16), bg=BACKGROUND_COLOR)
     welcome_label.pack(pady=10)
 
     # Set username label
-    info_label = Label(win, text="Username", font=(FONT, 12), bg=BG_COLOR)
+    info_label = Label(win, text="Username", font=(FONT, 12), bg=BACKGROUND_COLOR)
     info_label.pack()
 
     # Set text variables
@@ -45,12 +42,12 @@ def login(net: Network):
 
     # Set play button
     login_with_args = partial(login_btn_pressed, net, username_str_var)
-    login_btn = Button(win, text="Login", width=10, height=1, bg=BTN_COLOR, font=(FONT, 12), command=login_with_args)
+    login_btn = Button(win, text="Login", width=10, height=1, bg=DARK_COLOR, font=(FONT, 12), command=login_with_args)
     login_btn.pack(pady=5)
 
     # Set close button
     close_with_args = partial(close_btn_pressed, win)
-    close_btn = Button(win, text="Close", width=10, height=1, bg=BTN_COLOR, font=(FONT, 12), command=close_with_args)
+    close_btn = Button(win, text="Close", width=10, height=1, bg=DARK_COLOR, font=(FONT, 12), command=close_with_args)
     close_btn.pack()
 
     # Not correctly connected
@@ -87,18 +84,18 @@ def login(net: Network):
                     win_wait = Toplevel(win)
                     win_wait.geometry(f"{WIDTH_LOGIN}x{HEIGHT_LOGIN // 3}")
                     win_wait.title("Waiting")
-                    win_wait.config(bg=BG_COLOR)
+                    win_wait.config(bg=BACKGROUND_COLOR)
                     win_wait.resizable(width=False, height=False)
                     win_wait.protocol("WM_DELETE_WINDOW", do_nothing)
 
                     # Set username label
-                    waiting_label = Label(win_wait, text="Waiting for opponent...", font=(FONT, 12), bg=BG_COLOR)
+                    waiting_label = Label(win_wait, text="Waiting for opponent...", font=(FONT, 12), bg=BACKGROUND_COLOR)
                     waiting_label.pack(pady=30)
 
                     username = data[1]
                     print("Intro: Waiting!")
                 elif cmd == Cmd.FAILED_LOGIN.value:
-                    messagebox.showinfo("Login Failed", data[1])
+                    messagebox.showinfo(Cmd.FAILED_LOGIN.value, data[1])
                     print("Intro: Failed login!")
                 elif cmd == Cmd.START.value:
                     # START | P1 (white) | P1 (black) | 5x cards
@@ -106,12 +103,15 @@ def login(net: Network):
                     win.destroy()
                     return data, username
                 elif cmd == Cmd.RECONNECT.value:
-                    messagebox.showinfo("Reconnecting...", data[1])
-                    print("Intro: Reconnect!")
+                    print(Cmd.RECONNECT.value, data[1])
                     # TODO reconnect
+                elif cmd == "WRONG_DATA":
+                    print("WRONG_DATA", f"Data are not parsable!")
                 else:
-                    print(f"ERR: Unknown message: {data}")
-        elif exiting:
+                    print(f"ERR: Unknown message in Intro")
+
+        # Exiting to main menu by pressing Close
+        if exiting:
             return None, None
 
 
@@ -132,7 +132,6 @@ def close_btn_pressed(win):
     global exiting
     exiting = True
     win.destroy()
-
 
 
 """

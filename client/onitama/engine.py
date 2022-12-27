@@ -1,7 +1,5 @@
-import parser
-from parser import Cmd
 from network import Network
-import components
+from components import *
 
 
 """
@@ -23,9 +21,8 @@ class GameState:
             ["wP", "wP", "wK", "wP", "wP"]
         ]
         self.white_to_move = True
+        self.win_white = None
         self.move_log = []
-        self.white_won = None
-        self.winner_name = None
 
         # START | P1 (black) | P2 (white) | 5x cards
         self.black_name = start_arr[1]
@@ -43,7 +40,7 @@ class GameState:
         # 0 and 1 are black
         # 2 is spare
         # 3 and 4 are white
-        self.cards = components.CARDS
+        self.all_cards = DEF_CARDS
         self.selected_cards = start_arr[3:]
 
     """
@@ -92,6 +89,33 @@ class GameState:
         print("Players were switched!")
 
     """
+    Server encountered game over so switching accordingly
+    """
+    def game_over(self, winner_name):
+        if winner_name == self.black_name:
+            self.win_white = False
+        elif winner_name == self.white_name:
+            self.win_white = True
+        else:
+            print(f"ERR: Neither Black nor White player has won!")
+
+    """
+    Player has nowhere to go with both his card so he choose card to discard
+    """
+    def nowhere_to_go(self):
+        if self.curr_p == self.black_name:
+            list_1 = self.get_valid_moves(self.selected_cards[0])
+            list_2 = self.get_valid_moves(self.selected_cards[1])
+            if not list_1 and not list_2:
+                return True
+        elif self.curr_p == self.white_name:
+            list_1 = self.get_valid_moves(self.selected_cards[3])
+            list_2 = self.get_valid_moves(self.selected_cards[4])
+            if not list_1 and not list_2:
+                return True
+        return False
+
+    """
     Get list of all valid moves for given card.
     White or black on turn - will distinguish
     """
@@ -102,7 +126,7 @@ class GameState:
                 turn = self.board[r][c][0]
                 piece = self.board[r][c][1]
 
-                if piece != "--":
+                if piece != "-":
                     # White
                     if turn == 'w' and self.white_to_move:
                         self.one_valid_move(r, c, card, moves, turn)
@@ -116,7 +140,7 @@ class GameState:
     Calculate moves for one piece
     """
     def one_valid_move(self, r, c, card, moves, turn):
-        matrix = self.cards[card]
+        matrix = self.all_cards[card]
         for raw_vec in matrix:
             # Invert for black player
             vec = (0 - raw_vec[0], 0 - raw_vec[1]) if not self.white_to_move else raw_vec

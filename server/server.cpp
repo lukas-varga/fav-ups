@@ -24,14 +24,27 @@
 using namespace std;
 
 int main (int argc, char** argv){
-    if (argc != 2){
-        cout << "Please enter arguments: <port>" << endl;
+    if (argc != 3){
+        cout << "Please enter arguments: <port> <num_players>" << endl;
         exit(0);
     }
-    int port = atoi(argv[1]);
+
+    int port, num_players;
+    try {
+        port = stoi(argv[1]);
+        num_players = stoi(argv[2]);
+        if (num_players < 2){
+            throw exception();
+        }
+    }
+    catch (const exception &exc){
+        cerr << exc.what() << endl;
+        cout << "Arguments are not valid. Num of players must be >2 -> Exiting" << endl;
+        exit(0);
+    }
 
     const int NAME_LENGTH = 10;
-    const int CLIENT_NUM = 20;
+    const int CLIENT_NUM = num_players;
     const int GAME_NUM = CLIENT_NUM / 2;
     const int MAX_BUFF = 2048;
     char buff[MAX_BUFF];
@@ -89,7 +102,6 @@ int main (int argc, char** argv){
     while(true) {
         memset(buff, 0, MAX_BUFF);
         string rcv, snd;
-
         vector<string> data;
         string cmd, login_name;
 
@@ -125,7 +137,7 @@ int main (int argc, char** argv){
                     snd.append("Welcome to Onitama server!");
                     snd.append(1, Help::END);
                     send(client_socket, snd.data(), snd.size(), 0);
-                    Help::snd_log(fd, snd);
+                    Help::send_log(fd, snd);
 
                     for (i = 0; i < CLIENT_NUM; i++){
                         p = player_arr[i];
@@ -142,7 +154,7 @@ int main (int argc, char** argv){
                     rcv = "";
                     val_read = recv(fd, buff, sizeof(buff), 0);
                     rcv.append(buff);
-                    Help::rcv_log(fd, buff);
+                    Help::recv_log(fd, buff);
 
                     // na socketu se stalo neco spatneho
                     if (val_read == 0){
@@ -181,8 +193,8 @@ int main (int argc, char** argv){
                             lobby = new Lobby();
                             // LOGIN | name
                             if (cmd == Command::name(Cmd::LOGIN)){
-                                cout << "Entering: " << Command::name(Cmd::LOGIN) << endl;
                                 if (data.size() == 1 + 1) {
+                                    cout << "Entering: " << Command::name(Cmd::LOGIN) << endl;
                                     login_name = data.at(1);
                                     name_in_use = false;
                                     for (i = 0; i < CLIENT_NUM; i++) {
@@ -203,13 +215,7 @@ int main (int argc, char** argv){
                                             }
                                             else {
                                                 // Name already in use
-                                                snd = "";
-                                                snd.append(Command::name(Cmd::FAILED_LOGIN))
-                                                        .append(1, Help::SPL)
-                                                        .append("Name is already in use!")
-                                                        .append(1, Help::END);
-                                                send(fd, snd.data(), snd.size(), 0);
-                                                Help::snd_log(fd, snd);
+                                                lobby->already_in_use(fd);
                                             }
                                             name_in_use = true;
                                             break;
@@ -251,8 +257,7 @@ int main (int argc, char** argv){
                                     }
                                 }
                                 else{
-                                    // Wrong num of parameters or |
-                                    lobby->wrong_args(fd);
+                                    cout << "ERR: Wrong num of args!" << endl;
                                 }
                             }
                             else if (cmd == Command::name(Cmd::MAKE_MOVE)){
@@ -271,12 +276,12 @@ int main (int argc, char** argv){
                                                         card,st_row, st_col, end_row, end_col);
                                                 if (valid_move) {
                                                     game->move_was_made(card, st_row, st_col, end_row, end_col);
-                                                    if (!game->is_game_over()) {
+                                                    if (!game->is_end()) {
                                                         game->shuffle_cards(card);
                                                         game->switch_players();
                                                     }
                                                     else {
-                                                        game->end_game();
+                                                        game->game_over();
                                                     }
                                                 }
                                                 else {
@@ -284,25 +289,54 @@ int main (int argc, char** argv){
                                                 }
                                             }
                                             catch (const exception &exc){
+                                                cerr << exc.what() << endl;
                                                 game->move_not_parsable();
-                                                cerr << exc.what();
+
                                             }
                                             break;
                                         }
                                     }
                                 }
                                 else{
-                                    cout << "ERR: Wrong num of args in MAKE_MOVE!" << endl;
+                                    cout << "ERR: Wrong num of args!" << endl;
                                 }
                             }
-                            else if (cmd == Command::name(Cmd::STALEMATE)){
-                                cout << "Entering: " << Command::name(Cmd::STALEMATE) << endl;
+                            else if (cmd == Command::name(Cmd::MAKE_PASS)){
+                                if (data.size() == 1 + 1){
+                                    cout << "Entering: " << Command::name(Cmd::MAKE_PASS) << endl;
+                                    for (i = 0; i < GAME_NUM; i++) {
+                                        game = game_arr[i];
+                                        if (game->is_active and game->curr_p == player) {
+                                            try {
+                                                string card = data.at(1);
+                                                bool valid_swap = game->check_pass();
+                                                if (valid_swap) {
+                                                    game->pass_was_made(card);
+                                                    game->shuffle_cards(card);
+                                                    game->switch_players();
+                                                }
+                                                else {
+                                                    game->invalid_move();
+                                                }
+                                            }
+                                            catch (const exception &exc){
+                                                cerr << exc.what() << endl;
+                                                game->move_not_parsable();
+
+                                            }
+                                            break;
+                                        }
+                                    }
+                                }
+                                else{
+                                    cout << "ERR: Wrong num of args!" << endl;
+                                }
                             }
                             else if (cmd == "WRONG_DATA") {
                                 cout << "Wrong data -> server do not know how to respond!" << endl;
                             }
                             else{
-                                cout << "ERR:  What the heck happened?" << endl;
+                                cout << "ERR: Unknown message in Server!"<< endl;
                             }
                         }
                         else{

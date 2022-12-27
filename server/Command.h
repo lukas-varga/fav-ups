@@ -11,14 +11,14 @@ enum Cmd {
     // Client side
     LOGIN,
     MAKE_MOVE,
-    STALEMATE,
+    MAKE_PASS,
     // Server side
     FAILED_LOGIN,
     WAITING,
     START,
     MOVE_WAS_MADE,
+    PASS_WAS_MADE,
     INVALID_MOVE,
-    STALEMATE_CARD,
     RECONNECT,
     LOGOUT,
     GAME_OVER,

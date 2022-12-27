@@ -8,14 +8,14 @@ class Cmd(Enum):
     # Client side
     LOGIN = "LOGIN"
     MAKE_MOVE = "MAKE_MOVE"
-    STALEMATE = "STALEMATE"
+    MAKE_PASS = "MAKE_PASS"
     # Server side
-    FAILED_LOGIN = "FAILED_LOGIN"
     WAITING = "WAITING"
+    FAILED_LOGIN = "FAILED_LOGIN"
     START = "START"
     MOVE_WAS_MADE = "MOVE_WAS_MADE"
+    PASS_WAS_MADE = "PASS_WAS_MADE"
     INVALID_MOVE = "INVALID_MOVE"
-    STALEMATE_CARD = "STALEMATE_CARD"
     RECONNECT = "RECONNECT"
     LOGOUT = "LOGOUT"
     GAME_OVER = "GAME_OVER"
@@ -44,9 +44,14 @@ def parse(msg: str):
 def prepare_login(username):
     return f"{Cmd.LOGIN.value}{SPL}{username}{END}"
 
-def prepade_make_move(card, s_row, s_col, e_row, e_col):
+def prepare_logout(username):
+    return f"{Cmd.LOGOUT.value}{SPL}{username}{END}"
+
+def prepare_make_move(card, s_row, s_col, e_row, e_col):
     return f"{Cmd.MAKE_MOVE.value}{SPL}{card}{SPL}{s_row}{SPL}{s_col}{SPL}{e_row}{SPL}{e_col}{END}"
 
-def prepare_stalemate(card_to_swap):
-    return f"{Cmd.MAKE_MOVE.value}{SPL}{card_to_swap}{END}"
+def prepare_make_pass(card):
+    return f"{Cmd.MAKE_PASS.value}{SPL}{card}{END}"
+
+
 

@@ -16,6 +16,7 @@ Game::Game() {
     winner_p = nullptr;
     piece_moved = "";
     piece_captured = "";
+    send_text = "";
 
     vector<vector<string>> init
     {
@@ -23,7 +24,7 @@ Game::Game() {
         {"--", "--", "--", "--", "--"},
         {"--", "--", "--", "--", "--"},
         {"--", "--", "--", "--", "--"},
-        {"wP", "wP", "wK", "wP", "wP"},
+        {"wP", "wP", "wK", "wP", "wP"}
     };
     board = init;
     five_cards = Card::pick_five_cards();
@@ -34,25 +35,25 @@ void Game::enter_lobby(Player * player){
     if (white_p == nullptr){
         white_p = player;
 
-        string snd = "";
-        snd.append(Command::name(Cmd::WAITING))
+        send_text = "";
+        send_text.append(Command::name(Cmd::WAITING))
                 .append(1, Help::SPL)
                 .append(player->username)
                 .append(1, Help::END);
-        send(player->socket, snd.data(), snd.size(), 0);
-        Help::snd_log(player->socket, snd);
+        send(player->socket, send_text.data(), send_text.size(), 0);
+        Help::send_log(player->socket, send_text);
         cout << "Player1 " << player->username << " has entered lobby!" << endl;
     }
     else if(black_p == nullptr){
         black_p = player;
 
-        string snd = "";
-        snd.append(Command::name(Cmd::WAITING))
+        send_text = "";
+        send_text.append(Command::name(Cmd::WAITING))
                 .append(1, Help::SPL)
                 .append(player->username)
                 .append(1, Help::END);
-        send(player->socket, snd.data(), snd.size(), 0);
-        Help::snd_log(player->socket, snd);
+        send(player->socket, send_text.data(), send_text.size(), 0);
+        Help::send_log(player->socket, send_text);
         cout << "Player2 " << player->username << " has entered lobby!" << endl;
 
         // GAME started
@@ -65,8 +66,8 @@ void Game::start_game(){
     // Pick 5 random cards first BLACK SPARE WHITE
     int last_index = five_cards.size() - 1;
 
-    string snd = "";
-    snd.append(Command::name(Cmd::START))
+    send_text = "";
+    send_text.append(Command::name(Cmd::START))
             .append(1, Help::SPL)
             .append(black_p->username)
             .append(1, Help::SPL)
@@ -74,17 +75,17 @@ void Game::start_game(){
             .append(1, Help::SPL);
 
     for (int i = 0; i < last_index; ++i){
-        snd.append(five_cards[i])
+        send_text.append(five_cards[i])
             .append(1, Help::SPL);
     }
-    snd.append(five_cards[last_index])
+    send_text.append(five_cards[last_index])
         .append(1, Help::END);
 
     // Send to both TWO players START
-    send(black_p->socket, snd.data(), snd.size(), 0);
-    Help::snd_log(black_p->socket, snd);
-    send(white_p->socket, snd.data(), snd.size(), 0);
-    Help::snd_log(white_p->socket, snd);
+    send(black_p->socket, send_text.data(), send_text.size(), 0);
+    Help::send_log(black_p->socket, send_text);
+    send(white_p->socket, send_text.data(), send_text.size(), 0);
+    Help::send_log(white_p->socket, send_text);
 
     white_to_move = true;
     curr_p = white_p;
@@ -113,7 +114,7 @@ bool Game::check_move(const string& card, int st_row, int st_col, int end_row, i
     }
 
     positions = Card::get_positions(card, inverted);
-    // Using only black cards
+    // Using only black cards or white cards
     if(card == five_cards.at(fst_card) or card == five_cards.at(snd_card)){
         // Not outside of playing field
         if(end_row >= 0 and end_row <= 4 and end_col >= 0 and end_col <= 4){
@@ -143,8 +144,8 @@ bool Game::check_move(const string& card, int st_row, int st_col, int end_row, i
 }
 
 void Game::move_was_made(const string& card, int st_row, int st_col, int end_row, int end_col) {
-    string snd = "";
-    snd.append(Command::name(Cmd::MOVE_WAS_MADE))
+    send_text = "";
+    send_text.append(Command::name(Cmd::MOVE_WAS_MADE))
             .append(1, Help::SPL)
             .append(card)
             .append(1, Help::SPL)
@@ -157,33 +158,94 @@ void Game::move_was_made(const string& card, int st_row, int st_col, int end_row
             .append(to_string(end_col))
             .append(1, Help::END);
 
-    send(black_p->socket, snd.data(), snd.size(), 0);
-    Help::snd_log(black_p->socket, snd);
-    send(white_p->socket, snd.data(), snd.size(), 0);
-    Help::snd_log(white_p->socket, snd);
+    send(black_p->socket, send_text.data(), send_text.size(), 0);
+    Help::send_log(black_p->socket, send_text);
+    send(white_p->socket, send_text.data(), send_text.size(), 0);
+    Help::send_log(white_p->socket, send_text);
+}
+
+bool Game::check_pass() {
+    vector<vector<tuple<int, int>>> pos_card_1_2;
+    int new_r, new_c;
+    string piece_color, curr_piece;
+    bool inverted;
+
+    // Iterate trough black cards
+    if(!white_to_move){
+        inverted = true;
+        pos_card_1_2.push_back(Card::get_positions(five_cards[0], inverted));
+        pos_card_1_2.push_back(Card::get_positions(five_cards[1], inverted));
+        piece_color = "b";
+    }
+    // Iterate trough white cards
+    else{
+        inverted = false;
+        pos_card_1_2.push_back(Card::get_positions(five_cards[3], inverted));
+        pos_card_1_2.push_back(Card::get_positions(five_cards[4], inverted));
+        piece_color = "w";
+    }
+
+    for (int row = 0; row < board.size(); ++row){
+        for (int col = 0; col < board[row].size(); ++col){
+            curr_piece = board[row][col];
+            // Moving with our figures
+            if (curr_piece.substr(0, 1) == piece_color){
+                // Both cards
+                for (const vector<tuple<int,int>>& pos : pos_card_1_2){
+                    // Check for all possibilities
+                    for (tuple<int, int> vec : pos) {
+                        // Transform x,y system to board system
+                        new_r = row - get<1>(vec);
+                        new_c = col + get<0>(vec);
+                        // Not outside of playing field
+                        if(new_r >= 0 and new_r <= 4 and new_c >= 0 and new_c <= 4) {
+                            // Not to friendly figures
+                            if (board[new_r][new_c].substr(0,1) != piece_color){
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return true;
+}
+
+void Game::pass_was_made(const string& card) {
+    send_text = "";
+    send_text.append(Command::name(Cmd::PASS_WAS_MADE))
+            .append(1, Help::SPL)
+            .append(card)
+            .append(1, Help::END);
+
+    send(black_p->socket, send_text.data(), send_text.size(), 0);
+    Help::send_log(black_p->socket, send_text);
+    send(white_p->socket, send_text.data(), send_text.size(), 0);
+    Help::send_log(white_p->socket, send_text);
 }
 
 void Game::invalid_move() {
-    string snd = "";
-    snd.append(Command::name(Cmd::INVALID_MOVE))
+    send_text = "";
+    send_text.append(Command::name(Cmd::INVALID_MOVE))
             .append(1, Help::SPL)
-            .append("Move is not possible!")
+            .append("Move or pass is not allowed!")
             .append(1, Help::END);
-    send(curr_p->socket, snd.data(), snd.size(), 0);
-    Help::snd_log(curr_p->socket, snd);
+    send(curr_p->socket, send_text.data(), send_text.size(), 0);
+    Help::send_log(curr_p->socket, send_text);
 }
 
 void Game::move_not_parsable() {
-    string snd = "";
-    snd.append(Command::name(Cmd::INVALID_MOVE))
+    send_text = "";
+    send_text.append(Command::name(Cmd::INVALID_MOVE))
             .append(1, Help::SPL)
-            .append("Number of row or col is not integer OR card is to string!")
+            .append("Move data are not parsable!")
             .append(1, Help::END);
-    send(curr_p->socket, snd.data(), snd.size(), 0);
-    Help::snd_log(curr_p->socket, snd);
+    send(curr_p->socket, send_text.data(), send_text.size(), 0);
+    Help::send_log(curr_p->socket, send_text);
 }
 
-void Game::shuffle_cards(string card) {
+void Game::shuffle_cards(const string& card) {
     // Black player and White Player
     string tmp;
     for (int i = 0; i < five_cards.size(); ++i){
@@ -212,7 +274,7 @@ void Game::switch_players() {
     cout << "Players switched!" << endl;
 }
 
-bool Game::is_game_over() {
+bool Game::is_end() {
     // Checkmate || Enemy base for white || Enemy base for black
     if (piece_captured.substr(1, 1) == "K" or board[0][2] == "wK" or board[4][2] == "bK"){
         winner_p = curr_p;
@@ -223,20 +285,21 @@ bool Game::is_game_over() {
     return false;
 }
 
-void Game::end_game() {
-    string snd = "";
-    snd.append(Command::name(Cmd::GAME_OVER))
+void Game::game_over() {
+    send_text = "";
+    send_text.append(Command::name(Cmd::GAME_OVER))
             .append(1, Help::SPL)
             .append(winner_p->username)
             .append(1, Help::END);
-    send(white_p->socket, snd.data(), snd.size(), 0);
-    Help::snd_log(white_p->socket, snd);
-    send(black_p->socket, snd.data(), snd.size(), 0);
-    Help::snd_log(black_p->socket, snd);
+    send(white_p->socket, send_text.data(), send_text.size(), 0);
+    Help::send_log(white_p->socket, send_text);
+    send(black_p->socket, send_text.data(), send_text.size(), 0);
+    Help::send_log(black_p->socket, send_text);
 
     cout << "End of the game" << endl;
     //TODO send logout
 }
+
 
 
 

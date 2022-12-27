@@ -22,6 +22,7 @@ public:
     vector<string> five_cards;
     string piece_moved;
     string piece_captured;
+    string send_text;
 
     Game();
 
@@ -30,14 +31,21 @@ public:
 
     bool check_move(const string& card, int st_row, int st_col, int end_row, int end_col);
     void move_was_made(const string& card, int st_row, int st_col, int end_row, int end_col);
+
+    bool check_pass();
+    void pass_was_made(const string& card);
+
     void invalid_move();
     void move_not_parsable();
 
-    void shuffle_cards(string card);
+    void shuffle_cards(const string& card);
     void switch_players();
 
-    bool is_game_over();
-    void end_game();
+    bool is_end();
+    void game_over();
+
+
+
 
 };
 
