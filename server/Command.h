@@ -12,16 +12,18 @@ enum Cmd {
     LOGIN,
     MAKE_MOVE,
     MAKE_PASS,
+    REMATCH,
     // Server side
-    FAILED_LOGIN,
     WAITING,
+    FAILED_LOGIN,
     START,
     MOVE_WAS_MADE,
     PASS_WAS_MADE,
     INVALID_MOVE,
+    GAME_OVER,
     RECONNECT,
     LOGOUT,
-    GAME_OVER,
+
 };
 
 class Command{

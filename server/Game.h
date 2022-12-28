@@ -25,8 +25,9 @@ public:
     string send_text;
 
     Game();
+    void init();
 
-    void enter_lobby(Player * player);
+    void enter_game(Player * player);
     void start_game();
 
     bool check_move(const string& card, int st_row, int st_col, int end_row, int end_col);

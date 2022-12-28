@@ -2,6 +2,7 @@ import parser
 from components import *
 from parser import Cmd
 from network import Network
+import game
 
 from tkinter import *
 from tkinter import messagebox
@@ -50,34 +51,34 @@ def login(net: Network):
     close_btn = Button(win, text="Close", width=10, height=1, bg=DARK_COLOR, font=(FONT, 12), command=close_with_args)
     close_btn.pack()
 
-    # Not correctly connected
-    if net.id == -1:
-        username_entry['state'] = DISABLED
-        login_btn['state'] = DISABLED
-        messagebox.showinfo("Server Error", "Connection refused!")
-
-    #TODO delete on release
-    s = "abcdefghijklmnopqrstuvwxyz"
-    tmp = random.choice(s) + random.choice(s) + random.choice(s) + random.choice(s) + random.choice(s) + random.choice(s)+ random.choice(s)+ random.choice(s)
-    username_entry.insert(0, tmp)
-    login_btn_pressed(net, username_str_var)
-    # TODO delete on release
+    # #TODO delete on release
+    # s = "abcdefghijklmnopqrstuvwxyz"
+    # tmp = random.choice(s) + random.choice(s) + random.choice(s) + random.choice(s) + random.choice(s) + random.choice(s)+ random.choice(s)+ random.choice(s)
+    # username_entry.insert(0, tmp)
+    # login_btn_pressed(net, username_str_var)
+    # # TODO delete on release
 
     global exiting
     exiting = False
+    global is_logged
+    is_logged = False
+    global win_wait
     username = ""
+
     while True:
         win.update()
         win.update_idletasks()
 
         # Incoming message from server
         server_rx_buffer = []
-        if net.network_data_arrived(server_rx_buffer):
+        if is_logged and net.network_data_arrived(server_rx_buffer):
             for record in server_rx_buffer:
                 data = parser.parse(record)
                 cmd = data[0]
 
+                # WAITING | username
                 if cmd == Cmd.WAITING.value:
+                    print("Intro: Waiting!")
                     username_entry['state'] = DISABLED
                     login_btn['state'] = DISABLED
 
@@ -93,18 +94,33 @@ def login(net: Network):
                     waiting_label.pack(pady=30)
 
                     username = data[1]
-                    print("Intro: Waiting!")
+
+                # FAILED_LOGIN | *detailed_message*
                 elif cmd == Cmd.FAILED_LOGIN.value:
-                    messagebox.showinfo(Cmd.FAILED_LOGIN.value, data[1])
                     print("Intro: Failed login!")
+                    messagebox.showinfo(Cmd.FAILED_LOGIN.value, data[1])
+
+                # START | P1 (black) | P1 (white) | 5x cards
                 elif cmd == Cmd.START.value:
-                    # START | P1 (white) | P1 (black) | 5x cards
                     print("Intro: START!")
-                    win.destroy()
-                    return data, username
+
+                    win_wait.destroy()
+                    rematch = game.play(net, data, username)
+
+                    if rematch:
+                        rematch_mess = parser.prepare_rematch(username)
+                        net.send_data(rematch_mess)
+                    else:
+                        exiting = True
+
+                # RECONNECT
+                # is_player_white | white_to_move |
+                # black_p | white_p | (5x) cards |
+                # (25x) "wP" "wK" "--"
                 elif cmd == Cmd.RECONNECT.value:
-                    print(Cmd.RECONNECT.value, data[1])
-                    # TODO reconnect
+                    print(data)
+                    # TODO PARSE AND REVIVE STATE
+                    
                 elif cmd == "WRONG_DATA":
                     print("WRONG_DATA", f"Data are not parsable!")
                 else:
@@ -112,13 +128,18 @@ def login(net: Network):
 
         # Exiting to main menu by pressing Close
         if exiting:
-            return None, None
+            return
 
 
 """
 Play button pressed
 """
 def login_btn_pressed(net: Network, username_str_var):
+    global is_logged
+    is_logged = True
+
+    # Connect
+    net.create_connection()
     # Send LOGIN | name
     user = str(username_str_var.get())
     data = parser.prepare_login(user)

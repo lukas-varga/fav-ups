@@ -17,7 +17,7 @@ enum class Event {
     EV_LOGIN = 0,
     EV_PLAY = 1,
     EV_MOVE = 2,
-    EV_WRONG = 3,
+    EV_INVALID = 3,
     EV_DISC = 4,
     EV_RECON = 5,
 };

@@ -109,7 +109,7 @@ int main (int argc, char** argv){
         Player * p;
         Game * game;
         Player * player;
-        bool lobby_entered, name_in_use;
+        bool lobby_entered, name_in_use, reconnected;
 
         tests = client_socks;
         printf("Server is waiting...\n");
@@ -127,6 +127,9 @@ int main (int argc, char** argv){
             if (FD_ISSET(fd, &tests)) {
                 // je to server socket ? prijmeme nove spojeni
                 if (fd == server_socket) {
+                    cout << "fd num: " << fd << endl;
+                    cout << "client num: " << fd << endl;
+
                     client_len = sizeof(peer_addr);
                     client_socket = accept(server_socket, (struct sockaddr *) &peer_addr, &client_len);
                     FD_SET(client_socket, &client_socks);
@@ -137,15 +140,30 @@ int main (int argc, char** argv){
                     snd.append("Welcome to Onitama server!");
                     snd.append(1, Help::END);
                     send(client_socket, snd.data(), snd.size(), 0);
-                    Help::send_log(fd, snd);
+                    Help::send_log(client_socket, snd);
 
+                    // Check for reconnect
+                    reconnected = false;
                     for (i = 0; i < CLIENT_NUM; i++){
                         p = player_arr[i];
-                        if(p->socket == 0 && p->username.empty())
-                        {
-                            p->socket = client_socket;
-                            printf("Adding to list of sockets at index %d\n" , i);
+                        if(p->socket == client_socket and p->disconnected){
+                            reconnected = true;
+                            p->reconnect_attempt = true;
+                            cout << "Attempt to reconnect at index: " << i << endl;
                             break;
+                        }
+                    }
+                    // Looking for empty Player slot with empty name so far
+                    if (!reconnected){
+                        for (i = 0; i < CLIENT_NUM; i++){
+                            p = player_arr[i];
+                            if(p->socket == 0 && p->username.empty())
+                            {
+                                p->socket = client_socket;
+                                printf("Adding to list of sockets at index %d\n" , i);
+                                break;
+                            }
+
                         }
                     }
                 }
@@ -158,14 +176,12 @@ int main (int argc, char** argv){
 
                     // na socketu se stalo neco spatneho
                     if (val_read == 0){
+                        // Disconnecting user but remembering
                         for (i = 0; i < CLIENT_NUM; i++){
                             p = player_arr[i];
                             if(p->socket == fd){
-                                // TODO make reconnect logic
-                                p->socket = 0;
-                                p->username = "";
-//                                p->state = State_Machine::allowed_transition(p->state, Event::EV_DISC);
-//                                p->disconnected = true;
+                                p->disconnected = true;
+                                p->state = State_Machine::allowed_transition(p->state, Event::EV_DISC);
                                 break;
                             }
                         }
@@ -196,61 +212,52 @@ int main (int argc, char** argv){
                                 if (data.size() == 1 + 1) {
                                     cout << "Entering: " << Command::name(Cmd::LOGIN) << endl;
                                     login_name = data.at(1);
+
                                     name_in_use = false;
-                                    for (i = 0; i < CLIENT_NUM; i++) {
-                                        p = player_arr[i];
-                                        if (login_name.empty()){
-                                            // Empty login
-                                            lobby->empty_login(fd);
-                                            name_in_use = true;
-                                            break;
-                                        }
-                                        else if (p->username == login_name) {
-                                            if (p->disconnected) {
-                                                // Reconnect attempt
-//                                                p->state = State_Machine::allowed_transition(p->state, Event::EV_RECON);
-//                                                p->disconnected = false;
-                                                // TODO make reconnect logic
-                                                lobby->reconnect(fd, login_name);
+                                    // Empty login
+                                    if (login_name.empty()){
+                                        lobby->empty_login(fd);
+                                        name_in_use = true;
+                                    }
+                                    else{
+                                        // List all other names
+                                        for (i = 0; i < CLIENT_NUM; i++) {
+                                            p = player_arr[i];
+                                            if (p->username == login_name) {
+                                                // Reconnect attempt with login
+                                                if (p->reconnect_attempt) {
+                                                    lobby->reconnect(GAME_NUM, game_arr, player, fd);
+                                                }
+                                                else{
+                                                    lobby->already_in_use(fd);
+
+                                                }
+                                                name_in_use = true;
+                                                break;
                                             }
-                                            else {
-                                                // Name already in use
-                                                lobby->already_in_use(fd);
-                                            }
-                                            name_in_use = true;
-                                            break;
                                         }
                                     }
+
+                                    // Original name detected
                                     if (!name_in_use) {
-                                        // Original name detected
+                                        // Name not too long
                                         if (login_name.size() > NAME_LENGTH) {
-                                            // Name not too long
                                             lobby->name_too_long(fd, NAME_LENGTH);
                                         }
+                                        // Forbidden chars
                                         else if (login_name.find(Help::SPL) != string::npos
                                                 or login_name.find(Help::END) != string::npos){
-                                            // Forbidden chars
+
                                             lobby->forbidden_chars(fd);
                                         }
+                                        // Correct name
                                         else {
-                                            // Correct name
-                                            // Enter lobby or/and start game
-                                            lobby_entered = false;
-                                            for (i = 0; i < GAME_NUM; i++) {
-                                                game = game_arr[i];
-                                                if (!game->is_active) {
-                                                    // Create player finally and login
-                                                    player->username = login_name;
-                                                    player->state = State_Machine::allowed_transition(player->state,Event::EV_LOGIN);
-                                                    player->disconnected = false;
-                                                    // Cmd::WAITING + Cmd::PLAY
-                                                    game->enter_lobby(player);
-                                                    lobby_entered = true;
-                                                    break;
-                                                }
-                                            }
-                                            if (!lobby_entered) {
-                                                // No more available lobby
+                                            cout << "Name correct!" << endl;
+                                            player->username = login_name;
+                                            player->state = State_Machine::allowed_transition(p->state, Event::EV_LOGIN);
+
+                                            bool found = lobby->find_lobby(GAME_NUM, game_arr, player);
+                                            if(!found){
                                                 lobby->lobby_full(fd);
                                             }
                                         }
@@ -275,6 +282,7 @@ int main (int argc, char** argv){
                                                 bool valid_move = game->check_move(
                                                         card,st_row, st_col, end_row, end_col);
                                                 if (valid_move) {
+                                                    player->state = State_Machine::allowed_transition(p->state, Event::EV_MOVE);
                                                     game->move_was_made(card, st_row, st_col, end_row, end_col);
                                                     if (!game->is_end()) {
                                                         game->shuffle_cards(card);
@@ -282,9 +290,12 @@ int main (int argc, char** argv){
                                                     }
                                                     else {
                                                         game->game_over();
+                                                        // Refresh / Reset the game so anyone can enter again
+                                                        game_arr[i]->init();
                                                     }
                                                 }
                                                 else {
+                                                    player->state = State_Machine::allowed_transition(p->state, Event::EV_INVALID);
                                                     game->invalid_move();
                                                 }
                                             }
@@ -311,18 +322,19 @@ int main (int argc, char** argv){
                                                 string card = data.at(1);
                                                 bool valid_swap = game->check_pass();
                                                 if (valid_swap) {
+                                                    player->state = State_Machine::allowed_transition(p->state, Event::EV_MOVE);
                                                     game->pass_was_made(card);
                                                     game->shuffle_cards(card);
                                                     game->switch_players();
                                                 }
                                                 else {
+                                                    player->state = State_Machine::allowed_transition(p->state, Event::EV_INVALID);
                                                     game->invalid_move();
                                                 }
                                             }
                                             catch (const exception &exc){
                                                 cerr << exc.what() << endl;
                                                 game->move_not_parsable();
-
                                             }
                                             break;
                                         }
@@ -332,6 +344,23 @@ int main (int argc, char** argv){
                                     cout << "ERR: Wrong num of args!" << endl;
                                 }
                             }
+                            else if (cmd == Command::name(Cmd::REMATCH)){
+                                if (data.size() == 1 + 1){
+                                    if (player->username == data[1]){
+                                        bool found = lobby->find_lobby(GAME_NUM, game_arr, player);
+                                        if(!found){
+                                            lobby->lobby_full(fd);
+                                        }
+                                    }
+                                    else{
+                                        lobby->rematch_name(fd);
+                                    }
+                                }
+                                else{
+                                    cout << "ERR: Wrong num of args!" << endl;
+                                }
+                            }
+
                             else if (cmd == "WRONG_DATA") {
                                 cout << "Wrong data -> server do not know how to respond!" << endl;
                             }

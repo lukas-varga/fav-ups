@@ -6,16 +6,19 @@
   <component name="ChangeListManager">
     <list default="true" id="7ed4caa7-b1dd-4fb1-b7fb-f959700d601e" name="Changes" comment="Add source link to cards and docs folder">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/onitama/components.py" beforeDir="false" afterPath="$PROJECT_DIR$/onitama/components.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/onitama/engine.py" beforeDir="false" afterPath="$PROJECT_DIR$/onitama/engine.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/onitama/game.py" beforeDir="false" afterPath="$PROJECT_DIR$/onitama/game.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/onitama/intro.py" beforeDir="false" afterPath="$PROJECT_DIR$/onitama/intro.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/onitama/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/onitama/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/onitama/network.py" beforeDir="false" afterPath="$PROJECT_DIR$/onitama/network.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/onitama/parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/onitama/parser.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../server/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../server/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../server/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../server/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../server/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/../server/Makefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../server/server" beforeDir="false" afterPath="$PROJECT_DIR$/../server/server" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server/Command.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../server/Command.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server/Command.h" beforeDir="false" afterPath="$PROJECT_DIR$/../server/Command.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server/Player.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../server/Player.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server/Player.h" beforeDir="false" afterPath="$PROJECT_DIR$/../server/Player.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server/State.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../server/State.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server/State.h" beforeDir="false" afterPath="$PROJECT_DIR$/../server/State.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server/server.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../server/server.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -222,7 +225,12 @@
       <workItem from="1672071243698" duration="1466000" />
       <workItem from="1672077107533" duration="7494000" />
       <workItem from="1672085976414" duration="147000" />
-      <workItem from="1672139548226" duration="16621000" />
+      <workItem from="1672139548226" duration="16934000" />
+      <workItem from="1672174601979" duration="337000" />
+      <workItem from="1672175164214" duration="163000" />
+      <workItem from="1672225672608" duration="43000" />
+      <workItem from="1672249907007" duration="1589000" />
+      <workItem from="1672253238762" duration="11549000" />
     </task>
     <task id="LOCAL-00001" summary="Everything is working offline on one machinie yupii, needs to verify winning still">
       <created>1668450646046</created>
@@ -287,14 +295,14 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/onitama/network.py</url>
-          <line>85</line>
-          <option name="timeStamp" value="2" />
+          <line>31</line>
+          <option name="timeStamp" value="3" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/client$main.coverage" NAME="main Coverage Results" MODIFIED="1672173909156" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/onitama" />
+    <SUITE FILE_PATH="coverage/client$main.coverage" NAME="main Coverage Results" MODIFIED="1672269049856" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/onitama" />
     <SUITE FILE_PATH="coverage/client$run.coverage" NAME="run Coverage Results" MODIFIED="1668633945893" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/client$game.coverage" NAME="game Coverage Results" MODIFIED="1669626589396" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/onitama" />
     <SUITE FILE_PATH="coverage/client$onitama_main.coverage" NAME="onitama_main Coverage Results" MODIFIED="1667492761832" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/onitama" />

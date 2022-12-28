@@ -12,10 +12,11 @@ class Player{
 public:
     int socket;
     string username;
-    State state;
-    bool disconnected;
 
-    Player();
+    bool disconnected;
+    State state;
+    bool reconnect_attempt;
+
     Player(int sock, string name);
 };
 

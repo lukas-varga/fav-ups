@@ -6,9 +6,13 @@
 int Game::GAME_COUNTER = -1;
 
 Game::Game() {
+    game_id = ++GAME_COUNTER;
+    init();
+}
+
+void Game::init() {
     white_p = nullptr;
     black_p = nullptr;
-    game_id = ++GAME_COUNTER;
     is_active = false;
 
     curr_p = nullptr;
@@ -18,33 +22,21 @@ Game::Game() {
     piece_captured = "";
     send_text = "";
 
-    vector<vector<string>> init
-    {
-        {"bP", "bP", "bK", "bP", "bP"},
-        {"--", "--", "--", "--", "--"},
-        {"--", "--", "--", "--", "--"},
-        {"--", "--", "--", "--", "--"},
-        {"wP", "wP", "wK", "wP", "wP"}
-    };
-    board = init;
+    vector<vector<string>> def_board
+            {
+                    {"bP", "bP", "bK", "bP", "bP"},
+                    {"--", "--", "--", "--", "--"},
+                    {"--", "--", "--", "--", "--"},
+                    {"--", "--", "--", "--", "--"},
+                    {"wP", "wP", "wK", "wP", "wP"}
+            };
+    board = def_board;
     five_cards = Card::pick_five_cards();
 }
 
 
-void Game::enter_lobby(Player * player){
-    if (white_p == nullptr){
-        white_p = player;
-
-        send_text = "";
-        send_text.append(Command::name(Cmd::WAITING))
-                .append(1, Help::SPL)
-                .append(player->username)
-                .append(1, Help::END);
-        send(player->socket, send_text.data(), send_text.size(), 0);
-        Help::send_log(player->socket, send_text);
-        cout << "Player1 " << player->username << " has entered lobby!" << endl;
-    }
-    else if(black_p == nullptr){
+void Game::enter_game(Player * player){
+    if (black_p == nullptr){
         black_p = player;
 
         send_text = "";
@@ -54,18 +46,28 @@ void Game::enter_lobby(Player * player){
                 .append(1, Help::END);
         send(player->socket, send_text.data(), send_text.size(), 0);
         Help::send_log(player->socket, send_text);
-        cout << "Player2 " << player->username << " has entered lobby!" << endl;
+        cout << "Player1 (Black) " << player->username << " has entered lobby!" << endl;
+
+    }
+    else if(white_p == nullptr){
+        white_p = player;
+
+        send_text = "";
+        send_text.append(Command::name(Cmd::WAITING))
+                .append(1, Help::SPL)
+                .append(player->username)
+                .append(1, Help::END);
+        send(player->socket, send_text.data(), send_text.size(), 0);
+        Help::send_log(player->socket, send_text);
+        cout << "Player2 (White) " << player->username << " has entered lobby!" << endl;
 
         // GAME started
         start_game();
+        is_active = true;
     }
 }
 
 void Game::start_game(){
-    is_active = true;
-    // Pick 5 random cards first BLACK SPARE WHITE
-    int last_index = five_cards.size() - 1;
-
     send_text = "";
     send_text.append(Command::name(Cmd::START))
             .append(1, Help::SPL)
@@ -74,6 +76,8 @@ void Game::start_game(){
             .append(white_p->username)
             .append(1, Help::SPL);
 
+    // Pick 5 random cards first BLACK SPARE WHITE
+    int last_index = five_cards.size() - 1;
     for (int i = 0; i < last_index; ++i){
         send_text.append(five_cards[i])
             .append(1, Help::SPL);
@@ -84,8 +88,11 @@ void Game::start_game(){
     // Send to both TWO players START
     send(black_p->socket, send_text.data(), send_text.size(), 0);
     Help::send_log(black_p->socket, send_text);
+    black_p->state = State_Machine::allowed_transition(black_p->state, Event::EV_PLAY);
+
     send(white_p->socket, send_text.data(), send_text.size(), 0);
     Help::send_log(white_p->socket, send_text);
+    white_p->state = State_Machine::allowed_transition(black_p->state, Event::EV_PLAY);
 
     white_to_move = true;
     curr_p = white_p;
@@ -295,15 +302,8 @@ void Game::game_over() {
     Help::send_log(white_p->socket, send_text);
     send(black_p->socket, send_text.data(), send_text.size(), 0);
     Help::send_log(black_p->socket, send_text);
-
     cout << "End of the game" << endl;
-    //TODO send logout
 }
-
-
-
-
-
 
 
 

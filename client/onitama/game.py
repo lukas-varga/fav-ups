@@ -82,6 +82,7 @@ def play(net: Network, start_arr, username):
     # If user selected card
     card_picked = None
 
+    rematch = False
     running = True
     while running:
         # True if player has no option to play, so he gives back one card by clicking twice on it and pass turn
@@ -90,8 +91,6 @@ def play(net: Network, start_arr, username):
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
                 # TODO logout / reconnect
-                logout = parser.prepare_logout(gs.player_name)
-                net.send_data(logout)
                 running = False
 
             # Mouse handler Only current player can play
@@ -173,6 +172,7 @@ def play(net: Network, start_arr, username):
 
                 if cmd == Cmd.MOVE_WAS_MADE.value:
                     try:
+                        print(f"Move was accepted by server and made in client!")
                         # Move OK -> switch cards and move piece
                         the_card = data[1]
                         start_tup = (int(data[2]), int(data[3]))
@@ -187,22 +187,27 @@ def play(net: Network, start_arr, username):
                         # Shuffle cards and swap players
                         gs.shuffle_cards(the_card)
                         gs.switch_players()
-                        print(f"Move was accepted by server and made in client!")
                     except Exception as e:
                         print(e)
+
                 elif cmd == Cmd.PASS_WAS_MADE.value:
                     the_card = data[1]
+                    print(f"Pass was accepted by server and made in client with card {the_card}!")
                     gs.shuffle_cards(the_card)
                     gs.switch_players()
-                    print(f"Pass was accepted by server and made in client with card {the_card}!")
+
                 elif cmd == Cmd.INVALID_MOVE.value:
                     print(Cmd.INVALID_MOVE.value, f"{data[1]}")
+
                 elif cmd == Cmd.GAME_OVER.value:
                     winner_name = data[1]
-                    gs.game_over(winner_name)
                     print(f"Game over encountered, player {winner_name} has won!")
+                    gs.game_over(winner_name)
+                    rematch = True
+
                 elif cmd == "WRONG_DATA":
                     print("WRONG_DATA", f"Data are not parsable!")
+
                 else:
                     print(f"ERR: Unknown message in Game!")
 
@@ -212,7 +217,7 @@ def play(net: Network, start_arr, username):
 
     print("Game finished - quiting pygame!")
     pygame.quit()
-    return
+    return rematch
 
 
 """

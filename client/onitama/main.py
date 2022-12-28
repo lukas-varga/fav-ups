@@ -18,15 +18,7 @@ def main():
     net = network.Network(ip, port)
 
     # Login screen
-    start_arr, username = intro.login(net)
-    if start_arr is None:
-        print("User pressed Close button!")
-    elif start_arr[0] == Cmd.START.value:
-        print("Both players connected -> Game will start!")
-        game.play(net, start_arr, username)
-    else:
-        print("Unexpected behaviour in main!")
-
+    intro.login(net)
     net.close_connection()
     exit()
 
