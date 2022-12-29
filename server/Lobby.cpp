@@ -20,7 +20,7 @@ bool Lobby::find_lobby(int GAME_NUM, Game * game_arr[], Player * player) {
     return false;
 }
 
-//RECONNECT is_player_white | white_to_move | black_p | white_p | (5x) cards | (25x) "wP" "wK" "--"
+//RECONNECT black_p | white_p | (5x) cards | is_player_white | white_to_move | (25x) "wP" "wK" "--"
 void Lobby::reconnect(int GAME_NUM, Game * game_arr[], Player * player, int fd) {
     int i, row, col, last_piece;
     Game * g = nullptr;
@@ -64,10 +64,6 @@ void Lobby::reconnect(int GAME_NUM, Game * game_arr[], Player * player, int fd) 
         send_text = "";
         send_text.append(Command::name(Cmd::RECONNECT))
                 .append(1, Help::SPL)
-                .append(is_player_white)
-                .append(1, Help::SPL)
-                .append(white_to_move)
-                .append(1, Help::SPL)
                 .append(black_p)
                 .append(1, Help::SPL)
                 .append(white_p)
@@ -76,6 +72,12 @@ void Lobby::reconnect(int GAME_NUM, Game * game_arr[], Player * player, int fd) 
             send_text.append(card)
                     .append(1, Help::SPL);
         }
+
+        send_text.append(is_player_white)
+                .append(1, Help::SPL)
+                .append(white_to_move)
+                .append(1, Help::SPL);
+        
         last_piece = board_vec.size() - 1;
         for (i = 0; i < last_piece; ++i){
             send_text.append(board_vec[i])

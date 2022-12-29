@@ -15,6 +15,7 @@ import random
 WIDTH_LOGIN = 384
 HEIGHT_LOGIN = 256
 
+
 def login(net: Network):
     # Init
     win = Tk()
@@ -60,9 +61,8 @@ def login(net: Network):
 
     global exiting
     exiting = False
-    global is_logged
-    is_logged = False
     global win_wait
+    global username
     username = ""
 
     while True:
@@ -71,7 +71,10 @@ def login(net: Network):
 
         # Incoming message from server
         server_rx_buffer = []
-        if is_logged and net.network_data_arrived(server_rx_buffer):
+        res = net.network_data_arrived(server_rx_buffer)
+        if res is None:
+            exiting = True
+        else:
             for record in server_rx_buffer:
                 data = parser.parse(record)
                 cmd = data[0]
@@ -93,19 +96,23 @@ def login(net: Network):
                     waiting_label = Label(win_wait, text="Waiting for opponent...", font=(FONT, 12), bg=BACKGROUND_COLOR)
                     waiting_label.pack(pady=30)
 
-                    username = data[1]
-
                 # FAILED_LOGIN | *detailed_message*
                 elif cmd == Cmd.FAILED_LOGIN.value:
                     print("Intro: Failed login!")
-                    messagebox.showinfo(Cmd.FAILED_LOGIN.value, data[1])
+                    messagebox.showinfo("Failed Login", data[1])
 
                 # START | P1 (black) | P1 (white) | 5x cards
                 elif cmd == Cmd.START.value:
                     print("Intro: START!")
+                    # Waiting is not needed anymore
 
                     win_wait.destroy()
-                    rematch = game.play(net, data, username)
+                    # Hide Login screen
+                    win.withdraw()
+                    # Play game
+                    rematch = game.play(net, data, username, None)
+                    # Show Login screen
+                    win.deiconify()
 
                     if rematch:
                         rematch_mess = parser.prepare_rematch(username)
@@ -114,13 +121,32 @@ def login(net: Network):
                         exiting = True
 
                 # RECONNECT
-                # is_player_white | white_to_move |
                 # black_p | white_p | (5x) cards |
-                # (25x) "wP" "wK" "--"
+                # is_player_white | white_to_move | (25x) "wP" "wK" "--"
                 elif cmd == Cmd.RECONNECT.value:
-                    print(data)
-                    # TODO PARSE AND REVIVE STATE
-                    
+                    # START | P1 (black) | P2 (white) | 5x cards
+                    start_like = ["START", data[1], data[2]]
+                    for r in range(3, 8):
+                        start_like.append(data[r])
+
+                    # is_player_white | white_to_move | (25x) "wP" "wK" "--"
+                    rec_data = []
+                    for r in range(8, len(data)):
+                        rec_data.append(data[r])
+
+                    # Hide Login screen
+                    win.withdraw()
+                    # Play game
+                    rematch = game.play(net, start_like, username, rec_data)
+                    # Show Login screen
+                    win.deiconify()
+
+                    if rematch:
+                        rematch_mess = parser.prepare_rematch(username)
+                        net.send_data(rematch_mess)
+                    else:
+                        exiting = True
+
                 elif cmd == "WRONG_DATA":
                     print("WRONG_DATA", f"Data are not parsable!")
                 else:
@@ -135,14 +161,11 @@ def login(net: Network):
 Play button pressed
 """
 def login_btn_pressed(net: Network, username_str_var):
-    global is_logged
-    is_logged = True
-
-    # Connect
     net.create_connection()
     # Send LOGIN | name
-    user = str(username_str_var.get())
-    data = parser.prepare_login(user)
+    global username
+    username = str(username_str_var.get())
+    data = parser.prepare_login(username)
     net.send_data(data)
 
 

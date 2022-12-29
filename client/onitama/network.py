@@ -1,6 +1,7 @@
 import select
 import socket
-
+from socket import error as socket_error
+from tkinter import messagebox
 
 """
 Socket operating class for communication with server
@@ -77,20 +78,29 @@ class Network(object):
         result = False
         socks = [self.server]
 
-        # tiny read-timeout
-        in_, out_, exc_ = select.select(socks, [], [], 0)
+        try:
+            # tiny read-timeout
+            in_, out_, exc_ = select.select(socks, [], [], 0)
+            # has any data arrived?
+            if in_.count(self.server) > 0:
+                incoming_message = self.recv_data()
 
-        # has any data arrived?
-        if in_.count(self.server) > 0:
-            with_null = self.recv_data()
-            # Split messages by null character
-            records = with_null.split("\x00")
-            for record in records:
-                if record == "":
-                    continue
-                socket_buffer.append(record)
-                print(f"Appended to recv buffer: {record}")
-            # if len(socket_buffer) >= self.MAX_BUFF:
-            result = True
-        # No data gathered
+                # Server is disconnected
+                if len(incoming_message) == 0:
+                    raise Exception()
+
+                # Split messages by null character
+                records = incoming_message.split("\x00")
+                for record in records:
+                    if record == "":
+                        continue
+                    socket_buffer.append(record)
+                    print(f"Appended to recv buffer: {record}")
+                # if len(socket_buffer) >= self.MAX_BUFF:
+                result = True
+        except Exception:
+            # No data gathered
+            messagebox.showinfo("Server Error", "500 - Disconnected!")
+            result = None
+
         return result

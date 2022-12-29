@@ -53,7 +53,7 @@ CARD_IMAGES = {}
 """
 Handle user input and update graphics
 """
-def play(net: Network, start_arr, username):
+def play(net: Network, data, username, rec_data):
     # Init pygame library
     pygame.init()
     my_font = pygame.font.SysFont(FONT, 18)
@@ -66,7 +66,9 @@ def play(net: Network, start_arr, username):
     pygame.display.set_caption('Onitama')
 
     # Game state
-    gs = engine.GameState(net, start_arr, username)
+    gs = engine.GameState(net, data, username)
+    if rec_data is not None:
+        gs.reconnect(rec_data)
 
     # Only once before loop
     load_images(gs)
@@ -165,7 +167,11 @@ def play(net: Network, start_arr, username):
 
         # Incoming message from server
         server_rx_buffer = []
-        if net.network_data_arrived(server_rx_buffer):
+        res = net.network_data_arrived(server_rx_buffer)
+        if res is None:
+            running = False
+            rematch = False
+        else:
             for record in server_rx_buffer:
                 data = parser.parse(record)
                 cmd = data[0]

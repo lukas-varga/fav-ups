@@ -15,10 +15,14 @@ def main():
         exit()
     ip = str(sys.argv[1])
     port = int(sys.argv[2])
-    net = network.Network(ip, port)
 
+    # Make socket
+    net = network.Network(ip, port)
+    # Create connection
+    net.create_connection()
     # Login screen
     intro.login(net)
+    # Close connection
     net.close_connection()
     exit()
 
