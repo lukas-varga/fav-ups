@@ -10,6 +10,7 @@ class Cmd(Enum):
     MAKE_MOVE = "MAKE_MOVE"
     MAKE_PASS = "MAKE_PASS"
     REMATCH = "REMATCH"
+    LOGOUT = "LOGOUT"
     # Server side
     WAITING = "WAITING"
     FAILED_LOGIN = "FAILED_LOGIN"
@@ -18,8 +19,8 @@ class Cmd(Enum):
     PASS_WAS_MADE = "PASS_WAS_MADE"
     INVALID_MOVE = "INVALID_MOVE"
     GAME_OVER = "GAME_OVER"
-    RECONNECT = "RECONNECT" #TODO
-    LOGOUT = "LOGOUT" #TODO
+    RECONNECT = "RECONNECT"
+    DISCONNECTED = "DISCONNECTED"
 
 def is_enum(provided):
     for e in Cmd:
@@ -44,9 +45,6 @@ def parse(msg: str):
 def prepare_login(username):
     return f"{Cmd.LOGIN.value}{SPL}{username}{END}"
 
-def prepare_logout(username):
-    return f"{Cmd.LOGOUT.value}{SPL}{username}{END}"
-
 def prepare_make_move(card, s_row, s_col, e_row, e_col):
     return f"{Cmd.MAKE_MOVE.value}{SPL}{card}{SPL}{s_row}{SPL}{s_col}{SPL}{e_row}{SPL}{e_col}{END}"
 
@@ -56,5 +54,5 @@ def prepare_make_pass(card):
 def prepare_rematch(username):
     return f"{Cmd.REMATCH.value}{SPL}{username}{END}"
 
-def prepare_reconnect():
-    return
+def prepare_logout(username):
+    return f"{Cmd.LOGOUT.value}{SPL}{username}{END}"

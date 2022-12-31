@@ -8,11 +8,16 @@ Lobby::Lobby() {
 }
 
 bool Lobby::find_lobby(int GAME_NUM, Game * game_arr[], Player * player) {
+    Game * game;
     for (int i = 0; i < GAME_NUM; i++) {
-        Game * game = game_arr[i];
+        game = game_arr[i];
         // Enter lobby or/and start game
         if (!game->is_active) {
             // Cmd::WAITING + Cmd::PLAY
+            if (game->white_p == player or game->black_p == player){
+                cout << "ERR: Cannot enter game against myself!" << endl;
+                continue;
+            }
             game->enter_game(player);
             return true;
         }
@@ -21,9 +26,10 @@ bool Lobby::find_lobby(int GAME_NUM, Game * game_arr[], Player * player) {
 }
 
 //RECONNECT black_p | white_p | (5x) cards | is_player_white | white_to_move | (25x) "wP" "wK" "--"
-void Lobby::reconnect(int GAME_NUM, Game * game_arr[], Player * player, int fd) {
+void Lobby::reconnect(int GAME_NUM, Game * game_arr[], string username, int socket) {
     int i, row, col, last_piece;
-    Game * g = nullptr;
+    Game * game = nullptr;
+
     bool is_white;
     string is_player_white, white_to_move, black_p, white_p;
     vector<string> cards_vec;
@@ -31,33 +37,33 @@ void Lobby::reconnect(int GAME_NUM, Game * game_arr[], Player * player, int fd) 
 
     for (i = 0; i < GAME_NUM; ++i){
         if(game_arr[i]->is_active){
-            if(game_arr[i]->black_p == player){
-                g = game_arr[i];
+            if(game_arr[i]->black_p->username == username){
+                game = game_arr[i];
                 is_white = false;
                 break;
             }
-            else if(game_arr[i]->white_p == player){
+            else if(game_arr[i]->white_p->username == username){
+                game = game_arr[i];
                 is_white = true;
-                g = game_arr[i];
                 break;
             }
         }
     }
 
-    if (g != nullptr){
+    if (game != nullptr){
         is_player_white = (is_white) ? "1" : "0";
-        white_to_move = (g->white_to_move) ? "1" : "0";
-        black_p = g->black_p->username;
-        white_p = g->white_p->username;
+        white_to_move = (game->white_to_move) ? "1" : "0";
+        black_p = game->black_p->username;
+        white_p = game->white_p->username;
 
         // Pick cards first BLACK SPARE WHITE
-        for (i = 0; i < g->five_cards.size(); ++i){
-            cards_vec.push_back(g->five_cards[i]);
+        for (i = 0; i < game->five_cards.size(); ++i){
+            cards_vec.push_back(game->five_cards[i]);
         }
 
-        for (row = 0; row < g->board.size(); ++row){
-            for (col = 0; col < g->board[row].size(); ++col){
-                board_vec.push_back(g->board[row][col]);
+        for (row = 0; row < game->board.size(); ++row){
+            for (col = 0; col < game->board[row].size(); ++col){
+                board_vec.push_back(game->board[row][col]);
             }
         }
 
@@ -77,7 +83,7 @@ void Lobby::reconnect(int GAME_NUM, Game * game_arr[], Player * player, int fd) 
                 .append(1, Help::SPL)
                 .append(white_to_move)
                 .append(1, Help::SPL);
-        
+
         last_piece = board_vec.size() - 1;
         for (i = 0; i < last_piece; ++i){
             send_text.append(board_vec[i])
@@ -86,15 +92,67 @@ void Lobby::reconnect(int GAME_NUM, Game * game_arr[], Player * player, int fd) 
         send_text.append(board_vec[last_piece])
                 .append(1, Help::END);
 
-        send(fd, send_text.data(), send_text.size(), 0);
-        Help::send_log(fd, send_text);
+        send(socket, send_text.data(), send_text.size(), 0);
+        Help::send_log(socket, send_text);
 
-        player->disconnected = false;
-        player->state = State_Machine::allowed_transition(player->state, Event::EV_RECON);
         cout << "Reconnect attempt was send!" << endl;
     }
     else{
         cout << "ERR: Reconnected player not found!" << endl;
+    }
+}
+
+void Lobby::inform_disconnecting(int GAME_NUM, Game * game_arr[], string disc_username) {
+    Game * game;
+    send_text = "";
+    send_text.append(Command::name(Cmd::DISCONNECTED))
+            .append(1, Help::SPL)
+            .append(disc_username)
+            .append(1, Help::END);
+
+    for (int i = 0; i< GAME_NUM; ++i){
+        game = game_arr[i];
+        if(game->is_active){
+            // Inform white disconnected_p that black disconnected
+            if (game->black_p->username == disc_username){
+                send(game->white_p->socket, send_text.data(), send_text.size(), 0);
+                Help::send_log(game->white_p->socket, send_text);
+                break;
+            }
+                // Inform black disconnected_p that white disconnected
+            else if(game->white_p->username == disc_username){
+                send(game->black_p->socket, send_text.data(), send_text.size(), 0);
+                Help::send_log(game->black_p->socket, send_text);
+                break;
+            }
+        }
+    }
+}
+
+void Lobby::inform_reconnecting(int GAME_NUM, Game * game_arr[], string recon_username) {
+    Game * game;
+    send_text = "";
+    send_text.append(Command::name(Cmd::RECONNECT))
+            .append(1, Help::SPL)
+            .append(recon_username)
+            .append(1, Help::END);
+
+    for (int i = 0; i< GAME_NUM; ++i) {
+        game = game_arr[i];
+        if(game->is_active) {
+            // Inform white reconnected_p that black disconnected
+            if (game->black_p->username == recon_username) {
+                send(game->white_p->socket, send_text.data(), send_text.size(), 0);
+                Help::send_log(game->white_p->socket, send_text);
+                break;
+            }
+                // Inform black reconnected_p that white disconnected
+            else if (game->white_p->username == recon_username) {
+                send(game->black_p->socket, send_text.data(), send_text.size(), 0);
+                Help::send_log(game->black_p->socket, send_text);
+                break;
+            }
+        }
     }
 }
 

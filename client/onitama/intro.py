@@ -47,6 +47,11 @@ def login(net: Network):
     login_btn = Button(win, text="Login", width=10, height=1, bg=DARK_COLOR, font=(FONT, 12), command=login_with_args)
     login_btn.pack(pady=5)
 
+    # # Set close button
+    # logout_with_args = partial(logout_btn_pressed, net, username_str_var)
+    # logout_btn = Button(win, text="Logout", width=10, height=1, bg=DARK_COLOR, font=(FONT, 12), command=logout_with_args)
+    # logout_btn.pack(pady=5)
+
     # Set close button
     close_with_args = partial(close_btn_pressed, win)
     close_btn = Button(win, text="Close", width=10, height=1, bg=DARK_COLOR, font=(FONT, 12), command=close_with_args)
@@ -61,7 +66,9 @@ def login(net: Network):
 
     global exiting
     exiting = False
+
     global win_wait
+
     global username
     username = ""
 
@@ -71,8 +78,9 @@ def login(net: Network):
 
         # Incoming message from server
         server_rx_buffer = []
-        res = net.network_data_arrived(server_rx_buffer)
-        if res is None:
+
+        result = net.network_data_arrived(server_rx_buffer)
+        if result is None:
             exiting = True
         else:
             for record in server_rx_buffer:
@@ -118,34 +126,40 @@ def login(net: Network):
                         rematch_mess = parser.prepare_rematch(username)
                         net.send_data(rematch_mess)
                     else:
+                        # TODO logout
+                        logout_mess = parser.prepare_logout(username)
+                        net.send_data(logout_mess)
                         exiting = True
 
                 # RECONNECT
                 # black_p | white_p | (5x) cards |
                 # is_player_white | white_to_move | (25x) "wP" "wK" "--"
                 elif cmd == Cmd.RECONNECT.value:
-                    # START | P1 (black) | P2 (white) | 5x cards
-                    start_like = ["START", data[1], data[2]]
-                    for r in range(3, 8):
-                        start_like.append(data[r])
+                    if len(data) == 35:
+                        # START | P1 (black) | P2 (white) | 5x cards
+                        start_like = ["START", data[1], data[2]]
+                        for r in range(3, 8):
+                            start_like.append(data[r])
 
-                    # is_player_white | white_to_move | (25x) "wP" "wK" "--"
-                    rec_data = []
-                    for r in range(8, len(data)):
-                        rec_data.append(data[r])
+                        # is_player_white | white_to_move | (25x) "wP" "wK" "--"
+                        rec_data = []
+                        for r in range(8, len(data)):
+                            rec_data.append(data[r])
 
-                    # Hide Login screen
-                    win.withdraw()
-                    # Play game
-                    rematch = game.play(net, start_like, username, rec_data)
-                    # Show Login screen
-                    win.deiconify()
+                        # Hide Login screen
+                        win.withdraw()
+                        # Play game
+                        rematch = game.play(net, start_like, username, rec_data)
+                        # Show Login screen
+                        win.deiconify()
 
-                    if rematch:
-                        rematch_mess = parser.prepare_rematch(username)
-                        net.send_data(rematch_mess)
+                        if rematch:
+                            rematch_mess = parser.prepare_rematch(username)
+                            net.send_data(rematch_mess)
+                        else:
+                            exiting = True
                     else:
-                        exiting = True
+                        print("ERR: RECONNECT in Intro does not have right number of parameters!")
 
                 elif cmd == "WRONG_DATA":
                     print("WRONG_DATA", f"Data are not parsable!")
@@ -161,13 +175,17 @@ def login(net: Network):
 Play button pressed
 """
 def login_btn_pressed(net: Network, username_str_var):
-    net.create_connection()
     # Send LOGIN | name
     global username
     username = str(username_str_var.get())
     data = parser.prepare_login(username)
     net.send_data(data)
 
+"""
+Play button pressed
+"""
+def logout_btn_pressed(net: Network, username_str_var):
+    pass
 
 """
 Define a function to close the window

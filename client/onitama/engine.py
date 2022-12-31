@@ -21,13 +21,13 @@ class GameState:
             ["--", "--", "--", "--", "--"],
             ["wP", "wP", "wK", "wP", "wP"]
         ]
-        self.white_to_move = True
-        self.win_white = None
         self.move_log = []
 
         # START | P1 (black) | P2 (white) | 5x cards
         self.black_name = start_arr[1]
         self.white_name = start_arr[2]
+
+        self.white_to_move = True
         self.curr_p = self.white_name
 
         if self.black_name == username:
@@ -37,6 +37,9 @@ class GameState:
             self.player_name = self.white_name
             self.enemy_name = self.black_name
 
+        self.win_white = None
+        self.black_disconnected = False
+        self.white_disconnected = False
         # Generating in sever
         # 0 and 1 are black
         # 2 is spare

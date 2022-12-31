@@ -15,7 +15,6 @@ public:
 
     bool disconnected;
     State state;
-    bool reconnect_attempt;
 
     Player(int sock, string name);
 };

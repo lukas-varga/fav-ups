@@ -13,6 +13,7 @@ enum Cmd {
     MAKE_MOVE,
     MAKE_PASS,
     REMATCH,
+    LOGOUT,
     // Server side
     WAITING,
     FAILED_LOGIN,
@@ -22,8 +23,7 @@ enum Cmd {
     INVALID_MOVE,
     GAME_OVER,
     RECONNECT,
-    LOGOUT,
-
+    DISCONNECTED,
 };
 
 class Command{

@@ -6,7 +6,6 @@ Player::Player(int sock, string name) {
 
     disconnected = false;
     state = State::ST_INIT;
-    reconnect_attempt = false;
 }
 
 

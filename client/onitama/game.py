@@ -18,9 +18,9 @@ DIMENSION = 5
 SQ_SIZE = HEIGHT_PLAY // DIMENSION
 
 # Card size
-COEFFICIENT = 1 / 125
+CARD_COEF = 1 / 125
 # (x, y)
-CARD_SIZE = (COEFFICIENT * (300 * SQ_SIZE), COEFFICIENT * (174 * SQ_SIZE))
+CARD_SIZE = (CARD_COEF * (300 * SQ_SIZE), CARD_COEF * (174 * SQ_SIZE))
 
 # Card positions
 # (x, y)
@@ -37,12 +37,16 @@ CARD_POS = [
 
 # Label positions
 # (x, y)
-# Position relative to B1
-BLACK_LABEL_POS = (CARD_POS[0][0], CARD_POS[0][1] + CARD_SIZE[1])
-# Position relative to W1
-WHITE_LABEL_POS = (CARD_POS[3][0], CARD_POS[3][1] - CARD_SIZE[1] * 0.13)
+LABEL_COEF = 0.13
+# Position relative to B1 card
+BLACK_NAME_POS = (CARD_POS[0][0], CARD_POS[0][1] + CARD_SIZE[1])
+BLACK_STATUS_POS = (BLACK_NAME_POS[0] , BLACK_NAME_POS[1] + CARD_SIZE[1] * LABEL_COEF)
 # Relative to spare card
-SPARE_LABEL_POS = (CARD_POS[2][0] + CARD_SIZE[0] * 0.25, CARD_POS[2][1] - CARD_SIZE[1] * 0.13)
+SPARE_CARD_POS = (CARD_POS[2][0] + CARD_SIZE[0] * 2*LABEL_COEF, CARD_POS[2][1] - CARD_SIZE[1] * LABEL_COEF)
+# Position relative to W1 card
+WHITE_NAME_POS = (CARD_POS[3][0], CARD_POS[3][1] - CARD_SIZE[1] * LABEL_COEF)
+WHITE_STATUS_POS = (WHITE_NAME_POS[0], WHITE_NAME_POS[1] - CARD_SIZE[1] * LABEL_COEF)
+
 
 # Others
 MAX_FPS = 15
@@ -92,11 +96,15 @@ def play(net: Network, data, username, rec_data):
         # Event in pygame
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
-                # TODO logout / reconnect
+                # TODO logout
                 running = False
 
             # Mouse handler Only current player can play
-            if e.type == pygame.MOUSEBUTTONDOWN and gs.win_white is None and gs.curr_p == gs.player_name:
+            if e.type == pygame.MOUSEBUTTONDOWN \
+                    and gs.win_white is None \
+                    and gs.curr_p == gs.player_name \
+                    and not gs.black_disconnected \
+                    and not gs.white_disconnected:
                 # x,y loc of mouse
                 loc = pygame.mouse.get_pos()
 
@@ -210,6 +218,25 @@ def play(net: Network, data, username, rec_data):
                     print(f"Game over encountered, player {winner_name} has won!")
                     gs.game_over(winner_name)
                     rematch = True
+
+                elif cmd == Cmd.RECONNECT.value:
+                    if len(data) == 2 and data[1] == gs.enemy_name:
+                        if gs.enemy_name == gs.white_name:
+                            gs.white_disconnected = False
+                        elif gs.enemy_name == gs.black_name:
+                            gs.black_disconnected = False
+                    else:
+                        print("ERR: RECONNECT in Game not possible!")
+
+                elif cmd == Cmd.DISCONNECTED.value:
+                    if len(data) == 2 and data[1] == gs.enemy_name:
+                        if gs.enemy_name == gs.white_name:
+                            gs.white_disconnected = True
+                        elif gs.enemy_name == gs.black_name:
+                            gs.black_disconnected = True
+                    else:
+                        print(
+                            "ERR: DISCONNECTED in Game not possible!")
 
                 elif cmd == "WRONG_DATA":
                     print("WRONG_DATA", f"Data are not parsable!")
@@ -344,7 +371,10 @@ Possible highlight for selected card
 """
 def draw_card_highlight(screen, gs, which_card):
     # Blue highlight
-    if gs.curr_p == gs.player_name and gs.win_white is None:
+    if gs.curr_p == gs.player_name \
+            and gs.win_white is None \
+            and not gs.black_disconnected \
+            and not gs.white_disconnected:
         if gs.player_name == gs.black_name:
             x, y, w, h = get_rect_tuple(0)
             pygame.draw.rect(screen, pygame.Color(CARD_HIGHLIGHT_PASSIVE), pygame.Rect(x, y, w, h), width=3)
@@ -356,7 +386,9 @@ def draw_card_highlight(screen, gs, which_card):
             x, y, w, h = get_rect_tuple(4)
             pygame.draw.rect(screen, pygame.Color(CARD_HIGHLIGHT_PASSIVE), pygame.Rect(x, y, w, h), width=3)
 
-    if which_card is not None:
+    if which_card is not None \
+            and not gs.black_disconnected \
+            and not gs.white_disconnected:
         # Actively selected card
         i = gs.get_id_by_card(which_card)
         x, y, w, h = get_rect_tuple(i)
@@ -404,20 +436,35 @@ def animate_move(move, screen, board, clock):
 Draw label to inform which player is playing
 """
 def draw_player_label(screen, gs, my_font):
-    b_name = "You" if gs.player_name == gs.black_name else "Enemy"
-    w_name = "You" if gs.player_name == gs.white_name else "Enemy"
+    black_who = "You" if gs.player_name == gs.black_name else "Enemy"
+    white_who = "You" if gs.player_name == gs.white_name else "Enemy"
 
-    b_playing = " (PLAYING)" if not gs.white_to_move else ""
-    w_playing = " (PLAYING)" if gs.white_to_move else ""
+    black_status = "[PLAYING]" if not gs.white_to_move else ""
+    white_status = "[PLAYING]" if gs.white_to_move else ""
+
     if gs.win_white is not None:
-        b_playing = " (WON)" if not gs.win_white else " (LOST)"
-        w_playing = " (WON)" if gs.win_white else " (LOST)"
+        black_status = "[WON]" if not gs.win_white else "[LOST]"
+        white_status = "[WON]" if gs.win_white else "[LOST]"
+    elif gs.black_disconnected:
+        black_status = "[DISCONNECTED]"
+        white_status = "[PAUSED]"
+    elif gs.white_disconnected:
+        black_status = "[PAUSED]"
+        white_status = "[DISCONNECTED]"
 
-    black_label = my_font.render(f"{b_name}: {gs.black_name}{b_playing}", True, BLACK)
-    screen.blit(black_label, BLACK_LABEL_POS)
+    black_name_lb = my_font.render(f"{black_who}: {gs.black_name}", True, BLACK)
+    screen.blit(black_name_lb, BLACK_NAME_POS)
 
-    white_label = my_font.render(f"{w_name}: {gs.white_name}{w_playing}", True, BLACK)
-    screen.blit(white_label, WHITE_LABEL_POS)
+    black_status_lb = my_font.render(f"{black_status}", True, BLACK)
+    screen.blit(black_status_lb, BLACK_STATUS_POS)
 
-    spare_label = my_font.render(f"Spare Card", True, BLACK)
-    screen.blit(spare_label, SPARE_LABEL_POS)
+    spare_card_lb = my_font.render(f"Spare Card", True, BLACK)
+    screen.blit(spare_card_lb, SPARE_CARD_POS)
+
+    white_name_lb = my_font.render(f"{white_who}: {gs.white_name}", True, BLACK)
+    screen.blit(white_name_lb, WHITE_NAME_POS)
+
+    white_status_lb = my_font.render(f"{white_status}", True, BLACK)
+    screen.blit(white_status_lb, WHITE_STATUS_POS)
+
+
