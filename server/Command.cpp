@@ -2,21 +2,19 @@
 
 map<Cmd,string> Command::enum_map = map<Cmd,string>{
         // Client side
-        {Cmd::LOGIN ,          "LOGIN"},
-        {Cmd::MAKE_MOVE ,      "MAKE_MOVE"},
-        {Cmd::MAKE_PASS ,      "MAKE_PASS"},
-        {Cmd::REMATCH  ,       "REMATCH"},
-        {Cmd::LOGOUT ,         "LOGOUT"},
+        {Cmd::LOGIN ,         "LOGIN"},
+        {Cmd::MAKE_MOVE ,     "MAKE_MOVE"},
+        {Cmd::MAKE_PASS ,     "MAKE_PASS"},
         // Server side
-        {Cmd::WAITING ,        "WAITING"},
-        {Cmd::FAILED_LOGIN ,   "FAILED_LOGIN"},
-        {Cmd::START ,          "START"},
-        {Cmd::MOVE_WAS_MADE ,  "MOVE_WAS_MADE"},
-        {Cmd::PASS_WAS_MADE ,  "PASS_WAS_MADE"},
-        {Cmd::INVALID_MOVE ,   "INVALID_MOVE"},
-        {Cmd::GAME_OVER ,      "GAME_OVER"},
-        {Cmd::RECONNECT ,      "RECONNECT"},
-        {Cmd::DISCONNECTED ,   "DISCONNECTED"},
+        {Cmd::WAITING ,       "WAITING"},
+        {Cmd::FAILED ,        "FAILED"},
+        {Cmd::START ,         "START"},
+        {Cmd::MOVE_WAS_MADE , "MOVE_WAS_MADE"},
+        {Cmd::PASS_WAS_MADE , "PASS_WAS_MADE"},
+        {Cmd::INVALID_MOVE ,  "INVALID_MOVE"},
+        {Cmd::GAME_OVER ,     "GAME_OVER"},
+        {Cmd::RECONNECT ,     "RECONNECT"},
+        {Cmd::DISCONNECTED ,  "DISCONNECTED"},
 };
 
 string Command::name(Cmd cmd) {

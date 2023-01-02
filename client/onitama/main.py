@@ -11,7 +11,7 @@ Implementation of main method
 """
 def main():
     if len(sys.argv) != 3:
-        print("Please enter arguments: <ip> <port>")
+        print("Please enter client arguments: <ip> <port>")
         exit()
     ip = str(sys.argv[1])
     port = int(sys.argv[2])

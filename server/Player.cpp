@@ -2,7 +2,15 @@
 
 Player::Player(int sock, string name) {
     socket = sock;
-    username = std::move(name);
+    username = name;
+
+    disconnected = false;
+    state = State::ST_INIT;
+}
+
+void Player::init() {
+    socket = 0;
+    username = "";
 
     disconnected = false;
     state = State::ST_INIT;

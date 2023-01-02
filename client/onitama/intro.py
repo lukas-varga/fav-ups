@@ -47,17 +47,19 @@ def login(net: Network):
     login_btn = Button(win, text="Login", width=10, height=1, bg=DARK_COLOR, font=(FONT, 12), command=login_with_args)
     login_btn.pack(pady=5)
 
-    # # Set close button
-    # logout_with_args = partial(logout_btn_pressed, net, username_str_var)
-    # logout_btn = Button(win, text="Logout", width=10, height=1, bg=DARK_COLOR, font=(FONT, 12), command=logout_with_args)
-    # logout_btn.pack(pady=5)
-
     # Set close button
     close_with_args = partial(close_btn_pressed, win)
     close_btn = Button(win, text="Close", width=10, height=1, bg=DARK_COLOR, font=(FONT, 12), command=close_with_args)
     close_btn.pack()
 
     # #TODO delete on release
+
+    # # Set close button
+    # logout_with_args = partial(logout_btn_pressed, net, username_str_var)
+    # logout_btn = Button(win, text="Logout", width=10, height=1, bg=DARK_COLOR, font=(FONT, 12), command=logout_with_args)
+    # logout_btn.pack(pady=5)
+
+
     # s = "abcdefghijklmnopqrstuvwxyz"
     # tmp = random.choice(s) + random.choice(s) + random.choice(s) + random.choice(s) + random.choice(s) + random.choice(s)+ random.choice(s)+ random.choice(s)
     # username_entry.insert(0, tmp)
@@ -105,16 +107,17 @@ def login(net: Network):
                     waiting_label.pack(pady=30)
 
                 # FAILED_LOGIN | *detailed_message*
-                elif cmd == Cmd.FAILED_LOGIN.value:
-                    print("Intro: Failed login!")
-                    messagebox.showinfo("Failed Login", data[1])
+                elif cmd == Cmd.FAILED.value:
+                    print("Intro: FAILED!")
+                    messagebox.showinfo(Cmd.FAILED.value, data[1])
 
                 # START | P1 (black) | P1 (white) | 5x cards
                 elif cmd == Cmd.START.value:
                     print("Intro: START!")
                     # Waiting is not needed anymore
+                    if win_wait.winfo_exists():
+                        win_wait.destroy()
 
-                    win_wait.destroy()
                     # Hide Login screen
                     win.withdraw()
                     # Play game
@@ -123,12 +126,9 @@ def login(net: Network):
                     win.deiconify()
 
                     if rematch:
-                        rematch_mess = parser.prepare_rematch(username)
-                        net.send_data(rematch_mess)
+                        again_mess = parser.prepare_login(username)
+                        net.send_data(again_mess)
                     else:
-                        # TODO logout
-                        logout_mess = parser.prepare_logout(username)
-                        net.send_data(logout_mess)
                         exiting = True
 
                 # RECONNECT
@@ -146,23 +146,23 @@ def login(net: Network):
                         for r in range(8, len(data)):
                             rec_data.append(data[r])
 
+                        # Same as START without Waiting Window!!!
                         # Hide Login screen
                         win.withdraw()
-                        # Play game
                         rematch = game.play(net, start_like, username, rec_data)
                         # Show Login screen
                         win.deiconify()
 
                         if rematch:
-                            rematch_mess = parser.prepare_rematch(username)
-                            net.send_data(rematch_mess)
+                            again_mess = parser.prepare_login(username)
+                            net.send_data(again_mess)
                         else:
                             exiting = True
                     else:
                         print("ERR: RECONNECT in Intro does not have right number of parameters!")
 
                 elif cmd == "WRONG_DATA":
-                    print("WRONG_DATA", f"Data are not parsable!")
+                    print("ERR: WRONG_DATA", f"Data are not parsable!")
                 else:
                     print(f"ERR: Unknown message in Intro")
 
@@ -181,11 +181,6 @@ def login_btn_pressed(net: Network, username_str_var):
     data = parser.prepare_login(username)
     net.send_data(data)
 
-"""
-Play button pressed
-"""
-def logout_btn_pressed(net: Network, username_str_var):
-    pass
 
 """
 Define a function to close the window

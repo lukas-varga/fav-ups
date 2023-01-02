@@ -17,6 +17,7 @@ public:
     State state;
 
     Player(int sock, string name);
+    void init();
 };
 
 

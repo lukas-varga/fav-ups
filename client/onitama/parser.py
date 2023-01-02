@@ -9,11 +9,9 @@ class Cmd(Enum):
     LOGIN = "LOGIN"
     MAKE_MOVE = "MAKE_MOVE"
     MAKE_PASS = "MAKE_PASS"
-    REMATCH = "REMATCH"
-    LOGOUT = "LOGOUT"
     # Server side
     WAITING = "WAITING"
-    FAILED_LOGIN = "FAILED_LOGIN"
+    FAILED = "FAILED"
     START = "START"
     MOVE_WAS_MADE = "MOVE_WAS_MADE"
     PASS_WAS_MADE = "PASS_WAS_MADE"
@@ -51,8 +49,3 @@ def prepare_make_move(card, s_row, s_col, e_row, e_col):
 def prepare_make_pass(card):
     return f"{Cmd.MAKE_PASS.value}{SPL}{card}{END}"
 
-def prepare_rematch(username):
-    return f"{Cmd.REMATCH.value}{SPL}{username}{END}"
-
-def prepare_logout(username):
-    return f"{Cmd.LOGOUT.value}{SPL}{username}{END}"

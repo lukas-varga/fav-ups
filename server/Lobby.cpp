@@ -9,15 +9,26 @@ Lobby::Lobby() {
 
 bool Lobby::find_lobby(int GAME_NUM, Game * game_arr[], Player * player) {
     Game * game;
-    for (int i = 0; i < GAME_NUM; i++) {
+
+    // Try to connect to room where some people are waiting
+    for (int i = 0; i < GAME_NUM; ++i) {
+        game = game_arr[i];
+        // Enter lobby or/and start game
+        if (!game->is_active and (game->black_p != nullptr or game->white_p != nullptr)) {
+            // Cmd::WAITING + Cmd::PLAY
+            // Start new game
+            game->enter_game(player);
+            return true;
+        }
+    }
+
+    // Create new game room
+    for (int i = 0; i < GAME_NUM; ++i) {
         game = game_arr[i];
         // Enter lobby or/and start game
         if (!game->is_active) {
             // Cmd::WAITING + Cmd::PLAY
-            if (game->white_p == player or game->black_p == player){
-                cout << "ERR: Cannot enter game against myself!" << endl;
-                continue;
-            }
+            // Create Room
             game->enter_game(player);
             return true;
         }
@@ -160,7 +171,7 @@ void Lobby::inform_reconnecting(int GAME_NUM, Game * game_arr[], string recon_us
 
 void Lobby::lobby_full(int fd) {
     send_text = "";
-    send_text.append(Command::name(Cmd::FAILED_LOGIN))
+    send_text.append(Command::name(Cmd::FAILED))
             .append(1, Help::SPL)
             .append("All lobby are full!")
             .append(1, Help::END);
@@ -170,18 +181,17 @@ void Lobby::lobby_full(int fd) {
 
 void Lobby::forbidden_chars(int fd) {
     send_text = "";
-    send_text.append(Command::name(Cmd::FAILED_LOGIN))
+    send_text.append(Command::name(Cmd::FAILED))
             .append(1, Help::SPL)
             .append("Name include chars | or \\0)")
             .append(1, Help::END);
     send(fd, send_text.data(), send_text.size(), 0);
     Help::send_log(fd, send_text);
-
 }
 
 void Lobby::name_too_long(int fd, int NAME_LENGTH) {
     send_text = "";
-    send_text.append(Command::name(Cmd::FAILED_LOGIN))
+    send_text.append(Command::name(Cmd::FAILED))
             .append(1, Help::SPL)
             .append("Name is too long (>" + to_string(NAME_LENGTH) + ")!")
             .append(1, Help::END);
@@ -191,7 +201,7 @@ void Lobby::name_too_long(int fd, int NAME_LENGTH) {
 
 void Lobby::empty_login(int fd) {
     send_text = "";
-    send_text.append(Command::name(Cmd::FAILED_LOGIN))
+    send_text.append(Command::name(Cmd::FAILED))
             .append(1, Help::SPL)
             .append("Name must no be empty!")
             .append(1, Help::END);
@@ -200,7 +210,7 @@ void Lobby::empty_login(int fd) {
 }
 
 void Lobby::already_in_use(int fd) {
-    send_text.append(Command::name(Cmd::FAILED_LOGIN))
+    send_text.append(Command::name(Cmd::FAILED))
             .append(1, Help::SPL)
             .append("Name is already in use!")
             .append(1, Help::END);
@@ -208,14 +218,20 @@ void Lobby::already_in_use(int fd) {
     Help::send_log(fd, send_text);
 }
 
-void Lobby::rematch_name(int fd) {
-    send_text.append(Command::name(Cmd::FAILED_LOGIN))
+void Lobby::wrong_num_of_args(int fd) {
+    send_text.append(Command::name(Cmd::FAILED))
             .append(1, Help::SPL)
-            .append("Rematch name does not match!")
+            .append("Wrong num of args!")
             .append(1, Help::END);
     send(fd, send_text.data(), send_text.size(), 0);
     Help::send_log(fd, send_text);
 }
 
-
-
+void Lobby::not_parsable(int fd) {
+    send_text.append(Command::name(Cmd::FAILED))
+            .append(1, Help::SPL)
+            .append("Message is not parsable!")
+            .append(1, Help::END);
+    send(fd, send_text.data(), send_text.size(), 0);
+    Help::send_log(fd, send_text);
+}

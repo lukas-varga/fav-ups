@@ -96,7 +96,6 @@ def play(net: Network, data, username, rec_data):
         # Event in pygame
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
-                # TODO logout
                 running = False
 
             # Mouse handler Only current player can play
@@ -235,11 +234,10 @@ def play(net: Network, data, username, rec_data):
                         elif gs.enemy_name == gs.black_name:
                             gs.black_disconnected = True
                     else:
-                        print(
-                            "ERR: DISCONNECTED in Game not possible!")
+                        print("ERR: DISCONNECTED in Game not possible!")
 
                 elif cmd == "WRONG_DATA":
-                    print("WRONG_DATA", f"Data are not parsable!")
+                    print("ERR: WRONG_DATA", f"Data are not parsable!")
 
                 else:
                     print(f"ERR: Unknown message in Game!")

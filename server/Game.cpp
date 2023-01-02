@@ -171,7 +171,7 @@ void Game::move_was_made(const string& card, int st_row, int st_col, int end_row
     Help::send_log(white_p->socket, send_text);
 }
 
-bool Game::check_pass() {
+bool Game::valid_pass() {
     vector<vector<tuple<int, int>>> pos_card_1_2;
     int new_r, new_c;
     string piece_color, curr_piece;
@@ -208,6 +208,7 @@ bool Game::check_pass() {
                         if(new_r >= 0 and new_r <= 4 and new_c >= 0 and new_c <= 4) {
                             // Not to friendly figures
                             if (board[new_r][new_c].substr(0,1) != piece_color){
+                                cout << "Pass was invalid for some reason!" << endl;
                                 return false;
                             }
                         }
@@ -216,6 +217,8 @@ bool Game::check_pass() {
             }
         }
     }
+
+    cout << "Pass was OK!" << endl;
     return true;
 }
 

@@ -12,11 +12,9 @@ enum Cmd {
     LOGIN,
     MAKE_MOVE,
     MAKE_PASS,
-    REMATCH,
-    LOGOUT,
     // Server side
     WAITING,
-    FAILED_LOGIN,
+    FAILED,
     START,
     MOVE_WAS_MADE,
     PASS_WAS_MADE,

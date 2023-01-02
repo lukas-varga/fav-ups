@@ -25,7 +25,7 @@ using namespace std;
 
 int main (int argc, char** argv){
     if (argc != 3){
-        cout << "Please enter arguments: <port> <num_players>" << endl;
+        cout << "Please enter server arguments: <port> <num_players>" << endl;
         exit(0);
     }
 
@@ -107,7 +107,6 @@ int main (int argc, char** argv){
 
         Lobby * lobby;
         Player * player;
-        int index;
         Game * game;
 
         tests = client_socks;
@@ -139,26 +138,14 @@ int main (int argc, char** argv){
                     send(client_socket, snd.data(), snd.size(), 0);
                     Help::send_log(client_socket, snd);
 
-                    // Check for reconnect
                     Player * p;
-                    bool reconnect = false;
+                    // Looking for empty Player slot
                     for (i = 0; i < CLIENT_NUM; i++){
                         p = player_arr[i];
-                        if(p->socket == client_socket){
-                            printf("Socket already in array at index %d\n" , i);
-                            reconnect = true;
+                        if(p->socket == 0 and p->username.empty()){
+                            p->socket = client_socket;
+                            printf("Adding to list of sockets at index %d\n" , i);
                             break;
-                        }
-                    }
-                    // Looking for empty Player slot
-                    if (!reconnect){
-                        for (i = 0; i < CLIENT_NUM; i++){
-                            p = player_arr[i];
-                            if(p->socket == 0){
-                                p->socket = client_socket;
-                                printf("Adding to list of sockets at index %d\n" , i);
-                                break;
-                            }
                         }
                     }
                 }
@@ -177,7 +164,6 @@ int main (int argc, char** argv){
                         for (i = 0; i < CLIENT_NUM; i++) {
                             if (fd == player_arr[i]->socket){
                                 player = player_arr[i];
-                                index = i;
                                 break;
                             }
                         }
@@ -186,32 +172,44 @@ int main (int argc, char** argv){
                         if (player != nullptr) {
                             // Not logged player -> Delete Player Record completely
                             if (player->username.empty()) {
-                                player_arr[index] = new Player(0, "");
+                                cout << "Player with empty login Logged Out!" << endl;
+                                player->init();
                             }
+                            // Already logged
                             else {
-                                // Already logged
                                 for (i = 0; i < GAME_NUM; ++i) {
                                     game = game_arr[i];
-                                    if (game->white_p == player or game->black_p == player) {
-                                        // In Game -> Remember NAME for reconnect
-                                        if (game->is_active) {
+                                    // In Game -> Remember NAME for reconnect but forgets socket
+                                    if (game->is_active and (game->white_p == player or game->black_p == player)) {
+                                        // Second player is already disconnected
+                                        if(game->black_p->disconnected or game->white_p->disconnected) {
+                                            game->black_p->init();
+                                            game->white_p->init();
+                                            game->init();
+                                            cout << "Both players logged out and game finished!" << endl;
+                                        }
+                                        // Remember the Name - Fort Minor
+                                        else{
                                             player->socket = 0;
+                                            // player -> SAME USERNAME
                                             player->disconnected = true;
-                                            player->state = State_Machine::allowed_transition(player->state,Event::EV_DISC);
+                                            player->state = State_Machine::allowed_transition(player->state,
+                                                                                              Event::EV_DISC);
                                             lobby->inform_disconnecting(GAME_NUM, game_arr, player->username);
+                                            cout << "Player " << player->username << " has unfinished game!" << endl;
                                         }
-                                        // Waiting room -> Delete Player Record completely and REMOVE the GAME
-                                        else {
-                                            game_arr[i] = new Game();
-                                            player_arr[i] = new Player(0, "");
-                                        }
-                                        break;
+                                    }
+                                    // Waiting room -> Delete Player Record completely and REMOVE the GAME
+                                    else if (!game->is_active and (game->white_p == player or game->black_p == player)) {
+                                        player->init();
+                                        game->init();
+                                        cout << "Player " << player->username <<" logged out and Room closed!" << endl;
                                     }
                                 }
                             }
                         }
                         else{
-                            cout << "ERR: Player connected but not found in array of players (CLOSING)!" << endl;
+                            cerr << "FATAL_ERR: Player connected but not found in array of players (CLOSING)!" << endl;
                         }
 
                         // Remove closed fd
@@ -227,7 +225,6 @@ int main (int argc, char** argv){
                         for (i = 0; i < CLIENT_NUM; i++) {
                             if (fd == player_arr[i]->socket){
                                 player = player_arr[i];
-                                index = i;
                                 break;
                             }
                         }
@@ -245,39 +242,41 @@ int main (int argc, char** argv){
                                     if (!login_name.empty()){
                                         bool name_in_use = false;
                                         bool reconnect = false;
-                                        int temp_socket;
 
                                         // Check for reconnect
                                         for (i = 0; i < GAME_NUM; ++i){
                                             game = game_arr[i];
                                             if (game->is_active){
                                                 // Remove player login but take socket number for game
-                                                if(game->black_p->disconnected or game->white_p->disconnected) {
-                                                    // Reconnect attempt with login
-                                                    if (game->black_p->username == login_name
-                                                            or game->white_p->username == login_name) {
-                                                        for (i = 0; i < CLIENT_NUM; ++i){
-                                                            Player * p = player_arr[i];
-                                                            if (p->username == login_name and p != player){
-                                                                temp_socket = player->socket;
-                                                                player_arr[i]->socket = temp_socket;
-                                                                player_arr[i]->disconnected = false;
-                                                                player_arr[i]->state = State_Machine::allowed_transition(player_arr[i]->state, Event::EV_RECON);
+                                                if (game->black_p->username == login_name and game->black_p->disconnected ) {
+                                                    game->black_p->socket = player->socket;
+                                                    game->black_p->disconnected = false;
+                                                    game->black_p->state = State_Machine::allowed_transition(
+                                                            game->black_p->state, Event::EV_RECON);
 
-                                                                lobby->reconnect(GAME_NUM, game_arr, login_name, temp_socket);
-                                                                lobby->inform_reconnecting(GAME_NUM, game_arr, login_name);
+                                                    lobby->reconnect(GAME_NUM, game_arr, login_name, player->socket);
+                                                    lobby->inform_reconnecting(GAME_NUM, game_arr, login_name);
+                                                    player->init();
+                                                    reconnect = true;
+                                                    break;
 
-                                                                break;
-                                                            }
-                                                        }
+                                                }
+                                                else if(game->white_p->username == login_name and game->white_p->disconnected) {
+                                                    game->white_p->socket = player->socket;
+                                                    game->white_p->disconnected = false;
+                                                    game->white_p->state = State_Machine::allowed_transition(
+                                                            game->white_p->state, Event::EV_RECON);
 
-                                                        player_arr[index] = new Player(0, "");
-                                                        reconnect = true;
-                                                    }
+                                                    lobby->reconnect(GAME_NUM, game_arr, login_name,
+                                                                     player->socket);
+                                                    lobby->inform_reconnecting(GAME_NUM, game_arr, login_name);
+                                                    player->init();
+                                                    reconnect = true;
+                                                    break;
+
                                                 }
                                             }
                                         }
-
 
                                         // Not reconnect try to login as new user
                                         if (!reconnect){
@@ -320,7 +319,7 @@ int main (int argc, char** argv){
                                     }
                                 }
                                 else{
-                                    cout << "ERR: Wrong num of args!" << endl;
+                                    lobby->wrong_num_of_args(fd);
                                 }
                             }
                             else if (cmd == Command::name(Cmd::MAKE_MOVE)){
@@ -348,8 +347,18 @@ int main (int argc, char** argv){
                                                     }
                                                     else {
                                                         game->game_over();
-                                                        // Refresh / Reset the game so anyone can enter again
-                                                        game_arr[i]->init();
+
+                                                        // Rematch
+                                                        int old_sock = game->black_p->socket;
+                                                        game->black_p->init();
+                                                        game->black_p->socket = old_sock;
+
+                                                        old_sock = game->white_p->socket;
+                                                        game->white_p->init();
+                                                        game->white_p->socket = old_sock;
+
+                                                        cout << "Refresh / Reset the game so anyone can enter again!" << endl;
+                                                        game->init();
                                                     }
                                                 }
                                                 else {
@@ -367,7 +376,7 @@ int main (int argc, char** argv){
                                     }
                                 }
                                 else{
-                                    cout << "ERR: Wrong num of args!" << endl;
+                                    lobby->wrong_num_of_args(fd);
                                 }
                             }
                             else if (cmd == Command::name(Cmd::MAKE_PASS)){
@@ -380,7 +389,7 @@ int main (int argc, char** argv){
                                                 and !game->white_p->disconnected) {
                                             try {
                                                 string card = data.at(1);
-                                                bool valid_swap = game->check_pass();
+                                                bool valid_swap = game->valid_pass();
                                                 if (valid_swap) {
                                                     player->state = State_Machine::allowed_transition(player->state, Event::EV_MOVE);
                                                     game->pass_was_made(card);
@@ -401,34 +410,20 @@ int main (int argc, char** argv){
                                     }
                                 }
                                 else{
-                                    cout << "ERR: Wrong num of args!" << endl;
-                                }
-                            }
-                            else if (cmd == Command::name(Cmd::REMATCH)){
-                                if (data.size() == 1 + 1){
-                                    if (player->username == data[1]){
-                                        bool found = lobby->find_lobby(GAME_NUM, game_arr, player);
-                                        if(!found){
-                                            lobby->lobby_full(fd);
-                                        }
-                                    }
-                                    else{
-                                        lobby->rematch_name(fd);
-                                    }
-                                }
-                                else{
-                                    cout << "ERR: Wrong num of args!" << endl;
+                                    lobby->wrong_num_of_args(fd);
                                 }
                             }
                             else if (cmd == "WRONG_DATA") {
-                                cout << "Wrong data -> server do not know how to respond!" << endl;
+                                cerr << "ERR: Wrong data -> server do not know how to respond!" << endl;
+                                lobby->not_parsable(fd);
                             }
                             else{
-                                cout << "ERR: Unknown message in Server!"<< endl;
+                                cerr << "ERR: Unknown message in Server!"<< endl;
+                                lobby->not_parsable(fd);
                             }
                         }
                         else{
-                            cout << "ERR: Player connected but not found in array of players (READING)!" << endl;
+                            cerr << "FATAL_ERR: Player connected but not found in array of players (READING)!" << endl;
                         }
                     }
                 }
