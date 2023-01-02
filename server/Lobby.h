@@ -13,18 +13,12 @@ public:
     Lobby();
 
     bool find_lobby(int GAME_NUM, Game * game_arr[], Player * player);
+    void failed_because(int fd, string message);
+    void attempt_disconnect(int GAME_NUM, Game * game_arr[], Player * player, int fd, fd_set & client_socks);
+
     void reconnect(int GAME_NUM, Game * game_arr[], string username, int socket);
     void inform_disconnecting(int GAME_NUM, Game * game_arr[], string disc_username);
     void inform_reconnecting(int GAME_NUM, Game * game_arr[], string recon_username);
-
-    void lobby_full(int fd);
-    void forbidden_chars(int fd);
-    void name_too_long(int fd, int NAME_LENGTH);
-    void empty_login(int fd);
-    void already_in_use(int fd);
-
-    void wrong_num_of_args(int fd);
-    void not_parsable(int fd);
 };
 
 

@@ -27,15 +27,17 @@ vector<string> Help::parse(const string& msg, char del) {
             cout << "Command not found!" << endl;
             throw exception();
         }
+
+        // Valid message
+        return args;
     }
     catch (const exception &exc){
-        args = {"WRONG_DATA"};
-        cerr << exc.what();
+        cerr << exc.what() << endl;
         cout << "Not defined message received from client!" << endl;
-    }
 
-    // Valid message
-    return args;
+        args = {"WRONG_DATA"};
+        return args;
+    }
 }
 
 void Help::send_log(int fd, const string& snd){

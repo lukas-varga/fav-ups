@@ -15,6 +15,7 @@ map<Cmd,string> Command::enum_map = map<Cmd,string>{
         {Cmd::GAME_OVER ,     "GAME_OVER"},
         {Cmd::RECONNECT ,     "RECONNECT"},
         {Cmd::DISCONNECTED ,  "DISCONNECTED"},
+        {Cmd::LOGOUT,         "LOGOUT"},
 };
 
 string Command::name(Cmd cmd) {

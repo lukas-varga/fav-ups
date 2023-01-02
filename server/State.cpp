@@ -21,12 +21,12 @@ State State_Machine::allowed_transition(State state, Event event) {
 
         // Disconnect
         {tuple<State, Event>(State::ST_INIT,Event::EV_DISC),       State::ST_INIT},
-        {tuple<State, Event>(State::ST_WAITING,Event::EV_DISC),    State::ST_WAITING},
+        {tuple<State, Event>(State::ST_WAITING,Event::EV_DISC),    State::ST_INIT},
         {tuple<State, Event>(State::ST_PLAYING, Event::EV_DISC),   State::ST_PLAYING},
 
         // Reconnect
         {tuple<State, Event>(State::ST_INIT,Event::EV_RECON),      State::ST_INIT},
-        {tuple<State, Event>(State::ST_WAITING,Event::EV_RECON),   State::ST_WAITING},
+        {tuple<State, Event>(State::ST_WAITING,Event::EV_RECON),   State::ST_INIT},
         {tuple<State, Event>(State::ST_PLAYING,Event::EV_RECON),   State::ST_PLAYING},
     };
 

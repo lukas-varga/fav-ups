@@ -46,8 +46,8 @@ void Game::enter_game(Player * player){
                 .append(1, Help::END);
         send(player->socket, send_text.data(), send_text.size(), 0);
         Help::send_log(player->socket, send_text);
-        cout << "Player1 (Black) " << player->username << " has entered lobby!" << endl;
 
+        cout << "Player1 (Black) " << player->username << " has entered lobby!" << endl;
     }
     else if(white_p == nullptr){
         white_p = player;
@@ -59,6 +59,7 @@ void Game::enter_game(Player * player){
                 .append(1, Help::END);
         send(player->socket, send_text.data(), send_text.size(), 0);
         Help::send_log(player->socket, send_text);
+
         cout << "Player2 (White) " << player->username << " has entered lobby!" << endl;
 
         // GAME started
@@ -92,7 +93,7 @@ void Game::start_game(){
 
     send(white_p->socket, send_text.data(), send_text.size(), 0);
     Help::send_log(white_p->socket, send_text);
-    white_p->state = State_Machine::allowed_transition(black_p->state, Event::EV_PLAY);
+    white_p->state = State_Machine::allowed_transition(white_p->state, Event::EV_PLAY);
 
     white_to_move = true;
     curr_p = white_p;
@@ -235,24 +236,14 @@ void Game::pass_was_made(const string& card) {
     Help::send_log(white_p->socket, send_text);
 }
 
-void Game::invalid_move() {
+void Game::invalid_move(string message, int fd) {
     send_text = "";
     send_text.append(Command::name(Cmd::INVALID_MOVE))
             .append(1, Help::SPL)
-            .append("Move or pass is not allowed!")
+            .append(message)
             .append(1, Help::END);
-    send(curr_p->socket, send_text.data(), send_text.size(), 0);
-    Help::send_log(curr_p->socket, send_text);
-}
-
-void Game::move_not_parsable() {
-    send_text = "";
-    send_text.append(Command::name(Cmd::INVALID_MOVE))
-            .append(1, Help::SPL)
-            .append("Move data are not parsable!")
-            .append(1, Help::END);
-    send(curr_p->socket, send_text.data(), send_text.size(), 0);
-    Help::send_log(curr_p->socket, send_text);
+    send(fd, send_text.data(), send_text.size(), 0);
+    Help::send_log(fd, send_text);
 }
 
 void Game::shuffle_cards(const string& card) {
@@ -306,6 +297,15 @@ void Game::game_over() {
     send(black_p->socket, send_text.data(), send_text.size(), 0);
     Help::send_log(black_p->socket, send_text);
     cout << "End of the game" << endl;
+
+    // Rematch
+    int old_sock = black_p->socket;
+    black_p->init();
+    black_p->socket = old_sock;
+
+    old_sock = white_p->socket;
+    white_p->init();
+    white_p->socket = old_sock;
 }
 
 

@@ -35,17 +35,13 @@ public:
     bool valid_pass();
     void pass_was_made(const string& card);
 
-    void invalid_move();
-    void move_not_parsable();
+    void invalid_move(string message, int fd);
 
     void shuffle_cards(const string& card);
     void switch_players();
 
     bool is_end();
     void game_over();
-
-
-
 
 };
 

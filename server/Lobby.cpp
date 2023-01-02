@@ -36,6 +36,41 @@ bool Lobby::find_lobby(int GAME_NUM, Game * game_arr[], Player * player) {
     return false;
 }
 
+void Lobby::attempt_disconnect(int GAME_NUM, Game * game_arr[], Player * player, int fd, fd_set & client_socks) {
+    int i;
+    Game * game;
+    player->wrong_counter++;
+    int NUM_OF_ATTEMPTS = 5;
+
+    if(player->wrong_counter >= NUM_OF_ATTEMPTS){
+        for (i=0; i<GAME_NUM; ++i){
+            game = game_arr[i];
+            if(game->is_active){
+                if(game->black_p == player) {
+                    game->winner_p = game->white_p;
+                    game->game_over();
+                    game->init();
+                    cout << "Game reset!" << endl;
+                }
+                else if (game->white_p == player){
+                    game->winner_p = game->black_p;
+                    game->game_over();
+                    game->init();
+                    cout << "Game reset!" << endl;
+                }
+            }
+        }
+
+        cout << "Disconnect on 3 wrong attempts was made!" << endl;
+        player->init();
+
+        // Remove closed fd
+        close(fd);
+        FD_CLR(fd, &client_socks);
+        printf("Removing client (3 wrong attempts) on fd %d\n", fd);
+    }
+}
+
 //RECONNECT black_p | white_p | (5x) cards | is_player_white | white_to_move | (25x) "wP" "wK" "--"
 void Lobby::reconnect(int GAME_NUM, Game * game_arr[], string username, int socket) {
     int i, row, col, last_piece;
@@ -167,70 +202,11 @@ void Lobby::inform_reconnecting(int GAME_NUM, Game * game_arr[], string recon_us
     }
 }
 
-// Error messages while LOGIN and REMATCH
-
-void Lobby::lobby_full(int fd) {
+void Lobby::failed_because(int fd, string message){
     send_text = "";
     send_text.append(Command::name(Cmd::FAILED))
             .append(1, Help::SPL)
-            .append("All lobby are full!")
-            .append(1, Help::END);
-    send(fd, send_text.data(), send_text.size(), 0);
-    Help::send_log(fd, send_text);
-}
-
-void Lobby::forbidden_chars(int fd) {
-    send_text = "";
-    send_text.append(Command::name(Cmd::FAILED))
-            .append(1, Help::SPL)
-            .append("Name include chars | or \\0)")
-            .append(1, Help::END);
-    send(fd, send_text.data(), send_text.size(), 0);
-    Help::send_log(fd, send_text);
-}
-
-void Lobby::name_too_long(int fd, int NAME_LENGTH) {
-    send_text = "";
-    send_text.append(Command::name(Cmd::FAILED))
-            .append(1, Help::SPL)
-            .append("Name is too long (>" + to_string(NAME_LENGTH) + ")!")
-            .append(1, Help::END);
-    send(fd, send_text.data(), send_text.size(), 0);
-    Help::send_log(fd, send_text);
-}
-
-void Lobby::empty_login(int fd) {
-    send_text = "";
-    send_text.append(Command::name(Cmd::FAILED))
-            .append(1, Help::SPL)
-            .append("Name must no be empty!")
-            .append(1, Help::END);
-    send(fd, send_text.data(), send_text.size(), 0);
-    Help::send_log(fd, send_text);
-}
-
-void Lobby::already_in_use(int fd) {
-    send_text.append(Command::name(Cmd::FAILED))
-            .append(1, Help::SPL)
-            .append("Name is already in use!")
-            .append(1, Help::END);
-    send(fd, send_text.data(), send_text.size(), 0);
-    Help::send_log(fd, send_text);
-}
-
-void Lobby::wrong_num_of_args(int fd) {
-    send_text.append(Command::name(Cmd::FAILED))
-            .append(1, Help::SPL)
-            .append("Wrong num of args!")
-            .append(1, Help::END);
-    send(fd, send_text.data(), send_text.size(), 0);
-    Help::send_log(fd, send_text);
-}
-
-void Lobby::not_parsable(int fd) {
-    send_text.append(Command::name(Cmd::FAILED))
-            .append(1, Help::SPL)
-            .append("Message is not parsable!")
+            .append(message)
             .append(1, Help::END);
     send(fd, send_text.data(), send_text.size(), 0);
     Help::send_log(fd, send_text);

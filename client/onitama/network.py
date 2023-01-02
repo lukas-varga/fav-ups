@@ -1,6 +1,5 @@
 import select
 import socket
-from socket import error as socket_error
 from tkinter import messagebox
 
 """
@@ -12,10 +11,21 @@ class Network(object):
         # For this to work on your machine this must be equal to the ipv4 address of the machine running the server
         # You can find this address by typing ipconfig in CMD and copying the ipv4 address. Again this must be the
         # servers ipv4 address. This field will be the same for all your clients.
-        self.MAX_BUFF = 2048
+        self.MAX_BUFF = 1024
+        self.MAX_INPUT = 255
         self.host = ip
         self.port = port
         self.addr = (self.host, self.port)
+
+        self.NUM_OF_ATTEMPTS = 5
+        self.wrong_counter = 0
+
+        # Not to block server
+        # self.server.setblocking(False)
+
+        # Timeout
+        # self.timeout_seconds = 2
+        # self.server.settimeout(self.timeout_seconds)
 
     """
     Connect to server
@@ -25,8 +35,8 @@ class Network(object):
             self.server.connect(self.addr)
             print("Connected!")
 
-            welcome_rcv = self.recv_data()
-            print(welcome_rcv)
+            # welcome_rcv = self.recv_data()
+            # print(welcome_rcv)
 
             return 0
         except socket.error as e:
@@ -72,22 +82,27 @@ class Network(object):
             print(e)
             return ""
 
+    """ 
+    Read from the socket, stuffing data into the buffer.
+    Returns True when a full packet has been read into the buffer
+    """
     def network_data_arrived(self, socket_buffer):
-        """ Read from the socket, stuffing data into the buffer.
-            Returns True when a full packet has been read into the buffer """
+
         result = False
         socks = [self.server]
 
         try:
             # tiny read-timeout
             in_, out_, exc_ = select.select(socks, [], [], 0)
-            # has any data arrived?
-            if in_.count(self.server) > 0:
-                incoming_message = self.recv_data()
 
+            # has any data arrived?
+            if in_.count(socks[0]) > 0:
+                incoming_message = self.recv_data()
                 # Server is disconnected
                 if len(incoming_message) == 0:
-                    raise Exception()
+                    raise Exception("Cannot connect to server!")
+                if len(incoming_message) > self.MAX_INPUT:
+                    raise Exception("Too big data recv -> disconnect!")
 
                 # Split messages by null character
                 records = incoming_message.split("\x00")
@@ -98,9 +113,15 @@ class Network(object):
                     print(f"Appended to recv buffer: {record}")
                 # if len(socket_buffer) >= self.MAX_BUFF:
                 result = True
-        except Exception:
+
+        except Exception as e:
             # No data gathered
-            messagebox.showinfo("Server Error", "500 - Disconnected!")
+            print(e)
+            messagebox.showinfo("Server Error", "Disconnected!")
             result = None
+        # except socket.timeout as e:
+        #     print(e)
+        #     messagebox.showinfo("Server Error", "Timeout!")
+        #     result = False
 
         return result

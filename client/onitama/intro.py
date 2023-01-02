@@ -7,8 +7,11 @@ import game
 from tkinter import *
 from tkinter import messagebox
 from functools import partial
+
 #TODO delete
+
 import random
+
 #TODO delete
 
 
@@ -54,16 +57,11 @@ def login(net: Network):
 
     # #TODO delete on release
 
-    # # Set close button
-    # logout_with_args = partial(logout_btn_pressed, net, username_str_var)
-    # logout_btn = Button(win, text="Logout", width=10, height=1, bg=DARK_COLOR, font=(FONT, 12), command=logout_with_args)
-    # logout_btn.pack(pady=5)
-
-
     # s = "abcdefghijklmnopqrstuvwxyz"
-    # tmp = random.choice(s) + random.choice(s) + random.choice(s) + random.choice(s) + random.choice(s) + random.choice(s)+ random.choice(s)+ random.choice(s)
+    # tmp = random.choice(s) + random.choice(s) + random.choice(s)
     # username_entry.insert(0, tmp)
     # login_btn_pressed(net, username_str_var)
+
     # # TODO delete on release
 
     global exiting
@@ -91,45 +89,51 @@ def login(net: Network):
 
                 # WAITING | username
                 if cmd == Cmd.WAITING.value:
-                    print("Intro: Waiting!")
-                    username_entry['state'] = DISABLED
-                    login_btn['state'] = DISABLED
+                    if len(data) == 2:
+                        username_entry['state'] = DISABLED
+                        login_btn['state'] = DISABLED
 
-                    win_wait = Toplevel(win)
-                    win_wait.geometry(f"{WIDTH_LOGIN}x{HEIGHT_LOGIN // 3}")
-                    win_wait.title("Waiting")
-                    win_wait.config(bg=BACKGROUND_COLOR)
-                    win_wait.resizable(width=False, height=False)
-                    win_wait.protocol("WM_DELETE_WINDOW", do_nothing)
+                        win_wait = Toplevel(win)
+                        win_wait.geometry(f"{WIDTH_LOGIN}x{HEIGHT_LOGIN // 3}")
+                        win_wait.title("Waiting")
+                        win_wait.config(bg=BACKGROUND_COLOR)
+                        win_wait.resizable(width=False, height=False)
+                        win_wait.protocol("WM_DELETE_WINDOW", do_nothing)
 
-                    # Set username label
-                    waiting_label = Label(win_wait, text="Waiting for opponent...", font=(FONT, 12), bg=BACKGROUND_COLOR)
-                    waiting_label.pack(pady=30)
+                        # Set username label
+                        waiting_label = Label(win_wait, text="Waiting for opponent...", font=(FONT, 12), bg=BACKGROUND_COLOR)
+                        waiting_label.pack(pady=30)
+                    else:
+                        exiting = parser.attempt_disconnect(net)
 
                 # FAILED_LOGIN | *detailed_message*
                 elif cmd == Cmd.FAILED.value:
-                    print("Intro: FAILED!")
-                    messagebox.showinfo(Cmd.FAILED.value, data[1])
+                    if len(data) == 2:
+                        messagebox.showinfo(Cmd.FAILED.value, data[1])
+                    else:
+                        exiting = parser.attempt_disconnect(net)
 
                 # START | P1 (black) | P1 (white) | 5x cards
                 elif cmd == Cmd.START.value:
-                    print("Intro: START!")
-                    # Waiting is not needed anymore
-                    if win_wait.winfo_exists():
-                        win_wait.destroy()
+                    if len(data) == 8:
+                        # Waiting is not needed anymore
+                        if win_wait.winfo_exists():
+                            win_wait.destroy()
 
-                    # Hide Login screen
-                    win.withdraw()
-                    # Play game
-                    rematch = game.play(net, data, username, None)
-                    # Show Login screen
-                    win.deiconify()
+                        # Hide Login screen
+                        win.withdraw()
+                        # Play game
+                        rematch = game.play(net, data, username, None)
+                        # Show Login screen
+                        win.deiconify()
 
-                    if rematch:
-                        again_mess = parser.prepare_login(username)
-                        net.send_data(again_mess)
+                        if rematch:
+                            again_mess = parser.prepare_login(username)
+                            net.send_data(again_mess)
+                        else:
+                            exiting = True
                     else:
-                        exiting = True
+                        exiting = parser.attempt_disconnect(net)
 
                 # RECONNECT
                 # black_p | white_p | (5x) cards |
@@ -160,11 +164,15 @@ def login(net: Network):
                             exiting = True
                     else:
                         print("ERR: RECONNECT in Intro does not have right number of parameters!")
+                        exiting = parser.attempt_disconnect(net)
 
                 elif cmd == "WRONG_DATA":
                     print("ERR: WRONG_DATA", f"Data are not parsable!")
+                    exiting = parser.attempt_disconnect(net)
+
                 else:
-                    print(f"ERR: Unknown message in Intro")
+                    print(f"ERR: Unknown message in Intro!")
+                    exiting = parser.attempt_disconnect(net)
 
         # Exiting to main menu by pressing Close
         if exiting:

@@ -22,6 +22,7 @@ enum Cmd {
     GAME_OVER,
     RECONNECT,
     DISCONNECTED,
+    LOGOUT,
 };
 
 class Command{

@@ -16,8 +16,11 @@ public:
     bool disconnected;
     State state;
 
+    int wrong_counter;
+
     Player(int sock, string name);
     void init();
+
 };
 
 

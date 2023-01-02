@@ -1,4 +1,5 @@
 from enum import Enum
+from network import Network
 
 
 SPL = '|'
@@ -19,6 +20,7 @@ class Cmd(Enum):
     GAME_OVER = "GAME_OVER"
     RECONNECT = "RECONNECT"
     DISCONNECTED = "DISCONNECTED"
+    LOGOUT = "LOGOUT"
 
 def is_enum(provided):
     for e in Cmd:
@@ -31,9 +33,9 @@ def parse(msg: str):
     try:
         res = msg.split(SPL)
         if len(res) < 2:
-            raise Exception()
+            raise Exception("Command should have at least one parameter!")
         elif not is_enum(res[0]):
-            raise Exception()
+            raise Exception("Not a defined Command!")
     except Exception as e:
         res = ["WRONG_DATA"]
         print(e)
@@ -49,3 +51,11 @@ def prepare_make_move(card, s_row, s_col, e_row, e_col):
 def prepare_make_pass(card):
     return f"{Cmd.MAKE_PASS.value}{SPL}{card}{END}"
 
+def attempt_disconnect(net: Network):
+    net.wrong_counter += 1
+    print("Wrong counter: ", net.wrong_counter)
+
+    if net.wrong_counter >= net.NUM_OF_ATTEMPTS:
+        return True
+
+    return False

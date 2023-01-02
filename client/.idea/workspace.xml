@@ -9,16 +9,16 @@
       <change beforePath="$PROJECT_DIR$/onitama/game.py" beforeDir="false" afterPath="$PROJECT_DIR$/onitama/game.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/onitama/intro.py" beforeDir="false" afterPath="$PROJECT_DIR$/onitama/intro.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/onitama/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/onitama/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/onitama/network.py" beforeDir="false" afterPath="$PROJECT_DIR$/onitama/network.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/onitama/parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/onitama/parser.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../server/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../server/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../server/Command.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../server/Command.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../server/Command.h" beforeDir="false" afterPath="$PROJECT_DIR$/../server/Command.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../server/Game.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../server/Game.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../server/Game.h" beforeDir="false" afterPath="$PROJECT_DIR$/../server/Game.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server/Help.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../server/Help.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../server/Lobby.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../server/Lobby.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../server/Lobby.h" beforeDir="false" afterPath="$PROJECT_DIR$/../server/Lobby.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../server/Player.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../server/Player.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../server/Player.h" beforeDir="false" afterPath="$PROJECT_DIR$/../server/Player.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server/State.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../server/State.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../server/server" beforeDir="false" afterPath="$PROJECT_DIR$/../server/server" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../server/server.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../server/server.cpp" afterDir="false" />
     </list>
@@ -59,20 +59,20 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/lukas/Documents/GitHub/fav-ups/client&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settings.project.statistic.project.settings&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "last_opened_file_path": "/home/lukas/Documents/GitHub/fav-ups/client",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "settings.editor.selected.configurable": "debugger.dataViews.python.type.renderers",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$" />
@@ -120,7 +120,7 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/onitama/main.py" />
-      <option name="PARAMETERS" value="127.0.0.1 60000" />
+      <option name="PARAMETERS" value="127.0.0.1 10000" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -245,7 +245,9 @@
       <workItem from="1672483226317" duration="3214000" />
       <workItem from="1672493662962" duration="1665000" />
       <workItem from="1672654692998" duration="8031000" />
-      <workItem from="1672666582558" duration="4370000" />
+      <workItem from="1672666582558" duration="16507000" />
+      <workItem from="1672688371103" duration="2788000" />
+      <workItem from="1672691258901" duration="5756000" />
     </task>
     <task id="LOCAL-00001" summary="Everything is working offline on one machinie yupii, needs to verify winning still">
       <created>1668450646046</created>
@@ -306,7 +308,7 @@
     <option name="LAST_COMMIT_MESSAGE" value="Add source link to cards and docs folder" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/client$main.coverage" NAME="main Coverage Results" MODIFIED="1672670287721" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/onitama" />
+    <SUITE FILE_PATH="coverage/client$main.coverage" NAME="main Coverage Results" MODIFIED="1672698606560" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/onitama" />
     <SUITE FILE_PATH="coverage/client$run.coverage" NAME="run Coverage Results" MODIFIED="1668633945893" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/client$game.coverage" NAME="game Coverage Results" MODIFIED="1669626589396" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/onitama" />
     <SUITE FILE_PATH="coverage/client$onitama_main.coverage" NAME="onitama_main Coverage Results" MODIFIED="1667492761832" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/onitama" />

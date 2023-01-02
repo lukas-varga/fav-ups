@@ -6,6 +6,8 @@ Player::Player(int sock, string name) {
 
     disconnected = false;
     state = State::ST_INIT;
+
+    wrong_counter = 0;
 }
 
 void Player::init() {
@@ -14,7 +16,10 @@ void Player::init() {
 
     disconnected = false;
     state = State::ST_INIT;
+
+    wrong_counter = 0;
 }
+
 
 
 

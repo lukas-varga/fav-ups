@@ -174,8 +174,8 @@ def play(net: Network, data, username, rec_data):
 
         # Incoming message from server
         server_rx_buffer = []
-        res = net.network_data_arrived(server_rx_buffer)
-        if res is None:
+        buff = net.network_data_arrived(server_rx_buffer)
+        if buff is None:
             running = False
             rematch = False
         else:
@@ -186,6 +186,9 @@ def play(net: Network, data, username, rec_data):
                 if cmd == Cmd.MOVE_WAS_MADE.value:
                     try:
                         print(f"Move was accepted by server and made in client!")
+                        if len(data) != 6:
+                            raise Exception("Server MOVE_WAS_MADE invalid!")
+
                         # Move OK -> switch cards and move piece
                         the_card = data[1]
                         start_tup = (int(data[2]), int(data[3]))
@@ -200,22 +203,33 @@ def play(net: Network, data, username, rec_data):
                         # Shuffle cards and swap players
                         gs.shuffle_cards(the_card)
                         gs.switch_players()
+
                     except Exception as e:
                         print(e)
+                        running = not parser.attempt_disconnect(net)
 
                 elif cmd == Cmd.PASS_WAS_MADE.value:
-                    the_card = data[1]
-                    print(f"Pass was accepted by server and made in client with card {the_card}!")
-                    gs.shuffle_cards(the_card)
-                    gs.switch_players()
+                    if len(data) == 2:
+                        the_card = data[1]
+                        print(f"Pass was accepted by server and made in client with card {the_card}!")
+                        gs.shuffle_cards(the_card)
+                        gs.switch_players()
+                    else:
+                        running = not parser.attempt_disconnect(net)
 
                 elif cmd == Cmd.INVALID_MOVE.value:
-                    print(Cmd.INVALID_MOVE.value, f"{data[1]}")
+                    if len(data) == 2:
+                        print(Cmd.INVALID_MOVE.value, f"{data[1]}")
+                    else:
+                        running = not parser.attempt_disconnect(net)
 
                 elif cmd == Cmd.GAME_OVER.value:
-                    winner_name = data[1]
-                    print(f"Game over encountered, player {winner_name} has won!")
-                    gs.game_over(winner_name)
+                    if len(data) == 2:
+                        winner_name = data[1]
+                        print(f"Game over encountered, player {winner_name} has won!")
+                        gs.game_over(winner_name)
+                    else:
+                        running = parser.attempt_disconnect(net)
                     rematch = True
 
                 elif cmd == Cmd.RECONNECT.value:
@@ -226,6 +240,7 @@ def play(net: Network, data, username, rec_data):
                             gs.black_disconnected = False
                     else:
                         print("ERR: RECONNECT in Game not possible!")
+                        running = not parser.attempt_disconnect(net)
 
                 elif cmd == Cmd.DISCONNECTED.value:
                     if len(data) == 2 and data[1] == gs.enemy_name:
@@ -235,12 +250,15 @@ def play(net: Network, data, username, rec_data):
                             gs.black_disconnected = True
                     else:
                         print("ERR: DISCONNECTED in Game not possible!")
+                        running = not parser.attempt_disconnect(net)
 
                 elif cmd == "WRONG_DATA":
                     print("ERR: WRONG_DATA", f"Data are not parsable!")
+                    running = not parser.attempt_disconnect(net)
 
                 else:
                     print(f"ERR: Unknown message in Game!")
+                    running = not parser.attempt_disconnect(net)
 
         draw_game_state(screen, gs, valid_moves, sq_selected, card_picked, my_font)
         clock.tick(MAX_FPS)
