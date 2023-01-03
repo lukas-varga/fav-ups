@@ -1,6 +1,8 @@
 import select
 import socket
 from tkinter import messagebox
+from time import time
+import parser
 
 """
 Socket operating class for communication with server
@@ -17,15 +19,24 @@ class Network(object):
         self.port = port
         self.addr = (self.host, self.port)
 
+        # Wrong messages
         self.NUM_OF_ATTEMPTS = 5
         self.wrong_counter = 0
+
+        # Last time in millis
+        self.last_mess = time()
+        # Ping sent
+        self.can_ping = True
+        # Ping in seconds
+        self.PING_TIME = 4
+        # Ping in seconds
+        self.MAX_TIMEOUT = 10
 
         # Not to block server
         # self.server.setblocking(False)
 
-        # Timeout
-        # self.timeout_seconds = 2
-        # self.server.settimeout(self.timeout_seconds)
+        # Blocking timeout for socket
+        # self.server.settimeout(self.TIMEOUT)
 
     """
     Connect to server
@@ -82,11 +93,27 @@ class Network(object):
             print(e)
             return ""
 
+    def allow_ping(self):
+        self.last_mess = time()
+        self.can_ping = True
+
+    def send_ping(self):
+        if self.can_ping and (time() - self.last_mess) > self.PING_TIME:
+            ping = parser.prepare_ping()
+            self.send_data(ping)
+            self.can_ping = False
+
+    def broken_connection(self):
+        if (time() - self.last_mess) > self.MAX_TIMEOUT:
+            return True
+        return False
+
     """ 
     Read from the socket, stuffing data into the buffer.
     Returns True when a full packet has been read into the buffer
     """
     def network_data_arrived(self, socket_buffer):
+        self.send_ping()
 
         result = False
         socks = [self.server]
@@ -98,9 +125,10 @@ class Network(object):
             # has any data arrived?
             if in_.count(socks[0]) > 0:
                 incoming_message = self.recv_data()
+
                 # Server is disconnected
                 if len(incoming_message) == 0:
-                    raise Exception("Cannot connect to server!")
+                    raise Exception("Server not responding -> disconnect!")
                 if len(incoming_message) > self.MAX_INPUT:
                     raise Exception("Too big data recv -> disconnect!")
 
@@ -117,11 +145,17 @@ class Network(object):
         except Exception as e:
             # No data gathered
             print(e)
-            messagebox.showinfo("Server Error", "Disconnected!")
+            messagebox.showinfo("Server Error", "Disconnect!")
             result = None
-        # except socket.timeout as e:
-        #     print(e)
-        #     messagebox.showinfo("Server Error", "Timeout!")
-        #     result = False
 
         return result
+
+    def wrong_attempt(self):
+        self.wrong_counter += 1
+        print("Wrong counter: ", self.wrong_counter)
+
+        if self.wrong_counter >= self.NUM_OF_ATTEMPTS:
+            return True
+
+        return False
+

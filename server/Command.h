@@ -21,8 +21,9 @@ enum Cmd {
     INVALID_MOVE,
     GAME_OVER,
     RECONNECT,
-    DISCONNECTED,
-    LOGOUT,
+    DISCONNECT,
+    PING,
+    LAST,
 };
 
 class Command{

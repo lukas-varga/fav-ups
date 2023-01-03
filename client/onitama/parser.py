@@ -19,8 +19,8 @@ class Cmd(Enum):
     INVALID_MOVE = "INVALID_MOVE"
     GAME_OVER = "GAME_OVER"
     RECONNECT = "RECONNECT"
-    DISCONNECTED = "DISCONNECTED"
-    LOGOUT = "LOGOUT"
+    DISCONNECT = "DISCONNECT"
+    PING = "PING"
 
 def is_enum(provided):
     for e in Cmd:
@@ -51,11 +51,6 @@ def prepare_make_move(card, s_row, s_col, e_row, e_col):
 def prepare_make_pass(card):
     return f"{Cmd.MAKE_PASS.value}{SPL}{card}{END}"
 
-def attempt_disconnect(net: Network):
-    net.wrong_counter += 1
-    print("Wrong counter: ", net.wrong_counter)
+def prepare_ping():
+    return f"{Cmd.PING.value}{SPL}{Cmd.PING.value}{END}"
 
-    if net.wrong_counter >= net.NUM_OF_ATTEMPTS:
-        return True
-
-    return False

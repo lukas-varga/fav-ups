@@ -1,18 +1,18 @@
-#include "Help.h"
+#include "Parser.h"
 #include "Command.h"
 
 // Codes for delimiter and end
 
-const char Help::SPL = '|';
-const char Help::END = '\0';
+const char Parser::SPL = '|';
+const char Parser::END = '\0';
 
-vector<string> Help::parse(const string& msg, char del) {
+vector<string> Parser::parse(const string& msg) {
     stringstream ss(msg);
     string word;
     vector<string> args{};
 
     while (!ss.eof()) {
-        getline(ss, word, del);
+        getline(ss, word, SPL);
         args.push_back(word);
     }
 
@@ -40,10 +40,10 @@ vector<string> Help::parse(const string& msg, char del) {
     }
 }
 
-void Help::send_log(int fd, const string& snd){
+void Parser::send_log(int fd, const string& snd){
     cout << "Sending to fd(" << fd << "): "  << snd << endl;
 }
 
-void Help::recv_log(int fd, char buff[]) {
+void Parser::recv_log(int fd, char buff[]) {
     cout << "Receiving from fd(" << fd << "): " << buff << endl;
 }

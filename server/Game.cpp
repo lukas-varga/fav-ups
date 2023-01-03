@@ -1,6 +1,6 @@
 #include "Game.h"
 #include "Command.h"
-#include "Help.h"
+#include "Parser.h"
 #include "Card.h"
 
 int Game::GAME_COUNTER = -1;
@@ -41,26 +41,26 @@ void Game::enter_game(Player * player){
 
         send_text = "";
         send_text.append(Command::name(Cmd::WAITING))
-                .append(1, Help::SPL)
-                .append(player->username)
-                .append(1, Help::END);
-        send(player->socket, send_text.data(), send_text.size(), 0);
-        Help::send_log(player->socket, send_text);
+                .append(1, Parser::SPL)
+                .append(player->user)
+                .append(1, Parser::END);
+        send(player->sock, send_text.data(), send_text.size(), 0);
+        Parser::send_log(player->sock, send_text);
 
-        cout << "Player1 (Black) " << player->username << " has entered lobby!" << endl;
+        cout << "Player1 (Black) " << player->user << " has entered lobby!" << endl;
     }
     else if(white_p == nullptr){
         white_p = player;
 
         send_text = "";
         send_text.append(Command::name(Cmd::WAITING))
-                .append(1, Help::SPL)
-                .append(player->username)
-                .append(1, Help::END);
-        send(player->socket, send_text.data(), send_text.size(), 0);
-        Help::send_log(player->socket, send_text);
+                .append(1, Parser::SPL)
+                .append(player->user)
+                .append(1, Parser::END);
+        send(player->sock, send_text.data(), send_text.size(), 0);
+        Parser::send_log(player->sock, send_text);
 
-        cout << "Player2 (White) " << player->username << " has entered lobby!" << endl;
+        cout << "Player2 (White) " << player->user << " has entered lobby!" << endl;
 
         // GAME started
         start_game();
@@ -71,28 +71,28 @@ void Game::enter_game(Player * player){
 void Game::start_game(){
     send_text = "";
     send_text.append(Command::name(Cmd::START))
-            .append(1, Help::SPL)
-            .append(black_p->username)
-            .append(1, Help::SPL)
-            .append(white_p->username)
-            .append(1, Help::SPL);
+            .append(1, Parser::SPL)
+            .append(black_p->user)
+            .append(1, Parser::SPL)
+            .append(white_p->user)
+            .append(1, Parser::SPL);
 
     // Pick 5 random cards first BLACK SPARE WHITE
     int last_index = five_cards.size() - 1;
     for (int i = 0; i < last_index; ++i){
         send_text.append(five_cards[i])
-            .append(1, Help::SPL);
+            .append(1, Parser::SPL);
     }
     send_text.append(five_cards[last_index])
-        .append(1, Help::END);
+        .append(1, Parser::END);
 
     // Send to both TWO players START
-    send(black_p->socket, send_text.data(), send_text.size(), 0);
-    Help::send_log(black_p->socket, send_text);
+    send(black_p->sock, send_text.data(), send_text.size(), 0);
+    Parser::send_log(black_p->sock, send_text);
     black_p->state = State_Machine::allowed_transition(black_p->state, Event::EV_PLAY);
 
-    send(white_p->socket, send_text.data(), send_text.size(), 0);
-    Help::send_log(white_p->socket, send_text);
+    send(white_p->sock, send_text.data(), send_text.size(), 0);
+    Parser::send_log(white_p->sock, send_text);
     white_p->state = State_Machine::allowed_transition(white_p->state, Event::EV_PLAY);
 
     white_to_move = true;
@@ -154,22 +154,22 @@ bool Game::check_move(const string& card, int st_row, int st_col, int end_row, i
 void Game::move_was_made(const string& card, int st_row, int st_col, int end_row, int end_col) {
     send_text = "";
     send_text.append(Command::name(Cmd::MOVE_WAS_MADE))
-            .append(1, Help::SPL)
+            .append(1, Parser::SPL)
             .append(card)
-            .append(1, Help::SPL)
+            .append(1, Parser::SPL)
             .append(to_string(st_row))
-            .append(1, Help::SPL)
+            .append(1, Parser::SPL)
             .append(to_string(st_col))
-            .append(1, Help::SPL)
+            .append(1, Parser::SPL)
             .append(to_string(end_row))
-            .append(1, Help::SPL)
+            .append(1, Parser::SPL)
             .append(to_string(end_col))
-            .append(1, Help::END);
+            .append(1, Parser::END);
 
-    send(black_p->socket, send_text.data(), send_text.size(), 0);
-    Help::send_log(black_p->socket, send_text);
-    send(white_p->socket, send_text.data(), send_text.size(), 0);
-    Help::send_log(white_p->socket, send_text);
+    send(black_p->sock, send_text.data(), send_text.size(), 0);
+    Parser::send_log(black_p->sock, send_text);
+    send(white_p->sock, send_text.data(), send_text.size(), 0);
+    Parser::send_log(white_p->sock, send_text);
 }
 
 bool Game::valid_pass() {
@@ -226,24 +226,24 @@ bool Game::valid_pass() {
 void Game::pass_was_made(const string& card) {
     send_text = "";
     send_text.append(Command::name(Cmd::PASS_WAS_MADE))
-            .append(1, Help::SPL)
+            .append(1, Parser::SPL)
             .append(card)
-            .append(1, Help::END);
+            .append(1, Parser::END);
 
-    send(black_p->socket, send_text.data(), send_text.size(), 0);
-    Help::send_log(black_p->socket, send_text);
-    send(white_p->socket, send_text.data(), send_text.size(), 0);
-    Help::send_log(white_p->socket, send_text);
+    send(black_p->sock, send_text.data(), send_text.size(), 0);
+    Parser::send_log(black_p->sock, send_text);
+    send(white_p->sock, send_text.data(), send_text.size(), 0);
+    Parser::send_log(white_p->sock, send_text);
 }
 
 void Game::invalid_move(string message, int fd) {
     send_text = "";
     send_text.append(Command::name(Cmd::INVALID_MOVE))
-            .append(1, Help::SPL)
+            .append(1, Parser::SPL)
             .append(message)
-            .append(1, Help::END);
+            .append(1, Parser::END);
     send(fd, send_text.data(), send_text.size(), 0);
-    Help::send_log(fd, send_text);
+    Parser::send_log(fd, send_text);
 }
 
 void Game::shuffle_cards(const string& card) {
@@ -289,23 +289,23 @@ bool Game::is_end() {
 void Game::game_over() {
     send_text = "";
     send_text.append(Command::name(Cmd::GAME_OVER))
-            .append(1, Help::SPL)
-            .append(winner_p->username)
-            .append(1, Help::END);
-    send(white_p->socket, send_text.data(), send_text.size(), 0);
-    Help::send_log(white_p->socket, send_text);
-    send(black_p->socket, send_text.data(), send_text.size(), 0);
-    Help::send_log(black_p->socket, send_text);
+            .append(1, Parser::SPL)
+            .append(winner_p->user)
+            .append(1, Parser::END);
+    send(white_p->sock, send_text.data(), send_text.size(), 0);
+    Parser::send_log(white_p->sock, send_text);
+    send(black_p->sock, send_text.data(), send_text.size(), 0);
+    Parser::send_log(black_p->sock, send_text);
     cout << "End of the game" << endl;
 
     // Rematch
-    int old_sock = black_p->socket;
+    int old_sock = black_p->sock;
     black_p->init();
-    black_p->socket = old_sock;
+    black_p->sock = old_sock;
 
-    old_sock = white_p->socket;
+    old_sock = white_p->sock;
     white_p->init();
-    white_p->socket = old_sock;
+    white_p->sock = old_sock;
 }
 
 

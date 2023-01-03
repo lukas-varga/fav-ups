@@ -40,6 +40,8 @@ class GameState:
         self.win_white = None
         self.black_disconnected = False
         self.white_disconnected = False
+        self.broken_conn = False
+
         # Generating in sever
         # 0 and 1 are black
         # 2 is spare

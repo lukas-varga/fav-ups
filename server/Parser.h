@@ -1,5 +1,5 @@
-#ifndef SERVER_HELP_H
-#define SERVER_HELP_H
+#ifndef SERVER_PARSER_H
+#define SERVER_PARSER_H
 
 #include <cstdio>
 #include <sys/types.h>
@@ -19,17 +19,17 @@
 
 using namespace std;
 
-class Help {
+class Parser {
 public:
     // Codes for delimiter and end
     static const char SPL;
     static const char END;
 
     // A quick way to parse strings separated via any character delimiter
-    static vector<string> parse(const string& msg, char del);
+    static vector<string> parse(const string& msg);
     static void send_log(int fd, const string& snd);
     static void recv_log(int fd, char buff[]);
 };
 
 
-#endif //SERVER_HELP_H
+#endif //SERVER_PARSER_H

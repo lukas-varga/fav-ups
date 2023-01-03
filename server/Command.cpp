@@ -14,8 +14,9 @@ map<Cmd,string> Command::enum_map = map<Cmd,string>{
         {Cmd::INVALID_MOVE ,  "INVALID_MOVE"},
         {Cmd::GAME_OVER ,     "GAME_OVER"},
         {Cmd::RECONNECT ,     "RECONNECT"},
-        {Cmd::DISCONNECTED ,  "DISCONNECTED"},
-        {Cmd::LOGOUT,         "LOGOUT"},
+        {Cmd::DISCONNECT ,    "DISCONNECT"},
+        {Cmd::PING,           "PING"},
+        {Cmd::LAST,           "LAST"}
 };
 
 string Command::name(Cmd cmd) {
@@ -23,7 +24,7 @@ string Command::name(Cmd cmd) {
 }
 
 bool Command::is_enum(const string& name) {
-    for (int i = Cmd::LOGIN; i != Cmd::GAME_OVER; i++ ) {
+    for (int i = Cmd::LOGIN; i != Cmd::LAST; i++ ) {
         Cmd cmd = static_cast<Cmd>(i);
         if (Command::name(cmd) == name){
             return true;

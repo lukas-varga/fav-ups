@@ -78,17 +78,26 @@ def login(net: Network):
 
         # Incoming message from server
         server_rx_buffer = []
-
         result = net.network_data_arrived(server_rx_buffer)
         if result is None:
+            exiting = True
+        elif net.broken_connection():
+            messagebox.showinfo("Broken Conn", "Disconnect!")
             exiting = True
         else:
             for record in server_rx_buffer:
                 data = parser.parse(record)
                 cmd = data[0]
 
+                # PING | PING
+                if cmd == Cmd.PING.value:
+                    if data[1] == Cmd.PING.value:
+                        net.allow_ping()
+                    else:
+                        exiting = net.wrong_attempt()
+
                 # WAITING | username
-                if cmd == Cmd.WAITING.value:
+                elif cmd == Cmd.WAITING.value:
                     if len(data) == 2:
                         username_entry['state'] = DISABLED
                         login_btn['state'] = DISABLED
@@ -104,14 +113,14 @@ def login(net: Network):
                         waiting_label = Label(win_wait, text="Waiting for opponent...", font=(FONT, 12), bg=BACKGROUND_COLOR)
                         waiting_label.pack(pady=30)
                     else:
-                        exiting = parser.attempt_disconnect(net)
+                        exiting = net.wrong_attempt()
 
                 # FAILED_LOGIN | *detailed_message*
                 elif cmd == Cmd.FAILED.value:
                     if len(data) == 2:
                         messagebox.showinfo(Cmd.FAILED.value, data[1])
                     else:
-                        exiting = parser.attempt_disconnect(net)
+                        exiting = net.wrong_attempt()
 
                 # START | P1 (black) | P1 (white) | 5x cards
                 elif cmd == Cmd.START.value:
@@ -133,7 +142,7 @@ def login(net: Network):
                         else:
                             exiting = True
                     else:
-                        exiting = parser.attempt_disconnect(net)
+                        exiting = net.wrong_attempt()
 
                 # RECONNECT
                 # black_p | white_p | (5x) cards |
@@ -164,15 +173,15 @@ def login(net: Network):
                             exiting = True
                     else:
                         print("ERR: RECONNECT in Intro does not have right number of parameters!")
-                        exiting = parser.attempt_disconnect(net)
+                        exiting = net.wrong_attempt()
 
                 elif cmd == "WRONG_DATA":
                     print("ERR: WRONG_DATA", f"Data are not parsable!")
-                    exiting = parser.attempt_disconnect(net)
+                    exiting = net.wrong_attempt()
 
                 else:
                     print(f"ERR: Unknown message in Intro!")
-                    exiting = parser.attempt_disconnect(net)
+                    exiting = net.wrong_attempt()
 
         # Exiting to main menu by pressing Close
         if exiting:

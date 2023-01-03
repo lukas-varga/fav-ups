@@ -93,6 +93,8 @@ def play(net: Network, data, username, rec_data):
     while running:
         # True if player has no option to play, so he gives back one card by clicking twice on it and pass turn
         pass_turn = gs.nowhere_to_go()
+        gs.broken_conn = net.broken_connection()
+
         # Event in pygame
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
@@ -183,7 +185,13 @@ def play(net: Network, data, username, rec_data):
                 data = parser.parse(record)
                 cmd = data[0]
 
-                if cmd == Cmd.MOVE_WAS_MADE.value:
+                if cmd == Cmd.PING.value:
+                    if data[1] == Cmd.PING.value:
+                        net.allow_ping()
+                    else:
+                        running = not net.wrong_attempt()
+
+                elif cmd == Cmd.MOVE_WAS_MADE.value:
                     try:
                         print(f"Move was accepted by server and made in client!")
                         if len(data) != 6:
@@ -206,7 +214,7 @@ def play(net: Network, data, username, rec_data):
 
                     except Exception as e:
                         print(e)
-                        running = not parser.attempt_disconnect(net)
+                        running = not net.wrong_attempt()
 
                 elif cmd == Cmd.PASS_WAS_MADE.value:
                     if len(data) == 2:
@@ -215,13 +223,13 @@ def play(net: Network, data, username, rec_data):
                         gs.shuffle_cards(the_card)
                         gs.switch_players()
                     else:
-                        running = not parser.attempt_disconnect(net)
+                        running = not net.wrong_attempt()
 
                 elif cmd == Cmd.INVALID_MOVE.value:
                     if len(data) == 2:
                         print(Cmd.INVALID_MOVE.value, f"{data[1]}")
                     else:
-                        running = not parser.attempt_disconnect(net)
+                        running = not net.wrong_attempt()
 
                 elif cmd == Cmd.GAME_OVER.value:
                     if len(data) == 2:
@@ -229,7 +237,7 @@ def play(net: Network, data, username, rec_data):
                         print(f"Game over encountered, player {winner_name} has won!")
                         gs.game_over(winner_name)
                     else:
-                        running = parser.attempt_disconnect(net)
+                        running = not net.wrong_attempt()
                     rematch = True
 
                 elif cmd == Cmd.RECONNECT.value:
@@ -240,25 +248,25 @@ def play(net: Network, data, username, rec_data):
                             gs.black_disconnected = False
                     else:
                         print("ERR: RECONNECT in Game not possible!")
-                        running = not parser.attempt_disconnect(net)
+                        running = not net.wrong_attempt()
 
-                elif cmd == Cmd.DISCONNECTED.value:
+                elif cmd == Cmd.DISCONNECT.value:
                     if len(data) == 2 and data[1] == gs.enemy_name:
                         if gs.enemy_name == gs.white_name:
                             gs.white_disconnected = True
                         elif gs.enemy_name == gs.black_name:
                             gs.black_disconnected = True
                     else:
-                        print("ERR: DISCONNECTED in Game not possible!")
-                        running = not parser.attempt_disconnect(net)
+                        print("ERR: DISCONNECT in Game not possible!")
+                        running = not net.wrong_attempt()
 
                 elif cmd == "WRONG_DATA":
                     print("ERR: WRONG_DATA", f"Data are not parsable!")
-                    running = not parser.attempt_disconnect(net)
+                    running = not net.wrong_attempt()
 
                 else:
                     print(f"ERR: Unknown message in Game!")
-                    running = not parser.attempt_disconnect(net)
+                    running = not net.wrong_attempt()
 
         draw_game_state(screen, gs, valid_moves, sq_selected, card_picked, my_font)
         clock.tick(MAX_FPS)
@@ -390,7 +398,8 @@ def draw_card_highlight(screen, gs, which_card):
     if gs.curr_p == gs.player_name \
             and gs.win_white is None \
             and not gs.black_disconnected \
-            and not gs.white_disconnected:
+            and not gs.white_disconnected \
+            and not gs.broken_conn:
         if gs.player_name == gs.black_name:
             x, y, w, h = get_rect_tuple(0)
             pygame.draw.rect(screen, pygame.Color(CARD_HIGHLIGHT_PASSIVE), pygame.Rect(x, y, w, h), width=3)
@@ -404,7 +413,8 @@ def draw_card_highlight(screen, gs, which_card):
 
     if which_card is not None \
             and not gs.black_disconnected \
-            and not gs.white_disconnected:
+            and not gs.white_disconnected \
+            and not gs.broken_conn:
         # Actively selected card
         i = gs.get_id_by_card(which_card)
         x, y, w, h = get_rect_tuple(i)
@@ -458,15 +468,23 @@ def draw_player_label(screen, gs, my_font):
     black_status = "[PLAYING]" if not gs.white_to_move else ""
     white_status = "[PLAYING]" if gs.white_to_move else ""
 
+    # Won / Lost
     if gs.win_white is not None:
         black_status = "[WON]" if not gs.win_white else "[LOST]"
         white_status = "[WON]" if gs.win_white else "[LOST]"
+
+    # Disconnect
     elif gs.black_disconnected:
-        black_status = "[DISCONNECTED]"
-        white_status = "[PAUSED]"
+        black_status = "[DISCONNECT]"
+        white_status = "[PAUSE]"
     elif gs.white_disconnected:
-        black_status = "[PAUSED]"
-        white_status = "[DISCONNECTED]"
+        black_status = "[PAUSE]"
+        white_status = "[DISCONNECT]"
+
+    # BROKEN CONN
+    elif gs.broken_conn:
+        black_status = "[BROKEN CONN]"
+        white_status = "[BROKEN CONN]"
 
     black_name_lb = my_font.render(f"{black_who}: {gs.black_name}", True, BLACK)
     screen.blit(black_name_lb, BLACK_NAME_POS)

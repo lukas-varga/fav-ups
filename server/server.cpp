@@ -1,7 +1,7 @@
 #include "Game.h"
 #include "Player.h"
 #include "Command.h"
-#include "Help.h"
+#include "Parser.h"
 #include "State.h"
 #include "Lobby.h"
 
@@ -19,12 +19,15 @@
 #include <sstream>
 #include <vector>
 #include "string"
+#include <chrono>
+#include <algorithm>
 
 
 using namespace std;
+using namespace std::chrono;
 
-int main (int argc, char** argv){
-    if (argc != 3){
+int main(int argc, char **argv) {
+    if (argc != 3) {
         cout << "Please enter server arguments: <port> <num_players>" << endl;
         exit(0);
     }
@@ -33,43 +36,54 @@ int main (int argc, char** argv){
     try {
         port = stoi(argv[1]);
         num_players = stoi(argv[2]);
-        if (num_players < 2){
+        if (num_players < 2) {
             throw exception();
         }
-        if (port < 0 or port > 65535){
+        if (port < 0 or port > 65535) {
             throw exception();
         }
     }
-    catch (const exception &exc){
+    catch (const exception &exc) {
         cerr << exc.what() << endl;
         cout << "Num of players must be >2 and port must be in (0, 65535) -> Exiting" << endl;
         exit(0);
     }
 
+    // Limits for players
     const int NAME_LENGTH = 10;
     const int CLIENT_NUM = num_players;
     const int GAME_NUM = CLIENT_NUM / 2;
-    const int MAX_BUFF = 1024;
-    const int MAX_INPUT = 255;
-    char buff[MAX_BUFF];
-    const char SPL_CHR = '|';
 
+    // Buffer sizes
+    const int MAX_INPUT = 255;
+    const int MAX_BUFF = 1024;
+
+    // Number of wrong attempts before disconnect
+    int MAX_ATTEMPTS = 5;
+    // Milliseconds for disconnect
+    const double MAX_DISCONNECT = 20000;
+    // Milliseconds for removing
+    const double MAX_REMOVE = 100000;
+    // Timeout for Select
+    timeval timeout{};
+
+    //  Socket initials
     int client_socket;
     int server_socket;
-    int ret_val, val_read;
-    int fd, a2read, i;
+    int ret_val, fd;
     socklen_t client_len, server_len;
-    struct sockaddr_in my_addr, peer_addr;
+    sockaddr_in my_addr{}, peer_addr{};
     fd_set client_socks, tests;
 
-    Game * game_arr[GAME_NUM];
-    Player * player_arr[CLIENT_NUM];
-    Lobby * lobby = new Lobby();
+    // Pointers
+    Game *game_arr[GAME_NUM];
+    Player *player_arr[CLIENT_NUM];
+    auto *lobby = new Lobby();
 
-    for (i = 0; i < CLIENT_NUM; i++){
+    for (int i = 0; i < CLIENT_NUM; i++) {
         player_arr[i] = new Player(0, "");
     }
-    for (i = 0; i < GAME_NUM; i++){
+    for (int i = 0; i < GAME_NUM; i++) {
 //        Player * white_p = player_arr[i * 2];
 //        Player * black_p = player_arr[(i * 2)+ 1];
         game_arr[i] = new Game();
@@ -92,73 +106,83 @@ int main (int argc, char** argv){
 
     // CLIENT_NUM devices connected to chat
     ret_val = listen(server_socket, CLIENT_NUM);
-    if (ret_val == 0){
+    if (ret_val == 0) {
         printf("Listen - OK\n");
     } else {
         printf("Listen - ERR\n");
         return -1;
     }
 
-    // vyprazdnime sadu deskriptoru a vlozime server socket
-    FD_ZERO( &client_socks );
-    FD_SET( server_socket, &client_socks );
+    // vyprazdnime sadu deskriptoru a vlozime server sock
+    FD_ZERO(&client_socks);
+    FD_SET(server_socket, &client_socks);
 
-    while(true) {
+    while (true) {
+        char buff[MAX_BUFF];
+
         string rcv, snd;
         vector<string> data;
         string cmd, login_name;
 
-        Player * player;
-        Game * game;
+        Player *player;
+        Game *game;
+
+        timeout.tv_sec = 2;
+        timeout.tv_usec = 0;
+
+        auto a2read = 0;
+        int i;
 
         tests = client_socks;
-        printf("Server is waiting...\n");
+//        printf("Server is waiting... ");
 
         // sada deskriptoru je po kazdem volani select prepsana sadou deskriptoru kde se neco delo
-        ret_val = select(FD_SETSIZE, &tests, (fd_set *) 0, (fd_set *) 0, (struct timeval *) 0);
+//        ret_val = select(FD_SETSIZE, &tests, (fd_set *) 0, (fd_set *) 0, (struct timeval *) 0);
+        ret_val = select(FD_SETSIZE, &tests, (fd_set *) 0, (fd_set *) 0, &timeout);
         if (ret_val < 0) {
-            printf("Select - ERR\n");
+            cout << "Select - ERR" << endl;
             return -1;
         }
 
         // vynechavame stdin, stdout, stderr
         for (fd = 3; fd < FD_SETSIZE; fd++) {
-            // je dany socket v sade fd ze kterych lze cist ?
+            // je dany sock v sade fd ze kterych lze cist ?
             if (FD_ISSET(fd, &tests)) {
-
-                // Je to server socket ? prijmeme nove spojeni
+                // Je to server sock ? prijmeme nove spojeni
                 if (fd == server_socket) {
                     client_len = sizeof(peer_addr);
 
                     client_socket = accept(server_socket, (struct sockaddr *) &peer_addr, &client_len);
                     FD_SET(client_socket, &client_socks);
-                    printf("New connection - socket fd is %d\n", client_socket );
+                    printf("New connection - sock fd is %d\n", client_socket);
 
                     // send new connection greeting welcome_msg
 //                    snd = "";
 //                    snd.append("Welcome to Onitama server!");
-//                    snd.append(1, Help::END);
+//                    snd.append(1, Parser::END);
 //                    send(client_socket, snd.data(), snd.size(), 0);
-//                    Help::send_log(client_socket, snd);
+//                    Parser::send_log(client_socket, snd);
 
-                    Player * p;
+                    Player *p;
                     // Looking for empty Player slot
-                    for (i = 0; i < CLIENT_NUM; i++){
+                    for (i = 0; i < CLIENT_NUM; i++) {
                         p = player_arr[i];
-                        if(p->socket == 0 and p->username.empty()){
-                            p->socket = client_socket;
-                            printf("Adding to list of sockets at index %d\n" , i);
+                        if (p->sock == 0 and p->user.empty()) {
+                            p->init();
+                            p->sock = client_socket;
+                            printf("Adding to list of sockets at index %d\n", i);
                             break;
                         }
                     }
                 }
 
-                // Je to klientsky socket ? prijmem rcv
-                else {
+// _____________________________________________________________________________________________________________________
 
+                // Je to klientsky sock ? prijmem rcv
+                else {
                     player = nullptr;
                     for (i = 0; i < CLIENT_NUM; i++) {
-                        if (fd == player_arr[i]->socket){
+                        if (fd == player_arr[i]->sock) {
                             player = player_arr[i];
                             break;
                         }
@@ -169,27 +193,32 @@ int main (int argc, char** argv){
                         // pocet bajtu co je pripraveno ke cteni
                         ioctl(fd, FIONREAD, &a2read);
 
-                        // _________________________________________________________________________________
                         // Mame co cist
                         if (a2read > 0 and a2read < MAX_INPUT) {
-
                             // Alokace pameti pro cteci buffer
                             memset(buff, 0, MAX_BUFF);
 
-                            if(recv(fd, buff, sizeof(buff), 0) <= 0){
+                            if (recv(fd, buff, sizeof(buff), 0) <= 0) {
                                 cout << "No data came to server!" << endl;
                             }
 
+                            // Append data to string buffer
                             rcv = "";
                             rcv.append(buff);
-                            Help::recv_log(fd, buff);
+                            Parser::recv_log(fd, buff);
 
                             // Parsing
-                            data = Help::parse(rcv, SPL_CHR);
+                            data = Parser::parse(rcv);
                             cmd = data.at(0);
 
+                            // PING | name
+                            if (cmd == Command::name(Cmd::PING)){
+                                player->update_last_message();
+                                // Username can be empty (not logged yet)
+                                lobby->ping_back(fd);
+                            }
                             // LOGIN | name
-                            if (cmd == Command::name(Cmd::LOGIN)) {
+                            else if (cmd == Command::name(Cmd::LOGIN)) {
                                 if (data.size() == 1 + 1) {
                                     cout << "Entering: " << Command::name(Cmd::LOGIN) << endl;
                                     login_name = data.at(1);
@@ -201,40 +230,41 @@ int main (int argc, char** argv){
                                         for (i = 0; i < GAME_NUM; ++i) {
                                             game = game_arr[i];
                                             if (game->is_active) {
-                                                // Remove player login but take socket number for game
-                                                if (game->black_p->username == login_name and game->black_p->disconnected) {
-                                                    game->black_p->socket = player->socket;
-                                                    game->black_p->disconnected = false;
+                                                // Remove player login but take sock number for game
+                                                if (game->black_p->user == login_name and
+                                                    game->black_p->disc) {
+                                                    game->black_p->sock = player->sock;
+                                                    game->black_p->disc = false;
                                                     game->black_p->state = State_Machine::allowed_transition(
                                                             game->black_p->state, Event::EV_RECON);
 
-                                                    lobby->reconnect(GAME_NUM, game_arr, login_name, player->socket);
+                                                    lobby->reconnect(GAME_NUM, game_arr, login_name, player->sock);
                                                     lobby->inform_reconnecting(GAME_NUM, game_arr, login_name);
                                                     player->init();
                                                     playing = true;
                                                     break;
                                                 }
-                                                    // Remove player login but take socket number for game
-                                                else if (game->white_p->username == login_name and
-                                                         game->white_p->disconnected) {
-                                                    game->white_p->socket = player->socket;
-                                                    game->white_p->disconnected = false;
+                                                    // Remove player login but take sock number for game
+                                                else if (game->white_p->user == login_name and
+                                                         game->white_p->disc) {
+                                                    game->white_p->sock = player->sock;
+                                                    game->white_p->disc = false;
                                                     game->white_p->state = State_Machine::allowed_transition(
                                                             game->white_p->state, Event::EV_RECON);
 
                                                     lobby->reconnect(GAME_NUM, game_arr, login_name,
-                                                                     player->socket);
+                                                                     player->sock);
                                                     lobby->inform_reconnecting(GAME_NUM, game_arr, login_name);
                                                     player->init();
                                                     playing = true;
                                                     break;
                                                 }
 
-                                                    // Player already in game and not disconnected so cannot login again
-                                                else if (game->white_p->socket == player->socket or
-                                                         game->black_p->socket == player->socket) {
+                                                    // Player already in game and not disc so cannot login again
+                                                else if (game->white_p->sock == player->sock or
+                                                         game->black_p->sock == player->sock) {
                                                     lobby->failed_because(fd, "Socket already in game!");
-                                                    lobby->attempt_disconnect(GAME_NUM, game_arr, player, fd, client_socks);
+                                                    lobby->wrong_attempt(GAME_NUM, game_arr, player, client_socks, MAX_ATTEMPTS);
                                                     playing = true;
                                                     break;
                                                 }
@@ -246,10 +276,9 @@ int main (int argc, char** argv){
                                             for (i = 0; i < CLIENT_NUM; ++i) {
                                                 Player *p = player_arr[i];
                                                 // Name used, try different one
-                                                if (p->username == login_name) {
+                                                if (p->user == login_name) {
                                                     lobby->failed_because(fd, "Name is already in use!");
-                                                    lobby->attempt_disconnect(GAME_NUM, game_arr, player, fd,
-                                                                              client_socks);
+                                                    lobby->wrong_attempt(GAME_NUM, game_arr, player, client_socks, MAX_ATTEMPTS);
                                                     name_in_use = true;
                                                 }
                                             }
@@ -259,52 +288,50 @@ int main (int argc, char** argv){
                                                 // Name not too long
                                                 if (login_name.size() > NAME_LENGTH) {
                                                     lobby->failed_because(fd,
-                                                                          "Name is too long (>" + to_string(NAME_LENGTH) +
+                                                                          "Name is too long (>" +
+                                                                          to_string(NAME_LENGTH) +
                                                                           ")!");
-                                                    lobby->attempt_disconnect(GAME_NUM, game_arr, player, fd,
-                                                                              client_socks);
+                                                    lobby->wrong_attempt(GAME_NUM, game_arr, player, client_socks, MAX_ATTEMPTS);
                                                 }
                                                     // Forbidden chars
-                                                else if (login_name.find(Help::SPL) != string::npos
-                                                         or login_name.find(Help::END) != string::npos) {
+                                                else if (login_name.find(Parser::SPL) != string::npos
+                                                         or login_name.find(Parser::END) != string::npos) {
                                                     lobby->failed_because(fd, "Name include chars | or \\0)");
-                                                    lobby->attempt_disconnect(GAME_NUM, game_arr, player, fd,
-                                                                              client_socks);
+                                                    lobby->wrong_attempt(GAME_NUM, game_arr, player, client_socks, MAX_ATTEMPTS);
                                                 }
                                                     // Correct name
                                                 else {
-                                                    player->username = login_name;
-                                                    player->state = State_Machine::allowed_transition(player->state,
-                                                                                                      Event::EV_LOGIN);
+                                                    login_name.erase(std::remove_if(login_name.begin(), login_name.end(), ::isspace),
+                                                                     login_name.end());
+                                                    player->user = login_name;
+                                                    player->state = State_Machine::allowed_transition(player->state,Event::EV_LOGIN);
 
                                                     cout << "Name correct and in lobby!" << endl;
                                                     bool found = lobby->find_lobby(GAME_NUM, game_arr, player);
                                                     if (!found) {
                                                         lobby->failed_because(fd, "All lobby are full!");
-                                                        lobby->attempt_disconnect(GAME_NUM, game_arr, player, fd,
-                                                                                  client_socks);
+                                                        lobby->wrong_attempt(GAME_NUM, game_arr, player, client_socks, MAX_ATTEMPTS);
                                                     }
                                                 }
                                             }
                                         }
                                     } else {
                                         lobby->failed_because(fd, "Name must no be empty!");
-                                        lobby->attempt_disconnect(GAME_NUM, game_arr, player, fd, client_socks);
+                                        lobby->wrong_attempt(GAME_NUM, game_arr, player, client_socks, MAX_ATTEMPTS);
                                     }
                                 } else {
                                     lobby->failed_because(fd, "Wrong num of args!");
-                                    lobby->attempt_disconnect(GAME_NUM, game_arr, player, fd, client_socks);
+                                    lobby->wrong_attempt(GAME_NUM, game_arr, player, client_socks, MAX_ATTEMPTS);
                                 }
-                            }
-                            else if (cmd == Command::name(Cmd::MAKE_MOVE)) {
+                            } else if (cmd == Command::name(Cmd::MAKE_MOVE)) {
                                 if (data.size() == 5 + 1) {
                                     cout << "Entering: " << Command::name(Cmd::MAKE_MOVE) << endl;
                                     for (i = 0; i < GAME_NUM; i++) {
                                         game = game_arr[i];
                                         if (game->is_active and (game->black_p == player or game->white_p == player)) {
                                             if (game->curr_p == player
-                                                and !game->black_p->disconnected
-                                                and !game->white_p->disconnected) {
+                                                and !game->black_p->disc
+                                                and !game->white_p->disc) {
                                                 try {
                                                     string card = data.at(1);
                                                     int st_row = stoi(data.at(2));
@@ -322,24 +349,20 @@ int main (int argc, char** argv){
                                                             game->switch_players();
                                                         } else {
                                                             game->game_over();
-                                                            cout
-                                                                    << "Refresh / Reset the game so anyone can enter again!"
-                                                                    << endl;
+                                                            cout << "Refresh / Reset the game so anyone can enter again!" << endl;
                                                             game->init();
                                                         }
                                                     } else {
                                                         player->state = State_Machine::allowed_transition(player->state,
                                                                                                           Event::EV_INVALID);
                                                         game->invalid_move("Move is not allowed!", fd);
-                                                        lobby->attempt_disconnect(GAME_NUM, game_arr, player, fd,
-                                                                                  client_socks);
+                                                        lobby->wrong_attempt(GAME_NUM, game_arr, player, client_socks, MAX_ATTEMPTS);
                                                     }
                                                 }
                                                 catch (const exception &exc) {
                                                     cerr << exc.what() << endl;
                                                     game->invalid_move("Move is not parsable!", fd);
-                                                    lobby->attempt_disconnect(GAME_NUM, game_arr, player, fd,
-                                                                              client_socks);
+                                                    lobby->wrong_attempt(GAME_NUM, game_arr, player, client_socks, MAX_ATTEMPTS);
                                                 }
                                                 break;
                                             } else {
@@ -349,18 +372,17 @@ int main (int argc, char** argv){
                                     }
                                 } else {
                                     lobby->failed_because(fd, "Wrong num of args!");
-                                    lobby->attempt_disconnect(GAME_NUM, game_arr, player, fd, client_socks);
+                                    lobby->wrong_attempt(GAME_NUM, game_arr, player, client_socks, MAX_ATTEMPTS);
                                 }
-                            }
-                            else if (cmd == Command::name(Cmd::MAKE_PASS)) {
+                            } else if (cmd == Command::name(Cmd::MAKE_PASS)) {
                                 if (data.size() == 1 + 1) {
                                     cout << "Entering: " << Command::name(Cmd::MAKE_PASS) << endl;
                                     for (i = 0; i < GAME_NUM; i++) {
                                         game = game_arr[i];
                                         if (game->is_active and (game->black_p == player or game->white_p == player)) {
                                             if (game->curr_p == player
-                                                and !game->black_p->disconnected
-                                                and !game->white_p->disconnected) {
+                                                and !game->black_p->disc
+                                                and !game->white_p->disc) {
                                                 try {
                                                     string card = data.at(1);
                                                     bool valid_swap = game->valid_pass();
@@ -374,15 +396,13 @@ int main (int argc, char** argv){
                                                         player->state = State_Machine::allowed_transition(player->state,
                                                                                                           Event::EV_INVALID);
                                                         game->invalid_move("Pass is not allowed!", fd);
-                                                        lobby->attempt_disconnect(GAME_NUM, game_arr, player, fd,
-                                                                                  client_socks);
+                                                        lobby->wrong_attempt(GAME_NUM, game_arr, player, client_socks, MAX_ATTEMPTS);
                                                     }
                                                 }
                                                 catch (const exception &exc) {
                                                     cerr << exc.what() << endl;
                                                     game->invalid_move("Pass is not parsable!", fd);
-                                                    lobby->attempt_disconnect(GAME_NUM, game_arr, player, fd,
-                                                                              client_socks);
+                                                    lobby->wrong_attempt(GAME_NUM, game_arr, player, client_socks, MAX_ATTEMPTS);
                                                 }
                                                 break;
                                             } else {
@@ -392,75 +412,36 @@ int main (int argc, char** argv){
                                     }
                                 } else {
                                     lobby->failed_because(fd, "Wrong num of args!");
-                                    lobby->attempt_disconnect(GAME_NUM, game_arr, player, fd, client_socks);
+                                    lobby->wrong_attempt(GAME_NUM, game_arr, player, client_socks, MAX_ATTEMPTS);
                                 }
-                            }
-                            else if (cmd == "WRONG_DATA") {
-                                cerr << "ERR: Wrong data -> server do not know how to respond!" << endl;
+                            } else if (cmd == "WRONG_DATA") {
+                                cout << "ERR: Wrong data -> server do not know how to respond!" << endl;
                                 lobby->failed_because(fd, "Message is not parsable!");
-                                lobby->attempt_disconnect(GAME_NUM, game_arr, player, fd, client_socks);
-                            }
-                            else {
-                                cerr << "ERR: Unknown message in Server!" << endl;
+                                lobby->wrong_attempt(GAME_NUM, game_arr, player, client_socks, MAX_ATTEMPTS);
+                            } else {
+                                cout << "ERR: Unknown message in Server!" << endl;
                                 lobby->failed_because(fd, "Message is not parsable!");
-                                lobby->attempt_disconnect(GAME_NUM, game_arr, player, fd, client_socks);
+                                lobby->wrong_attempt(GAME_NUM, game_arr, player, client_socks, MAX_ATTEMPTS);
                             }
                         }
 
+// _____________________________________________________________________________________________________________________
 
 
-
-                        // _________________________________________________________________________________
-                        // Na socketu se stalo neco spatneho
-                        // OR  Message is too long -> disconnect client
-                        else{
-                            // Not logged player -> Delete Player Record completely
-                            if (player->username.empty()) {
-                                cout << "User with empty login closed!" << endl;
-                                player->init();
-                            }
-                                // Already logged
-                            else {
-                                for (i = 0; i < GAME_NUM; ++i) {
-                                    game = game_arr[i];
-                                    // In Game -> Remember NAME for reconnect but forgets socket
-                                    if (game->is_active and (game->white_p == player or game->black_p == player)) {
-                                        // Second player is already disconnected
-                                        if(game->black_p->disconnected or game->white_p->disconnected) {
-                                            game->black_p->init();
-                                            game->white_p->init();
-                                            game->init();
-                                            cout << "Both players logged out and game finished!" << endl;
-                                        }
-                                        // Remember the Name - Fort Minor
-                                        else{
-                                            player->socket = 0;
-                                            // player -> SAME USERNAME
-                                            player->disconnected = true;
-                                            player->state = State_Machine::allowed_transition(player->state,
-                                                                                              Event::EV_DISC);
-                                            lobby->inform_disconnecting(GAME_NUM, game_arr, player->username);
-                                            cout << "Player " << player->username << " has unfinished game!" << endl;
-                                        }
-                                    }
-                                        // Waiting room -> Delete Player Record completely and REMOVE the GAME
-                                    else if (!game->is_active and (game->white_p == player or game->black_p == player)) {
-                                        player->init();
-                                        game->init();
-                                        cout << "Player " << player->username <<" logged out and Room closed!" << endl;
-                                    }
-                                }
-                            }
-
-                            // Remove closed fd
-                            // (from the unmodified fd_set readfds)
-                            close(fd);
-                            FD_CLR(fd, &client_socks);
-                            printf("Removing client on fd %d\n", fd);
+                        // Message is too long -> disconnect completely
+                        else if (a2read > MAX_INPUT) {
+                            lobby->disconnect_completely(GAME_NUM, game_arr, player, client_socks);
+                        }
+                        // Na socketu se stalo neco spatneho -> disconnect partly with reconnect
+                        else {
+                            lobby->disconnect_partly(GAME_NUM, game_arr, player, client_socks);
                         }
                     }
                 }
             }
-        }
+        } // FD for cycle
+
+        //odpojeni vsech klientu, kteri porusili protokol nebo jsou timed out
+        lobby->keep_alive(GAME_NUM, game_arr, CLIENT_NUM, player_arr, client_socks, MAX_DISCONNECT, MAX_REMOVE);
     }
 }

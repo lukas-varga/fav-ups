@@ -1,23 +1,36 @@
 #include "Player.h"
+#include <utility>
+#include <iostream>
 
 Player::Player(int sock, string name) {
-    socket = sock;
-    username = name;
+    sock = sock;
+    user = std::move(name);
 
-    disconnected = false;
+    disc = false;
     state = State::ST_INIT;
 
-    wrong_counter = 0;
+    wrong_ct = 0;
+    last_mess = system_clock::now();
 }
 
 void Player::init() {
-    socket = 0;
-    username = "";
+    sock = 0;
+    user = "";
 
-    disconnected = false;
+    disc = false;
     state = State::ST_INIT;
 
-    wrong_counter = 0;
+    wrong_ct = 0;
+    last_mess = system_clock::now();
+}
+
+void Player::inc_wrong_attempt(){
+    wrong_ct++;
+    cout << "Player " << user << " has wrong counter: " << wrong_ct << endl;
+}
+
+void Player::update_last_message() {
+    last_mess = system_clock::now();
 }
 
 
