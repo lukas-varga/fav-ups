@@ -60,9 +60,9 @@ int main(int argc, char **argv) {
 
     // Number of wrong attempts before disconnect
     int MAX_ATTEMPTS = 5;
-    // Milliseconds for disconnect
+    // Milliseconds for disconnect 20s
     const double MAX_DISCONNECT = 20000;
-    // Milliseconds for removing
+    // Milliseconds for removing 100s
     const double MAX_REMOVE = 100000;
     // Timeout for Select
     timeval timeout{};
@@ -211,9 +211,14 @@ int main(int argc, char **argv) {
                             data = Parser::parse(rcv);
                             cmd = data.at(0);
 
+                            // Update last message when PING or other COMMAND
+                            if(Command::is_enum(cmd)){
+                                player->update_last_message();
+                            }
+
+                            // Message handling
                             // PING | name
                             if (cmd == Command::name(Cmd::PING)){
-                                player->update_last_message();
                                 // Username can be empty (not logged yet)
                                 lobby->ping_back(fd);
                             }
@@ -221,7 +226,12 @@ int main(int argc, char **argv) {
                             else if (cmd == Command::name(Cmd::LOGIN)) {
                                 if (data.size() == 1 + 1) {
                                     cout << "Entering: " << Command::name(Cmd::LOGIN) << endl;
+
+                                    // Cleaning the username of white spaces before and after
                                     login_name = data.at(1);
+                                    login_name.erase(std::remove_if(login_name.begin(), login_name.end(), ::isspace),
+                                                     login_name.end());
+
                                     if (!login_name.empty()) {
                                         bool name_in_use = false;
                                         bool playing = false;
@@ -232,11 +242,12 @@ int main(int argc, char **argv) {
                                             if (game->is_active) {
                                                 // Remove player login but take sock number for game
                                                 if (game->black_p->user == login_name and
-                                                    game->black_p->disc) {
+                                                        game->black_p->disc) {
                                                     game->black_p->sock = player->sock;
                                                     game->black_p->disc = false;
                                                     game->black_p->state = State_Machine::allowed_transition(
                                                             game->black_p->state, Event::EV_RECON);
+                                                    game->black_p->update_last_message();
 
                                                     lobby->reconnect(GAME_NUM, game_arr, login_name, player->sock);
                                                     lobby->inform_reconnecting(GAME_NUM, game_arr, login_name);
@@ -251,6 +262,7 @@ int main(int argc, char **argv) {
                                                     game->white_p->disc = false;
                                                     game->white_p->state = State_Machine::allowed_transition(
                                                             game->white_p->state, Event::EV_RECON);
+                                                    game->white_p->update_last_message();
 
                                                     lobby->reconnect(GAME_NUM, game_arr, login_name,
                                                                      player->sock);
@@ -260,7 +272,7 @@ int main(int argc, char **argv) {
                                                     break;
                                                 }
 
-                                                    // Player already in game and not disc so cannot login again
+                                                // Player already in game and not disc so cannot login again
                                                 else if (game->white_p->sock == player->sock or
                                                          game->black_p->sock == player->sock) {
                                                     lobby->failed_because(fd, "Socket already in game!");
@@ -301,8 +313,6 @@ int main(int argc, char **argv) {
                                                 }
                                                     // Correct name
                                                 else {
-                                                    login_name.erase(std::remove_if(login_name.begin(), login_name.end(), ::isspace),
-                                                                     login_name.end());
                                                     player->user = login_name;
                                                     player->state = State_Machine::allowed_transition(player->state,Event::EV_LOGIN);
 
