@@ -2,10 +2,9 @@ from network import Network
 from components import *
 
 """
-Information about current game
+Information about current game. Object which encapsulate all needed data for Game.
+It includes also disconnect/reconnect handling.
 """
-
-
 class GameState:
     def __init__(self, net: Network, start_arr, username):
         self.net = net
@@ -42,17 +41,18 @@ class GameState:
         self.white_disconnected = False
         self.broken_conn = False
 
-        # Generating in sever
-        # 0 and 1 are black
-        # 2 is spare
-        # 3 and 4 are white
+        """
+        Cards are generated in sever
+        0 and 1 are black
+        2 is spare
+        3 and 4 are white
+        """
         self.all_cards = DEF_CARDS
         self.selected_cards = start_arr[3:]
 
     """
-    Takes move as parameter and executes it
+    Takes move as parameter and executes it.
     """
-
     def make_move(self, move):
         # Make move
         self.board[move.start_row][move.start_col] = "--"
@@ -62,9 +62,8 @@ class GameState:
         print("Move made: " + move.get_chess_like_notation())
 
     """
-    Shuffle card, which was played right away and give player spare card
+    Shuffle card, which was played right away and give player spare card.
     """
-
     def shuffle_cards(self, card_picked):
         card_id = self.get_id_by_card(card_picked)
         temp = self.selected_cards[2]
@@ -73,36 +72,33 @@ class GameState:
         print("Cards was shuffled!")
 
     """
-    Get selected card by id
+    Get selected card by id.
     """
-
     def get_card_by_id(self, card_id):
         for i, c in enumerate(self.selected_cards):
             if card_id == i:
                 return c
 
     """
-    Get id by selected card
+    Get id by selected card.
     """
-
     def get_id_by_card(self, card_name):
         for i, c in enumerate(self.selected_cards):
             if card_name == c:
                 return i
 
     """
-    Switch player
+    Switches players and who is on turn.
     """
-
     def switch_players(self):
         self.curr_p = self.black_name if self.white_to_move else self.white_name
         self.white_to_move = not self.white_to_move
         print("Players were switched!")
 
     """
-    Server encountered game over so switching accordingly
+    Server encountered game over so switching accordingly.
+    Game is paused so both players can check how the game ended.
     """
-
     def game_over(self, winner_name):
         if winner_name == self.black_name:
             self.win_white = False
@@ -112,9 +108,9 @@ class GameState:
             print(f"ERR: Neither Black nor White player has won!")
 
     """
-    Player has nowhere to go with both his card so he choose card to discard
+    Player has nowhere to go with both his card so he choose card to discard.
+    Server check if it allowed or not.
     """
-
     def nowhere_to_go(self):
         if self.curr_p == self.black_name:
             list_1 = self.get_valid_moves(self.selected_cards[0])
@@ -130,9 +126,8 @@ class GameState:
 
     """
     Get list of all valid moves for given card.
-    White or black on turn - will distinguish
+    White or black on turn - will distinguish.
     """
-
     def get_valid_moves(self, card):
         moves = []
         for r in range(len(self.board)):
@@ -151,9 +146,8 @@ class GameState:
         return moves
 
     """
-    Calculate moves for one piece
+    Calculate moves for one piece.
     """
-
     def one_valid_move(self, r, c, card, moves, turn):
         matrix = self.all_cards[card]
         for raw_vec in matrix:
@@ -174,9 +168,8 @@ class GameState:
                     moves.append(new_move)
 
     """
-    Fill onitama engine with reconnected data
+    Fill Onitama engine with reconnected data so user can continue playing.
     """
-
     def reconnect(self, rec_data):
         # is_player_white | white_to_move | (25x) "wP" "wK" "--"
         is_player_white_rec = None
@@ -214,8 +207,6 @@ class GameState:
 """
 Class for handling input moves from user
 """
-
-
 class Move:
     # Chess-like description of rows
     ranks_to_rows = {"1": 4, "2": 3, "3": 2, "4": 1, "5": 0}
@@ -224,6 +215,9 @@ class Move:
     files_to_cols = {"a": 0, "b": 1, "c": 2, "d": 3, "e": 4}
     cols_to_files = {v: k for k, v in files_to_cols.items()}
 
+    """
+    Create move as an object
+    """
     def __init__(self, start_sq, end_sq, board):
         self.start_row = start_sq[0]
         self.start_col = start_sq[1]
@@ -234,26 +228,23 @@ class Move:
         self.move_id = self.start_row * 1000 + self.start_col * 100 + self.end_row * 10 + self.end_col
 
     """
-    Overriding equal method
+    Overriding equal method.
     """
-
     def __eq__(self, other):
         if isinstance(other, Move):
             return self.move_id == other.move_id
         return False
 
     """
-    Method for toString like printing
+    Method for toString like printing (logging).
     """
-
     def get_chess_like_notation(self):
         source = self.get_rank_file(self.start_row, self.start_col)
         target = self.get_rank_file(self.end_row, self.end_col)
         return source + " -> " + target
 
     """
-    Get rows and cols using chess description
+    Get rows and cols using chess description (A1 - F8)
     """
-
     def get_rank_file(self, r, c):
         return self.cols_to_files[c] + self.rows_to_ranks[r]

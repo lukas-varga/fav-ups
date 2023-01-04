@@ -1,10 +1,13 @@
 from enum import Enum
-from network import Network
 
-
+# Data seperator in one message
 SPL = '|'
+# Separator of several messages
 END = '\0'
 
+"""
+Enum of possible valid commands used in communication. Some of them are for client and some for server.
+"""
 class Cmd(Enum):
     # Client side
     LOGIN = "LOGIN"
@@ -22,6 +25,10 @@ class Cmd(Enum):
     DISCONNECT = "DISCONNECT"
     PING = "PING"
 
+
+"""
+Return true is provided string is valid enum.
+"""
 def is_enum(provided):
     for e in Cmd:
         if e.value == provided:
@@ -29,6 +36,9 @@ def is_enum(provided):
     return False
 
 
+"""
+Parse incoming message and either return it in array or return WRONG_DATA.
+"""
 def parse(msg: str):
     try:
         res = msg.split(SPL)
@@ -42,15 +52,30 @@ def parse(msg: str):
     return res
 
 
+"""
+Prepare LOGIN message to be send
+"""
 def prepare_login(username):
     return f"{Cmd.LOGIN.value}{SPL}{username}{END}"
 
+
+"""
+Prepare MAKE_MOVE message to be send
+"""
 def prepare_make_move(card, s_row, s_col, e_row, e_col):
     return f"{Cmd.MAKE_MOVE.value}{SPL}{card}{SPL}{s_row}{SPL}{s_col}{SPL}{e_row}{SPL}{e_col}{END}"
 
+
+"""
+Prepare MAKE_PASS message to be send
+"""
 def prepare_make_pass(card):
     return f"{Cmd.MAKE_PASS.value}{SPL}{card}{END}"
 
+
+"""
+Prepare PING message to be send. Message always looks like PING|PING
+"""
 def prepare_ping():
     return f"{Cmd.PING.value}{SPL}{Cmd.PING.value}{END}"
 

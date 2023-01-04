@@ -1,24 +1,24 @@
-import parser
-from components import *
-from parser import Cmd
-from network import Network
 import game
+import parser
+from parser import Cmd
+from components import *
+from network import Network
 
 from tkinter import *
 from tkinter import messagebox
 from functools import partial
 
-#TODO delete
 
-import random
-
-#TODO delete
-
-
+# Intro win width in px
 WIDTH_LOGIN = 384
+# Intro win height in px
 HEIGHT_LOGIN = 256
 
 
+"""
+Method for start Intro window and wait for user to fill username which is sent and confirmed by server.
+Then user enter game waiting room/lobby. When another player enter room, game starts immediately.
+"""
 def login(net: Network):
     # Init
     win = Tk()
@@ -54,15 +54,6 @@ def login(net: Network):
     close_with_args = partial(close_btn_pressed, win)
     close_btn = Button(win, text="Close", width=10, height=1, bg=DARK_COLOR, font=(FONT, 12), command=close_with_args)
     close_btn.pack()
-
-    # #TODO delete on release
-
-    # s = "abcdefghijklmnopqrstuvwxyz"
-    # tmp = random.choice(s) + random.choice(s) + random.choice(s)
-    # username_entry.insert(0, tmp)
-    # login_btn_pressed(net, username_str_var)
-
-    # # TODO delete on release
 
     global exiting
     exiting = False
@@ -189,7 +180,7 @@ def login(net: Network):
 
 
 """
-Play button pressed
+Play button pressed and username sent to server
 """
 def login_btn_pressed(net: Network, username_str_var):
     # Send LOGIN | name
@@ -200,7 +191,7 @@ def login_btn_pressed(net: Network, username_str_var):
 
 
 """
-Define a function to close the window
+Define a function to close the window by clicking button
 """
 def close_btn_pressed(win):
     global exiting

@@ -121,26 +121,29 @@ bool Game::check_move(const string& card, int st_row, int st_col, int end_row, i
         piece_color = "w";
     }
 
-    positions = Card::get_positions(card, inverted);
-    // Using only black cards or white cards
-    if(card == five_cards.at(fst_card) or card == five_cards.at(snd_card)){
-        // Not outside of playing field
-        if(end_row >= 0 and end_row <= 4 and end_col >= 0 and end_col <= 4){
-            // Moving with our figures and not to friendly figures
-            if (board[st_row][st_col].substr(0,1) == piece_color
-            and board[end_row][end_col].substr(0,1) != piece_color){
-                for (tuple<int, int> vec : positions) {
-                    // Transform x,y system to board system
-                    new_r = st_row - get<1>(vec);
-                    new_c = st_col + get<0>(vec);
-                    // Card and given position is right
-                    if (new_r == end_row and new_c == end_col) {
-                        piece_moved = board[st_row][st_col];
-                        piece_captured = board[end_row][end_col];
-                        board[st_row][st_col] = "--";
-                        board[end_row][end_col] = piece_moved;
-                        cout << "Move was OK!" << endl;
-                        return true;
+    // Card is valid
+    if (Card::is_valid_card(card)){
+        positions = Card::get_positions(card, inverted);
+        // Using only black cards or white cards
+        if(card == five_cards.at(fst_card) or card == five_cards.at(snd_card)){
+            // Not outside of playing field
+            if(end_row >= 0 and end_row <= 4 and end_col >= 0 and end_col <= 4){
+                // Moving with our figures and not to friendly figures
+                if (board[st_row][st_col].substr(0,1) == piece_color
+                and board[end_row][end_col].substr(0,1) != piece_color){
+                    for (tuple<int, int> vec : positions) {
+                        // Transform x,y system to board system
+                        new_r = st_row - get<1>(vec);
+                        new_c = st_col + get<0>(vec);
+                        // Card and given position is right
+                        if (new_r == end_row and new_c == end_col) {
+                            piece_moved = board[st_row][st_col];
+                            piece_captured = board[end_row][end_col];
+                            board[st_row][st_col] = "--";
+                            board[end_row][end_col] = piece_moved;
+                            cout << "Move was OK!" << endl;
+                            return true;
+                        }
                     }
                 }
             }

@@ -34,7 +34,7 @@ bool Lobby::find_lobby(int GAME_NUM, Game * game_arr[], Player * player) {
 
 
 void Lobby::failed_because(int fd, string message){
-    send_text = "";
+    string send_text;
     send_text.append(Command::name(Cmd::FAILED))
             .append(1, Parser::SPL)
             .append(message)
@@ -45,7 +45,7 @@ void Lobby::failed_because(int fd, string message){
 
 
 void Lobby::ping_back(int fd) {
-    send_text = "";
+    string send_text;
     send_text.append(Command::name(Cmd::PING))
             .append(1, Parser::SPL)
             .append(Command::name(Cmd::PING))
@@ -66,14 +66,13 @@ void Lobby::keep_alive(int GAME_NUM, Game * game_arr[], int CLIENT_NUM, Player *
 
         if(p->sock != 0) {
             if (durationMillis > MAX_DISCONNECT) {
-                cout << "Player " << p->user << " with sock " << p->sock
-                     << " reached fst timeout -> disconnect!" << endl;
+                cerr << "Player " << p->user << " with sock " << p->sock
+                     << " reached 1st timeout -> disconnect!" << endl;
                 disconnect_partly(GAME_NUM, game_arr, p, client_socks);
             }
 
             if (durationMillis > MAX_REMOVE) {
-                cout << "Player " << p->user << " with sock " << p->sock
-                     << " reached snd timeout -> remove!" << endl;
+                cerr << "Player " << p->user << " reached 2nd timeout -> remove!" << endl;
                 disconnect_completely(GAME_NUM, game_arr, p, client_socks);
             }
         }
@@ -86,6 +85,7 @@ void Lobby::keep_alive(int GAME_NUM, Game * game_arr[], int CLIENT_NUM, Player *
 
         if(p->disc and !p->user.empty()){
             if (durationMillis > MAX_REMOVE) {
+                cerr << "Paused player " << p->user << " reached 2nd timeout -> remove!" << endl;
                 finish_paused_game(GAME_NUM, game_arr, p);
             }
         }
@@ -104,7 +104,7 @@ void Lobby::wrong_attempt(int GAME_NUM, Game * game_arr[], Player * player, fd_s
 
 
 void Lobby::disconnect_partly(int GAME_NUM, Game * game_arr[], Player * player, fd_set & client_socks){
-    cerr << "Disconnecting partly!" << endl;
+    cout << "Disconnecting partly!" << endl;
 
     int fd = player->sock;
     int i;
@@ -151,7 +151,7 @@ void Lobby::disconnect_partly(int GAME_NUM, Game * game_arr[], Player * player, 
 }
 
 void Lobby::disconnect_completely(int GAME_NUM, Game * game_arr[], Player * player, fd_set & client_socks) {
-    cerr << "Disconnecting completely!" << endl;
+    cout << "Disconnecting completely!" << endl;
     int fd = player->sock;
 
     finish_paused_game(GAME_NUM, game_arr, player);
@@ -161,6 +161,7 @@ void Lobby::disconnect_completely(int GAME_NUM, Game * game_arr[], Player * play
 void Lobby::finish_paused_game(int GAME_NUM, Game * game_arr[], Player * player) {
     int i;
     Game * game;
+
     // End games which are unfinished
     for (i=0; i<GAME_NUM; ++i){
         game = game_arr[i];
@@ -235,7 +236,7 @@ void Lobby::reconnect(int GAME_NUM, Game * game_arr[], string username, int sock
             }
         }
 
-        send_text = "";
+        string send_text;
         send_text.append(Command::name(Cmd::RECONNECT))
                 .append(1, Parser::SPL)
                 .append(black_p)
@@ -272,7 +273,7 @@ void Lobby::reconnect(int GAME_NUM, Game * game_arr[], string username, int sock
 
 void Lobby::inform_disconnecting(int GAME_NUM, Game * game_arr[], string disc_username) {
     Game * game;
-    send_text = "";
+    string send_text;
     send_text.append(Command::name(Cmd::DISCONNECT))
             .append(1, Parser::SPL)
             .append(disc_username)
@@ -299,7 +300,7 @@ void Lobby::inform_disconnecting(int GAME_NUM, Game * game_arr[], string disc_us
 
 void Lobby::inform_reconnecting(int GAME_NUM, Game * game_arr[], string recon_username) {
     Game * game;
-    send_text = "";
+    string send_text;
     send_text.append(Command::name(Cmd::RECONNECT))
             .append(1, Parser::SPL)
             .append(recon_username)

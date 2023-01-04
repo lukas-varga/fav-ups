@@ -1,11 +1,13 @@
+import parser
+
 import select
 import socket
 from tkinter import messagebox
 from time import time
-import parser
+
 
 """
-Socket operating class for communication with server
+Socket class for connecting and communication with server (IP, port). It also handles all incoming data with select.
 """
 class Network(object):
     def __init__(self, ip, port):
@@ -39,7 +41,7 @@ class Network(object):
         # self.server.settimeout(self.TIMEOUT)
 
     """
-    Connect to server
+    Connect to server and keeps connection.
     """
     def create_connection(self):
         try:
@@ -55,7 +57,7 @@ class Network(object):
             return -1
 
     """
-    Close the connection to server
+    Close the connection to server. Either on program exit or server error.
     """
     def close_connection(self):
         try:
@@ -67,7 +69,7 @@ class Network(object):
             return -1
 
     """
-    Send data to server
+    Send data to server. Data are presented in UTF-8 so they are readable.
     """
     def send_data(self, data):
         try:
@@ -80,7 +82,7 @@ class Network(object):
             return -1
 
     """
-    Receive data from server while waiting
+    Receive data from server. Data are in UTF-8 format.
     :return str data
     """
     def recv_data(self):
@@ -93,16 +95,26 @@ class Network(object):
             print(e)
             return ""
 
+    """
+    Allows ping after ping_back was received from server.
+    """
     def allow_ping(self):
         self.last_mess = time()
         self.can_ping = True
 
+    """
+    Sending ping to server each PING_TIME seconds.
+    """
     def send_ping(self):
         if self.can_ping and (time() - self.last_mess) > self.PING_TIME:
             ping = parser.prepare_ping()
             self.send_data(ping)
             self.can_ping = False
 
+    """
+    If ping was not received in MAX_TIMEOUT seconds,
+    connection is marked as broken without leaving the game.
+    """
     def broken_connection(self):
         if (time() - self.last_mess) > self.MAX_TIMEOUT:
             return True
@@ -110,7 +122,9 @@ class Network(object):
 
     """ 
     Read from the socket, stuffing data into the buffer.
-    Returns True when a full packet has been read into the buffer
+    Returns True when a full packet has been read into the buffer.
+    Returns False if no data arrived.
+    Return None if server send too big data or is not responding
     """
     def network_data_arrived(self, socket_buffer):
         self.send_ping()
@@ -150,6 +164,9 @@ class Network(object):
 
         return result
 
+    """
+    Counter of wrong attempts. If server sends not valid data x many times, client disconnects.
+    """
     def wrong_attempt(self):
         self.wrong_counter += 1
         print("Wrong counter: ", self.wrong_counter)

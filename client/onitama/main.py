@@ -1,13 +1,12 @@
 import intro
-import game
 import network
-from parser import Cmd
 
 import sys
 
 
 """
-Implementation of main method
+Implementation of main method which check IP and PORT parameters, creates connection and start Intro window.
+After app returns from Intro, connection is closed and program closed.
 """
 def main():
     if len(sys.argv) != 3:
@@ -37,7 +36,7 @@ def main():
 
 
 """
- Main
+ Main method of python programs where the program starts
 """
 if __name__ == "__main__":
     main()

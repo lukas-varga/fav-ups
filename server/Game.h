@@ -24,6 +24,7 @@ public:
     string send_text;
 
     Game();
+
     void init();
 
     void enter_game(Player * player);

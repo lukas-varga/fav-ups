@@ -13,6 +13,7 @@ Player::Player(int sock, string name) {
     last_mess = system_clock::now();
 }
 
+
 void Player::init() {
     sock = 0;
     user = "";
@@ -32,6 +33,7 @@ void Player::inc_wrong_attempt(){
 void Player::update_last_message() {
     last_mess = system_clock::now();
 }
+
 
 
 

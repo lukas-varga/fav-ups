@@ -1,25 +1,24 @@
 import engine
 import parser
-from components import *
 from parser import Cmd
+from components import *
 from network import Network
 
-from tkinter import messagebox
 import pygame
 
 
-# Resolution
+# Resolution for main game window
 WIDTH_PLAY = 1024
 HEIGHT_PLAY = 512
-# Dimension of board
+# Dimension of board (how many squares)
 DIMENSION = 5
 # Square size
 # (x, y)
 SQ_SIZE = HEIGHT_PLAY // DIMENSION
 
-# Card size
+# Temp variable for Card size
 CARD_COEF = 1 / 125
-# (x, y)
+# Card size (x, y)
 CARD_SIZE = (CARD_COEF * (300 * SQ_SIZE), CARD_COEF * (174 * SQ_SIZE))
 
 # Card positions
@@ -35,9 +34,9 @@ CARD_POS = [
     (WIDTH_PLAY - CARD_SIZE[0], HEIGHT_PLAY - CARD_SIZE[1]),
 ]
 
-# Label positions
-# (x, y)
+# Temp variable for Label size
 LABEL_COEF = 0.13
+# Label positions (x, y)
 # Position relative to B1 card
 BLACK_NAME_POS = (CARD_POS[0][0], CARD_POS[0][1] + CARD_SIZE[1])
 BLACK_STATUS_POS = (BLACK_NAME_POS[0] , BLACK_NAME_POS[1] + CARD_SIZE[1] * LABEL_COEF)
@@ -47,7 +46,6 @@ SPARE_CARD_POS = (CARD_POS[2][0] + CARD_SIZE[0] * 2*LABEL_COEF, CARD_POS[2][1] -
 WHITE_NAME_POS = (CARD_POS[3][0], CARD_POS[3][1] - CARD_SIZE[1] * LABEL_COEF)
 WHITE_STATUS_POS = (WHITE_NAME_POS[0], WHITE_NAME_POS[1] - CARD_SIZE[1] * LABEL_COEF)
 
-
 # Others
 MAX_FPS = 15
 PIECE_IMAGES = {}
@@ -55,7 +53,7 @@ CARD_IMAGES = {}
 
 
 """
-Handle user input and update graphics
+Handle user input and update graphics. Also react to messages from server and update game stats accordingly.
 """
 def play(net: Network, data, username, rec_data):
     # Init pygame library
@@ -278,7 +276,7 @@ def play(net: Network, data, username, rec_data):
 
 
 """
-Clear player selection
+Clear player selection so nothing is chosen
 """
 def clear_selection():
     global card_picked, valid_moves, sq_selected, player_clicks
@@ -292,7 +290,9 @@ def clear_selection():
 
 
 """
-Global dictionary of pieces
+Global dictionary of pieces and cards. Pictures and loaded only once on program start.
+Source of cards: https://www.ultraboardgames.com/onitama/game-rules.php
+Source of pieces: https://drive.google.com/drive/folders/1qH7IQj5lj7o3MQIb5TAZhsDr_5f9p8aq
 """
 def load_images(gs):
     # Assigning pieces using dictionary PIECE_IMAGES["wP"] = pieces/wP.png
@@ -308,7 +308,7 @@ def load_images(gs):
 
 
 """
-Responsible for all graphics within current game state
+Responsible for all graphics changes within current game state. Drawing and refresh board, pieces, cards and labels.
 """
 def draw_game_state(screen, gs, valid_moves, sq_selected, which_card, my_font):
     # Reset screen
@@ -328,7 +328,7 @@ def draw_game_state(screen, gs, valid_moves, sq_selected, which_card, my_font):
 
 
 """
-Draw squares of board
+Draw squares of board on the left side of window
 """
 def draw_board(screen):
     global colors
@@ -342,9 +342,8 @@ def draw_board(screen):
             pygame.draw.rect(screen, color, pygame.Rect(c * SQ_SIZE, r * SQ_SIZE, SQ_SIZE, SQ_SIZE))
 
 
-
 """
-Highlight square and moves for piece
+Highlight clicked square which piece is selected
 """
 def highlight_square(screen, gs, valid_moves, sq_selected):
     if sq_selected != ():
@@ -366,7 +365,7 @@ def highlight_square(screen, gs, valid_moves, sq_selected):
 
 
 """
-Draw pieces on the top of board
+Draw pieces on the top of board.
 """
 def draw_pieces(screen, board):
     for r in range(DIMENSION):
@@ -378,7 +377,7 @@ def draw_pieces(screen, board):
 
 
 """
-Draw card holders
+Draw card holders with cards inside. Two cards for black, one spare card and two cards for white player.
 """
 def draw_card_holders(screen, gs):
     for i, card in enumerate(gs.selected_cards):
@@ -391,7 +390,7 @@ def draw_card_holders(screen, gs):
 
 
 """
-Possible highlight for selected card
+Possible highlight for selected card. Also highlight cards for the current player
 """
 def draw_card_highlight(screen, gs, which_card):
     # Blue highlight
@@ -429,7 +428,7 @@ def get_rect_tuple(i):
 
 
 """
-Animate move    
+Animate move of piece for one second
 """
 def animate_move(move, screen, board, clock):
     global colors
@@ -459,7 +458,7 @@ def animate_move(move, screen, board, clock):
 
 
 """
-Draw label to inform which player is playing
+Draw label to inform which player is playing and some other info regarding connection and game over.
 """
 def draw_player_label(screen, gs, my_font):
     black_who = "You" if gs.player_name == gs.black_name else "Enemy"
@@ -500,5 +499,4 @@ def draw_player_label(screen, gs, my_font):
 
     white_status_lb = my_font.render(f"{white_status}", True, BLACK)
     screen.blit(white_status_lb, WHITE_STATUS_POS)
-
 

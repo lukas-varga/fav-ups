@@ -26,6 +26,8 @@
 using namespace std;
 using namespace std::chrono;
 
+void free_on_exit(int GAME_NUM, Game * game_arr[], int CLIENT_NUM, Player * player_arr[], Lobby * lobby, fd_set & client_socks);
+
 int main(int argc, char **argv) {
     if (argc != 3) {
         cout << "Please enter server arguments: <port> <num_players>" << endl;
@@ -60,8 +62,8 @@ int main(int argc, char **argv) {
 
     // Number of wrong attempts before disconnect
     int MAX_ATTEMPTS = 5;
-    // Milliseconds for disconnect 20s
-    const double MAX_DISCONNECT = 20000;
+    // Milliseconds for disconnect 30s
+    const double MAX_DISCONNECT = 30000;
     // Milliseconds for removing 100s
     const double MAX_REMOVE = 100000;
     // Timeout for Select
@@ -89,6 +91,7 @@ int main(int argc, char **argv) {
         game_arr[i] = new Game();
     }
 
+
     server_socket = socket(AF_INET, SOCK_STREAM, 0);
     memset(&my_addr, 0, sizeof(struct sockaddr_in));
     my_addr.sin_family = AF_INET;
@@ -100,6 +103,7 @@ int main(int argc, char **argv) {
     if (ret_val == 0)
         printf("Bind - OK\n");
     else {
+        free_on_exit(GAME_NUM, game_arr, CLIENT_NUM, player_arr, lobby, client_socks);
         printf("Bind - ERR\n");
         return -1;
     }
@@ -110,6 +114,7 @@ int main(int argc, char **argv) {
         printf("Listen - OK\n");
     } else {
         printf("Listen - ERR\n");
+        free_on_exit(GAME_NUM, game_arr, CLIENT_NUM, player_arr, lobby, client_socks);
         return -1;
     }
 
@@ -124,14 +129,13 @@ int main(int argc, char **argv) {
         vector<string> data;
         string cmd, login_name;
 
-        Player *player;
-        Game *game;
+        Player * player;
+        Game * game;
 
         timeout.tv_sec = 2;
         timeout.tv_usec = 0;
 
         auto a2read = 0;
-        int i;
 
         tests = client_socks;
 //        printf("Server is waiting... ");
@@ -141,6 +145,7 @@ int main(int argc, char **argv) {
         ret_val = select(FD_SETSIZE, &tests, (fd_set *) 0, (fd_set *) 0, &timeout);
         if (ret_val < 0) {
             cout << "Select - ERR" << endl;
+            free_on_exit(GAME_NUM, game_arr, CLIENT_NUM, player_arr, lobby, client_socks);
             return -1;
         }
 
@@ -165,7 +170,7 @@ int main(int argc, char **argv) {
 
                     Player *p;
                     // Looking for empty Player slot
-                    for (i = 0; i < CLIENT_NUM; i++) {
+                    for (int i = 0; i < CLIENT_NUM; i++) {
                         p = player_arr[i];
                         if (p->sock == 0 and p->user.empty()) {
                             p->init();
@@ -181,7 +186,7 @@ int main(int argc, char **argv) {
                 // Je to klientsky sock ? prijmem rcv
                 else {
                     player = nullptr;
-                    for (i = 0; i < CLIENT_NUM; i++) {
+                    for (int i = 0; i < CLIENT_NUM; i++) {
                         if (fd == player_arr[i]->sock) {
                             player = player_arr[i];
                             break;
@@ -237,7 +242,7 @@ int main(int argc, char **argv) {
                                         bool playing = false;
 
                                         // Check for playing
-                                        for (i = 0; i < GAME_NUM; ++i) {
+                                        for (int i = 0; i < GAME_NUM; ++i) {
                                             game = game_arr[i];
                                             if (game->is_active) {
                                                 // Remove player login but take sock number for game
@@ -285,7 +290,7 @@ int main(int argc, char **argv) {
 
                                         // Not playing try to login as new user
                                         if (!playing) {
-                                            for (i = 0; i < CLIENT_NUM; ++i) {
+                                            for (int i = 0; i < CLIENT_NUM; ++i) {
                                                 Player *p = player_arr[i];
                                                 // Name used, try different one
                                                 if (p->user == login_name) {
@@ -336,7 +341,7 @@ int main(int argc, char **argv) {
                             } else if (cmd == Command::name(Cmd::MAKE_MOVE)) {
                                 if (data.size() == 5 + 1) {
                                     cout << "Entering: " << Command::name(Cmd::MAKE_MOVE) << endl;
-                                    for (i = 0; i < GAME_NUM; i++) {
+                                    for (int i = 0; i < GAME_NUM; i++) {
                                         game = game_arr[i];
                                         if (game->is_active and (game->black_p == player or game->white_p == player)) {
                                             if (game->curr_p == player
@@ -387,7 +392,7 @@ int main(int argc, char **argv) {
                             } else if (cmd == Command::name(Cmd::MAKE_PASS)) {
                                 if (data.size() == 1 + 1) {
                                     cout << "Entering: " << Command::name(Cmd::MAKE_PASS) << endl;
-                                    for (i = 0; i < GAME_NUM; i++) {
+                                    for (int i = 0; i < GAME_NUM; i++) {
                                         game = game_arr[i];
                                         if (game->is_active and (game->black_p == player or game->white_p == player)) {
                                             if (game->curr_p == player
@@ -454,4 +459,23 @@ int main(int argc, char **argv) {
         //odpojeni vsech klientu, kteri porusili protokol nebo jsou timed out
         lobby->keep_alive(GAME_NUM, game_arr, CLIENT_NUM, player_arr, client_socks, MAX_DISCONNECT, MAX_REMOVE);
     }
+
+    free_on_exit(GAME_NUM, game_arr, CLIENT_NUM, player_arr, lobby, client_socks);
+}
+
+void free_on_exit(int GAME_NUM, Game * game_arr[], int CLIENT_NUM, Player * player_arr[], Lobby * lobby, fd_set & client_socks){
+    // Free pointers memory and close sockets
+    for(int i=0; i < CLIENT_NUM; ++i){
+        close(player_arr[i]->sock);
+        FD_CLR(player_arr[i]->sock, &client_socks);
+        delete player_arr[i];
+    }
+
+    for(int i=0; i < GAME_NUM; ++i){
+        delete game_arr[i];
+    }
+
+    delete lobby;
+
+    cout << "Resources freed on exit!" << endl;
 }

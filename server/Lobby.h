@@ -8,8 +8,6 @@ using namespace std;
 using namespace std::chrono;
 
 class Lobby {
-private:
-    string send_text;
 public:
 
     bool find_lobby(int GAME_NUM, Game * game_arr[], Player * player);

@@ -22,6 +22,7 @@ public:
     time_point<chrono::system_clock> last_mess;
 
     Player(int sock, string name);
+
     void init();
     void inc_wrong_attempt();
     void update_last_message();
