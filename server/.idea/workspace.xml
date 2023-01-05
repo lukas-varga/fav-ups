@@ -22,15 +22,13 @@
   <component name="ChangeListManager">
     <list default="true" id="b8ed92a8-e9d2-457f-9a81-ceb035a0f772" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/../client/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../client/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/onitama/game.py" beforeDir="false" afterPath="$PROJECT_DIR$/../client/onitama/game.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/onitama/network.py" beforeDir="false" afterPath="$PROJECT_DIR$/../client/onitama/network.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/onitama/parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/../client/onitama/parser.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Game.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Game.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Game.h" beforeDir="false" afterPath="$PROJECT_DIR$/Game.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Lobby.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Lobby.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Lobby.h" beforeDir="false" afterPath="$PROJECT_DIR$/Lobby.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/Makefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Player.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Player.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Player.h" beforeDir="false" afterPath="$PROJECT_DIR$/Player.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Parser.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Parser.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/server.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -113,10 +111,10 @@
     </configuration>
     <list>
       <item itemvalue="CMake Application.server" />
+      <item itemvalue="Makefile Target.Makefile" />
       <item itemvalue="Makefile Target.all" />
       <item itemvalue="Makefile Target.clean" />
       <item itemvalue="Makefile Target.server" />
-      <item itemvalue="Makefile Target.Makefile" />
     </list>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
@@ -190,22 +188,13 @@
       <workItem from="1672795935112" duration="128000" />
       <workItem from="1672796101703" duration="3403000" />
       <workItem from="1672829947959" duration="6640000" />
+      <workItem from="1672865775735" duration="105000" />
+      <workItem from="1672904474849" duration="6073000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/Card.cpp</url>
-          <line>58</line>
-          <option name="timeStamp" value="4" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

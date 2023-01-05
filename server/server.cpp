@@ -21,6 +21,7 @@
 #include "string"
 #include <chrono>
 #include <algorithm>
+#include <cctype>
 
 
 using namespace std;
@@ -232,14 +233,11 @@ int main(int argc, char **argv) {
                                 if (data.size() == 1 + 1) {
                                     cout << "Entering: " << Command::name(Cmd::LOGIN) << endl;
 
-                                    // Cleaning the username of white spaces before and after
                                     login_name = data.at(1);
-                                    login_name.erase(std::remove_if(login_name.begin(), login_name.end(), ::isspace),
-                                                     login_name.end());
-
                                     if (!login_name.empty()) {
-                                        bool name_in_use = false;
                                         bool playing = false;
+                                        bool name_in_use = false;
+                                        bool white_spaces = false;
 
                                         // Check for playing
                                         for (int i = 0; i < GAME_NUM; ++i) {
@@ -310,13 +308,13 @@ int main(int argc, char **argv) {
                                                                           ")!");
                                                     lobby->wrong_attempt(GAME_NUM, game_arr, player, client_socks, MAX_ATTEMPTS);
                                                 }
-                                                    // Forbidden chars
+                                                // Forbidden chars | \0
                                                 else if (login_name.find(Parser::SPL) != string::npos
                                                          or login_name.find(Parser::END) != string::npos) {
-                                                    lobby->failed_because(fd, "Name include chars | or \\0)");
+                                                    lobby->failed_because(fd, "Not allowed chars)");
                                                     lobby->wrong_attempt(GAME_NUM, game_arr, player, client_socks, MAX_ATTEMPTS);
                                                 }
-                                                    // Correct name
+                                                // Correct name
                                                 else {
                                                     player->user = login_name;
                                                     player->state = State_Machine::allowed_transition(player->state,Event::EV_LOGIN);
@@ -331,7 +329,7 @@ int main(int argc, char **argv) {
                                             }
                                         }
                                     } else {
-                                        lobby->failed_because(fd, "Name must no be empty!");
+                                        lobby->failed_because(fd, "Name empty!");
                                         lobby->wrong_attempt(GAME_NUM, game_arr, player, client_socks, MAX_ATTEMPTS);
                                     }
                                 } else {
@@ -400,7 +398,7 @@ int main(int argc, char **argv) {
                                                 and !game->white_p->disc) {
                                                 try {
                                                     string card = data.at(1);
-                                                    bool valid_swap = game->valid_pass();
+                                                    bool valid_swap = game->valid_pass(card);
                                                     if (valid_swap) {
                                                         player->state = State_Machine::allowed_transition(player->state,
                                                                                                           Event::EV_MOVE);

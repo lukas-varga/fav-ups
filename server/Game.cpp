@@ -175,9 +175,9 @@ void Game::move_was_made(const string& card, int st_row, int st_col, int end_row
     Parser::send_log(white_p->sock, send_text);
 }
 
-bool Game::valid_pass() {
+bool Game::valid_pass(string card) {
     vector<vector<tuple<int, int>>> pos_card_1_2;
-    int new_r, new_c;
+    int new_r, new_c , fst_card, snd_card;
     string piece_color, curr_piece;
     bool inverted;
 
@@ -186,6 +186,8 @@ bool Game::valid_pass() {
         inverted = true;
         pos_card_1_2.push_back(Card::get_positions(five_cards[0], inverted));
         pos_card_1_2.push_back(Card::get_positions(five_cards[1], inverted));
+        fst_card = 0;
+        snd_card = 1;
         piece_color = "b";
     }
     // Iterate trough white cards
@@ -193,8 +195,11 @@ bool Game::valid_pass() {
         inverted = false;
         pos_card_1_2.push_back(Card::get_positions(five_cards[3], inverted));
         pos_card_1_2.push_back(Card::get_positions(five_cards[4], inverted));
+        fst_card = 3;
+        snd_card = 4;
         piece_color = "w";
     }
+
 
     for (int row = 0; row < board.size(); ++row){
         for (int col = 0; col < board[row].size(); ++col){
@@ -222,8 +227,17 @@ bool Game::valid_pass() {
         }
     }
 
-    cout << "Pass was OK!" << endl;
-    return true;
+    // Cant move so card will be swapped
+    // Card is valid
+    if (Card::is_valid_card(card)) {
+        // Using only black cards or white cards
+        if (card == five_cards.at(fst_card) or card == five_cards.at(snd_card)) {
+            cout << "Pass was OK!" << endl;
+            return true;
+        }
+    }
+    // Given card does not exist
+    return false;
 }
 
 void Game::pass_was_made(const string& card) {

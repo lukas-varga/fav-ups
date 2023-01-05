@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "Parser.h"
 #include "Command.h"
 
@@ -13,7 +14,19 @@ vector<string> Parser::parse(const string& msg) {
 
     while (!ss.eof()) {
         getline(ss, word, SPL);
-        args.push_back(word);
+
+        // Cleaning the username of white spaces before and after
+        word.erase(std::remove_if(word.begin(), word.end(), ::isspace),
+                   word.end());
+        // Cleaning \n
+        string new_word;
+        for (char ch : word){
+            if (ch != '\n'){
+                new_word.append(1, ch);
+            }
+        }
+
+        args.push_back(new_word);
     }
 
     // Check validity of message

@@ -41,6 +41,7 @@ Parse incoming message and either return it in array or return WRONG_DATA.
 """
 def parse(msg: str):
     try:
+        msg = msg.strip()
         res = msg.split(SPL)
         if len(res) < 2:
             raise Exception("Command should have at least one parameter!")

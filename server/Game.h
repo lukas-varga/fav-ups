@@ -33,7 +33,7 @@ public:
     bool check_move(const string& card, int st_row, int st_col, int end_row, int end_col);
     void move_was_made(const string& card, int st_row, int st_col, int end_row, int end_col);
 
-    bool valid_pass();
+    bool valid_pass(string card);
     void pass_was_made(const string& card);
 
     void invalid_move(string message, int fd);

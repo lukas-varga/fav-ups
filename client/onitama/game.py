@@ -103,7 +103,8 @@ def play(net: Network, data, username, rec_data):
                     and gs.win_white is None \
                     and gs.curr_p == gs.player_name \
                     and not gs.black_disconnected \
-                    and not gs.white_disconnected:
+                    and not gs.white_disconnected \
+                    and not gs.broken_conn:
                 # x,y loc of mouse
                 loc = pygame.mouse.get_pos()
 
