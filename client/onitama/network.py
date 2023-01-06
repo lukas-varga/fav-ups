@@ -141,20 +141,20 @@ class Network(object):
                 incoming_message = self.recv_data()
 
                 # Server is disconnected
-                if len(incoming_message) == 0:
-                    raise Exception("Server not responding -> disconnect!")
-                if len(incoming_message) > self.MAX_INPUT:
-                    raise Exception("Too big data recv -> disconnect!")
+                if len(incoming_message) != 0:
+                    # raise Exception("Server not responding -> disconnect!")
+                    if len(incoming_message) > self.MAX_INPUT:
+                        raise Exception("Too big data recv -> disconnect!")
 
-                # Split messages by null character
-                records = incoming_message.split("\x00")
-                for record in records:
-                    if record == "":
-                        continue
-                    socket_buffer.append(record)
-                    print(f"Appended to recv buffer: {record}")
-                # if len(socket_buffer) >= self.MAX_BUFF:
-                result = True
+                    # Split messages by null character
+                    records = incoming_message.split("\x00")
+                    for record in records:
+                        if record == "":
+                            continue
+                        socket_buffer.append(record)
+                        print(f"Appended to recv buffer: {record}")
+                    # if len(socket_buffer) >= self.MAX_BUFF:
+                    result = True
 
         except Exception as e:
             # No data gathered

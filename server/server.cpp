@@ -35,6 +35,7 @@ int main(int argc, char **argv) {
         exit(0);
     }
 
+    // Check ip by: hostname --ip-address
     int port, num_players;
     try {
         port = stoi(argv[1]);
