@@ -32,7 +32,6 @@ bool Lobby::find_lobby(int GAME_NUM, Game * game_arr[], Player * player) {
     return false;
 }
 
-
 void Lobby::failed_because(int fd, string message){
     string send_text;
     send_text.append(Command::name(Cmd::FAILED))
@@ -42,7 +41,6 @@ void Lobby::failed_because(int fd, string message){
     send(fd, send_text.data(), send_text.size(), 0);
     Parser::send_log(fd, send_text);
 }
-
 
 void Lobby::ping_back(int fd) {
     string send_text;
@@ -185,7 +183,6 @@ void Lobby::finish_paused_game(int GAME_NUM, Game * game_arr[], Player * player)
     player->init();
 }
 
-
 void Lobby::close_connection(int fd, fd_set & client_socks){
     // Remove closed fd
     // (from the unmodified fd_set readfds)
@@ -194,8 +191,8 @@ void Lobby::close_connection(int fd, fd_set & client_socks){
     printf("Removing client on fd %d\n", fd);
 }
 
-//RECONNECT black_p | white_p | (5x) cards | is_player_white | white_to_move | (25x) "wP" "wK" "--"
 void Lobby::reconnect(int GAME_NUM, Game * game_arr[], string username, int socket) {
+    //RECONNECT black_p | white_p | (5x) cards | is_player_white | white_to_move | (25x) "wP" "wK" "--"
     int i, row, col, last_piece;
     Game * game = nullptr;
 
@@ -324,8 +321,4 @@ void Lobby::inform_reconnecting(int GAME_NUM, Game * game_arr[], string recon_us
         }
     }
 }
-
-
-
-
 

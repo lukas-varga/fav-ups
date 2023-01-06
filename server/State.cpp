@@ -1,12 +1,6 @@
 #include "State.h"
 
 
-/**
- * Vrací hodnotu v matici, výsledek
- * @param state Aktuální stav
- * @param event Událost, která se děje
- * @return Vrací hodnotu mez 0-5
- */
 State State_Machine::allowed_transition(State state, Event event) {
     map<tuple<State,Event>, State> transition = {
         // Login and play

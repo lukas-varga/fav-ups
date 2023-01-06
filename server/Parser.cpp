@@ -2,7 +2,6 @@
 #include "Parser.h"
 #include "Command.h"
 
-// Codes for delimiter and end
 
 const char Parser::SPL = '|';
 const char Parser::END = '\0';

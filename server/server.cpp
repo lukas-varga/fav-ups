@@ -64,12 +64,16 @@ int main(int argc, char **argv) {
 
     // Number of wrong attempts before disconnect
     int MAX_ATTEMPTS = 5;
-    // Milliseconds for disconnect 30s
-    const double MAX_DISCONNECT = 30000;
-    // Milliseconds for removing 60s
-    const double MAX_REMOVE = 60000;
+
     // Timeout for Select
     timeval timeout{};
+    // After this timeout, sockets are closed
+    const long TIMEOUT_SEC = 15;
+    // Milliseconds for disconnect 15s MILLIS
+    const double MAX_DISCONNECT = 15 * 1000;
+    // Milliseconds for removing 60s MILLIS
+    const double MAX_REMOVE = 60 * 1000;
+
 
     //  Socket initials
     int client_socket;
@@ -134,7 +138,7 @@ int main(int argc, char **argv) {
         Player * player;
         Game * game;
 
-        timeout.tv_sec = 10;
+        timeout.tv_sec = TIMEOUT_SEC;
         timeout.tv_usec = 0;
 
         auto a2read = 0;

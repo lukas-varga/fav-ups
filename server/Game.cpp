@@ -6,21 +6,19 @@
 int Game::GAME_COUNTER = -1;
 
 Game::Game() {
+    // ID number of the game by incrementing counter
     game_id = ++GAME_COUNTER;
+    // Default starting game state
     init();
 }
 
 void Game::init() {
-    white_p = nullptr;
     black_p = nullptr;
+    white_p = nullptr;
     is_active = false;
-
     curr_p = nullptr;
     white_to_move = true;
     winner_p = nullptr;
-    piece_moved = "";
-    piece_captured = "";
-    send_text = "";
 
     vector<vector<string>> def_board
             {
@@ -32,14 +30,16 @@ void Game::init() {
             };
     board = def_board;
     five_cards = Card::pick_five_cards();
-}
 
+    piece_moved = "";
+    piece_captured = "";
+}
 
 void Game::enter_game(Player * player){
     if (black_p == nullptr){
         black_p = player;
 
-        send_text = "";
+        string send_text;
         send_text.append(Command::name(Cmd::WAITING))
                 .append(1, Parser::SPL)
                 .append(player->user)
@@ -52,7 +52,7 @@ void Game::enter_game(Player * player){
     else if(white_p == nullptr){
         white_p = player;
 
-        send_text = "";
+        string send_text;
         send_text.append(Command::name(Cmd::WAITING))
                 .append(1, Parser::SPL)
                 .append(player->user)
@@ -69,7 +69,7 @@ void Game::enter_game(Player * player){
 }
 
 void Game::start_game(){
-    send_text = "";
+    string send_text;
     send_text.append(Command::name(Cmd::START))
             .append(1, Parser::SPL)
             .append(black_p->user)
@@ -155,7 +155,7 @@ bool Game::check_move(const string& card, int st_row, int st_col, int end_row, i
 }
 
 void Game::move_was_made(const string& card, int st_row, int st_col, int end_row, int end_col) {
-    send_text = "";
+    string send_text;
     send_text.append(Command::name(Cmd::MOVE_WAS_MADE))
             .append(1, Parser::SPL)
             .append(card)
@@ -241,7 +241,7 @@ bool Game::valid_pass(string card) {
 }
 
 void Game::pass_was_made(const string& card) {
-    send_text = "";
+    string send_text;
     send_text.append(Command::name(Cmd::PASS_WAS_MADE))
             .append(1, Parser::SPL)
             .append(card)
@@ -254,7 +254,7 @@ void Game::pass_was_made(const string& card) {
 }
 
 void Game::invalid_move(string message, int fd) {
-    send_text = "";
+    string send_text;
     send_text.append(Command::name(Cmd::INVALID_MOVE))
             .append(1, Parser::SPL)
             .append(message)
@@ -304,7 +304,7 @@ bool Game::is_end() {
 }
 
 void Game::game_over() {
-    send_text = "";
+    string send_text;
     send_text.append(Command::name(Cmd::GAME_OVER))
             .append(1, Parser::SPL)
             .append(winner_p->user)
@@ -324,6 +324,3 @@ void Game::game_over() {
     white_p->init();
     white_p->sock = old_sock;
 }
-
-
-

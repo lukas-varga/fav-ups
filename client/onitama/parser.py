@@ -6,32 +6,41 @@ SPL = '|'
 END = '\0'
 
 """
-Enum of possible valid commands used in communication. Some of them are for client and some for server.
+Includes all commands used in TCP protocol as enum. Some of them are for client and some for server.
 """
 class Cmd(Enum):
     """
      Client side
     """
-    # Try login with username
+    # Try login with username or reconnect to open game
     LOGIN = "LOGIN"
-    # Send move to validating (piece + card)
+    # Send move for validation to server (piece + card)
     MAKE_MOVE = "MAKE_MOVE"
-    # Pass turn if possible (only card)
+    # Pass turn if there is no other option left (only card)
     MAKE_PASS = "MAKE_PASS"
 
     """
     Server side
     """
-    #
+    # Waiting for other players to join in lobby/waiting room
     WAITING = "WAITING"
+    # Failed login or reconnect. As second parameter there is error message
     FAILED = "FAILED"
+    # Game starts. First player is black, second is white. Five cards are distributed (everyone sees them).
     START = "START"
+    # Provided move was correct (checked by server). Both players receive confirmation about new game state.
     MOVE_WAS_MADE = "MOVE_WAS_MADE"
+    # User could not move in any way, so he passed the turn and switch the card. The other players is on turn.
     PASS_WAS_MADE = "PASS_WAS_MADE"
+    # Provided move was incorrect for some reason. The reason is showed in second parameter. Player plays again.
     INVALID_MOVE = "INVALID_MOVE"
+    # Game ended. Either by taking opponent king or moving my own king to opponent king's start square.
     GAME_OVER = "GAME_OVER"
+    # Reconnect to game occurred. Reconnected player get all the game state info. Paused player get only notification.
     RECONNECT = "RECONNECT"
+    # Player was notified that opponent disconnected from the game. He can reconnect in certain amount of time.
     DISCONNECT = "DISCONNECT"
+    # Ping message which is sent by clients and server respond by pinging back. Occur every few seconds.
     PING = "PING"
 
 
