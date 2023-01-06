@@ -66,8 +66,8 @@ int main(int argc, char **argv) {
     int MAX_ATTEMPTS = 5;
     // Milliseconds for disconnect 30s
     const double MAX_DISCONNECT = 30000;
-    // Milliseconds for removing 100s
-    const double MAX_REMOVE = 100000;
+    // Milliseconds for removing 60s
+    const double MAX_REMOVE = 60000;
     // Timeout for Select
     timeval timeout{};
 
@@ -134,7 +134,7 @@ int main(int argc, char **argv) {
         Player * player;
         Game * game;
 
-        timeout.tv_sec = 2;
+        timeout.tv_sec = 10;
         timeout.tv_usec = 0;
 
         auto a2read = 0;
