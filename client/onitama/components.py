@@ -17,8 +17,8 @@ CARD_HIGHLIGHT_PASSIVE = "steelblue3"
 FONT = "calibri"
 
 """
-Cards presented in the game using vectors from current location
-from point of view of current player (x,y), (x,y), ...
+Cards presented in the game using map. Key is string name
+and value are coordinates from current location (x,y), (x,y), ...
 """
 DEF_CARDS = {
     "tiger": [(0, 2), (0, -1)],

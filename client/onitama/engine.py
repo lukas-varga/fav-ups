@@ -9,9 +9,10 @@ class GameState:
     def __init__(self, net: Network, start_arr, username):
         self.net = net
         """
-        Board is 5x5 2D list where each element has two chars
-        Fst char represents color and snd char represents type (Pawn/King)
-        Symbol -- represents empty board
+        Board is 5x5 2D list where each element has two chars.
+        Fst char represents color (Black/White)
+        and snd char represents type (Pawn/King).
+        Symbol -- represents empty board.
         """
         self.board = [
             ["bP", "bP", "bK", "bP", "bP"],
@@ -26,9 +27,11 @@ class GameState:
         self.black_name = start_arr[1]
         self.white_name = start_arr[2]
 
+        # Who is current player using bool or player object
         self.white_to_move = True
         self.curr_p = self.white_name
 
+        # Relative names for the game
         if self.black_name == username:
             self.player_name = self.black_name
             self.enemy_name = self.white_name
@@ -36,9 +39,14 @@ class GameState:
             self.player_name = self.white_name
             self.enemy_name = self.black_name
 
+        # Which player has won
         self.win_white = None
+
+        # Disconnecting status
         self.black_disconnected = False
         self.white_disconnected = False
+
+        # Broken connection flag
         self.broken_conn = False
 
         """

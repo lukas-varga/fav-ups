@@ -22,14 +22,14 @@
   <component name="ChangeListManager">
     <list default="true" id="b8ed92a8-e9d2-457f-9a81-ceb035a0f772" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/../client/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../client/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/onitama/game.py" beforeDir="false" afterPath="$PROJECT_DIR$/../client/onitama/game.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../client/onitama/network.py" beforeDir="false" afterPath="$PROJECT_DIR$/../client/onitama/network.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/onitama/components.py" beforeDir="false" afterPath="$PROJECT_DIR$/../client/onitama/components.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/onitama/engine.py" beforeDir="false" afterPath="$PROJECT_DIR$/../client/onitama/engine.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../client/onitama/parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/../client/onitama/parser.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Game.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Game.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Game.h" beforeDir="false" afterPath="$PROJECT_DIR$/Game.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Parser.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Parser.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/server.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Card.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Card.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Card.h" beforeDir="false" afterPath="$PROJECT_DIR$/Card.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Command.h" beforeDir="false" afterPath="$PROJECT_DIR$/Command.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server" beforeDir="false" afterPath="$PROJECT_DIR$/server" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -190,6 +190,8 @@
       <workItem from="1672829947959" duration="6640000" />
       <workItem from="1672865775735" duration="105000" />
       <workItem from="1672904474849" duration="6073000" />
+      <workItem from="1672951894958" duration="1738000" />
+      <workItem from="1673004088516" duration="492000" />
     </task>
     <servers />
   </component>

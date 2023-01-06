@@ -9,11 +9,20 @@ END = '\0'
 Enum of possible valid commands used in communication. Some of them are for client and some for server.
 """
 class Cmd(Enum):
-    # Client side
+    """
+     Client side
+    """
+    # Try login with username
     LOGIN = "LOGIN"
+    # Send move to validating (piece + card)
     MAKE_MOVE = "MAKE_MOVE"
+    # Pass turn if possible (only card)
     MAKE_PASS = "MAKE_PASS"
-    # Server side
+
+    """
+    Server side
+    """
+    #
     WAITING = "WAITING"
     FAILED = "FAILED"
     START = "START"

@@ -6,10 +6,14 @@
   <component name="ChangeListManager">
     <list default="true" id="7ed4caa7-b1dd-4fb1-b7fb-f959700d601e" name="Changes" comment="Add source link to cards and docs folder">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/onitama/game.py" beforeDir="false" afterPath="$PROJECT_DIR$/onitama/game.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/onitama/network.py" beforeDir="false" afterPath="$PROJECT_DIR$/onitama/network.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/onitama/components.py" beforeDir="false" afterPath="$PROJECT_DIR$/onitama/components.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/onitama/engine.py" beforeDir="false" afterPath="$PROJECT_DIR$/onitama/engine.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/onitama/parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/onitama/parser.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../server/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../server/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server/Card.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../server/Card.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server/Card.h" beforeDir="false" afterPath="$PROJECT_DIR$/../server/Card.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server/Command.h" beforeDir="false" afterPath="$PROJECT_DIR$/../server/Command.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../server/server" beforeDir="false" afterPath="$PROJECT_DIR$/../server/server" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -246,6 +250,7 @@
       <workItem from="1672829947332" duration="8290000" />
       <workItem from="1672865776858" duration="106000" />
       <workItem from="1672904475572" duration="4500000" />
+      <workItem from="1672952967725" duration="903000" />
     </task>
     <task id="LOCAL-00001" summary="Everything is working offline on one machinie yupii, needs to verify winning still">
       <created>1668450646046</created>

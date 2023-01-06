@@ -4,15 +4,27 @@
 #include <string>
 #include <map>
 
-
+// Standard namespace
 using namespace std;
 
+/**
+ * Includes all commands used in TCP protocol.
+ * Some of them are send by client, others by server.
+ */
 enum Cmd {
-    // Client side
+    /**
+     * Client side
+     */
+    // Try login with username
     LOGIN,
+    // Send move to validating (piece + card)
     MAKE_MOVE,
+    // Pass turn if possible (only card)
     MAKE_PASS,
-    // Server side
+
+    /**
+     * Server side
+     */
     WAITING,
     FAILED,
     START,
@@ -23,6 +35,7 @@ enum Cmd {
     RECONNECT,
     DISCONNECT,
     PING,
+    // Used only for method is is_enum (iterating though enums).
     LAST,
 };
 
