@@ -12,9 +12,9 @@ map<Cmd,string> Command::enum_map = map<Cmd,string>{
         {Cmd::MOVE_WAS_MADE , "MOVE_WAS_MADE"},
         {Cmd::PASS_WAS_MADE , "PASS_WAS_MADE"},
         {Cmd::INVALID_MOVE ,  "INVALID_MOVE"},
-        {Cmd::GAME_OVER ,     "GAME_OVER"},
-        {Cmd::RECONNECT ,     "RECONNECT"},
         {Cmd::DISCONNECT ,    "DISCONNECT"},
+        {Cmd::RECONNECT ,     "RECONNECT"},
+        {Cmd::GAME_OVER ,     "GAME_OVER"},
         {Cmd::PING,           "PING"},
         {Cmd::LAST,           "LAST"}
 };

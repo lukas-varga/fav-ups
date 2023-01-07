@@ -36,12 +36,12 @@ enum Cmd {
     PASS_WAS_MADE,
     // Provided move was incorrect for some reason. The reason is showed in second parameter. Player plays again.
     INVALID_MOVE,
-    // Game ended. Either by taking opponent king or moving my own king to opponent king's start square.
-    GAME_OVER,
-    // Reconnect to game occurred. Reconnected player get all the game state info. Paused player get only notification.
-    RECONNECT,
     // Player was notified that opponent disconnected from the game. He can reconnect in certain amount of time.
     DISCONNECT,
+    // Reconnect to game occurred. Reconnected player get all the game state info. Paused player get only notification.
+    RECONNECT,
+    // Game ended. Either by taking opponent king or moving my own king to opponent king's start square.
+    GAME_OVER,
     // Ping message which is sent by clients and server respond by pinging back. Occur every few seconds.
     PING,
     // Used only for method is is_enum (iterating though enums).

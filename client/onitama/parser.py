@@ -34,12 +34,12 @@ class Cmd(Enum):
     PASS_WAS_MADE = "PASS_WAS_MADE"
     # Provided move was incorrect for some reason. The reason is showed in second parameter. Player plays again.
     INVALID_MOVE = "INVALID_MOVE"
-    # Game ended. Either by taking opponent king or moving my own king to opponent king's start square.
-    GAME_OVER = "GAME_OVER"
-    # Reconnect to game occurred. Reconnected player get all the game state info. Paused player get only notification.
-    RECONNECT = "RECONNECT"
     # Player was notified that opponent disconnected from the game. He can reconnect in certain amount of time.
     DISCONNECT = "DISCONNECT"
+    # Reconnect to game occurred. Reconnected player get all the game state info. Paused player get only notification.
+    RECONNECT = "RECONNECT"
+    # Game ended. Either by taking opponent king or moving my own king to opponent king's start square.
+    GAME_OVER = "GAME_OVER"
     # Ping message which is sent by clients and server respond by pinging back. Occur every few seconds.
     PING = "PING"
 

@@ -192,11 +192,11 @@ class GameState:
         elif rec_data[1] == "0":
             white_to_move_rec = False
 
-        cards_rec = rec_data[2:]
+        rec_board = rec_data[2:]
         if (
                 (is_player_white_rec and self.white_name == self.player_name) or
                 (not is_player_white_rec and self.black_name == self.player_name)
-        ) and len(cards_rec) == 25:
+        ) and len(rec_board) == 25:
             # Right player to play BOOL + CURR_P
             self.curr_p = self.white_name if white_to_move_rec else self.black_name
             self.white_to_move = white_to_move_rec
@@ -205,7 +205,7 @@ class GameState:
             i = 0
             for r in range(len(self.board)):
                 for c in range(len(self.board[r])):
-                    self.board[r][c] = cards_rec[i]
+                    self.board[r][c] = rec_board[i]
                     i += 1
 
         else:
