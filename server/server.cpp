@@ -87,11 +87,11 @@ int main(int argc, char **argv) {
     // Timeout for Select
     timeval timeout{};
     // After this timeout, sockets are closed
-    const long TIMEOUT_SEC = 15;
-    // Milliseconds for disconnect 15s MILLIS
-    const double MAX_DISCONNECT = 15 * 1000;
-    // Milliseconds for removing 60s MILLIS
-    const double MAX_REMOVE = 60 * 1000;
+    const long TIMEOUT_SEC = 30;
+    // Milliseconds for disconnect 30s MILLIS
+    const double MAX_DISCONNECT = 30 * 1000;
+    // Milliseconds for removing 90s MILLIS
+    const double MAX_REMOVE = 90 * 1000;
 
 
     //  Socket initials
