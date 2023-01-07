@@ -68,7 +68,7 @@ public:
      * @param st_col col of starting position
      * @param end_row row of ending position
      * @param end_col col of ending position
-     * @return true if move is correct, false otherwise
+     * @return Return true if move is correct, false otherwise.
      */
     bool check_move(const string& card, int st_row, int st_col, int end_row, int end_col);
 
@@ -116,12 +116,12 @@ public:
 
     /**
      * Check win conditions and return accordingly.
-     * @return true if game is over, false if players still plays
+     * @return Return true if game is over, false if players still plays.
      */
     bool is_end();
 
     /**
-     * After game over is encountered, game ends and both players needs to be informed about who won the game.
+     * After game over event is encountered, game ends and both players needs to be informed about who won the game.
      */
     void game_over();
 };

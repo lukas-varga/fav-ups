@@ -24,11 +24,30 @@
 #include <cctype>
 
 
+// Standard namespace
 using namespace std;
+// Namespace for time
 using namespace std::chrono;
 
+/**
+ * Free the memory by deleting pointers on game exit (error socket)
+ * @param GAME_NUM total number of games available
+ * @param game_arr array with references to all games (including empty games)
+ * @param CLIENT_NUM total number of client (2 * GAME_NUM)
+ * @param player_arr array with references to all player (even empty slots)
+ * @param lobby pointer to lobby object
+ * @param client_socks set of client sockets for communication
+ */
 void free_on_exit(int GAME_NUM, Game * game_arr[], int CLIENT_NUM, Player * player_arr[], Lobby * lobby, fd_set & client_socks);
 
+
+/**
+ * Main server loop which uses select to handles multi client communication. No threads are created.
+ * When server receive messages from client, it is parsed and then taken care of here.
+ * @param argc number of starting parameters
+ * @param argv parameters itself
+ * @return Return from the program on exit.
+ */
 int main(int argc, char **argv) {
     if (argc != 3) {
         cout << "Please enter server arguments: <port> <num_players>" << endl;

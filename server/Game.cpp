@@ -36,6 +36,7 @@ void Game::init() {
 }
 
 void Game::enter_game(Player * player){
+    // Black player slot available
     if (black_p == nullptr){
         black_p = player;
 
@@ -49,6 +50,7 @@ void Game::enter_game(Player * player){
 
         cout << "Player1 (Black) " << player->user << " has entered lobby!" << endl;
     }
+    // White player slot available
     else if(white_p == nullptr){
         white_p = player;
 
@@ -64,7 +66,6 @@ void Game::enter_game(Player * player){
 
         // GAME started
         start_game();
-        is_active = true;
     }
 }
 
@@ -95,6 +96,7 @@ void Game::start_game(){
     Parser::send_log(white_p->sock, send_text);
     white_p->state = State_Machine::allowed_transition(white_p->state, Event::EV_PLAY);
 
+    is_active = true;
     white_to_move = true;
     curr_p = white_p;
     cout << "Game started with id: " << game_id << endl;
