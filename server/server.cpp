@@ -54,7 +54,7 @@ int main(int argc, char **argv) {
         exit(0);
     }
 
-    // Check ip by: hostname --ip-address
+    // Check ip by: hostname -I OR ip a OR ifconfig
     int port, num_players;
     try {
         port = stoi(argv[1]);
@@ -88,9 +88,9 @@ int main(int argc, char **argv) {
     timeval timeout{};
     // After this timeout, sockets are closed
     const long TIMEOUT_SEC = 30;
-    // Milliseconds for disconnect 30s MILLIS
+    // Milliseconds for disconnect 30s * MILLIS
     const double MAX_DISCONNECT = 30 * 1000;
-    // Milliseconds for removing 90s MILLIS
+    // Milliseconds for removing 90 * MILLIS
     const double MAX_REMOVE = 90 * 1000;
 
 
@@ -468,10 +468,12 @@ int main(int argc, char **argv) {
                         // Message is too long -> disconnect completely
                         else if (a2read > MAX_INPUT) {
                             lobby->disconnect_completely(GAME_NUM, game_arr, player, client_socks);
+                            cout << "Message too long - disconnected!" << endl;
                         }
                         // Na socketu se stalo neco spatneho -> disconnect partly with reconnect
                         else {
                             lobby->disconnect_partly(GAME_NUM, game_arr, player, client_socks);
+                            cout << "Something wrong happened on socket!" << endl;
                         }
                     }
                 }

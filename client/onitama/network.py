@@ -30,9 +30,9 @@ class Network(object):
         # Ping sent
         self.can_ping = True
         # Ping in seconds
-        self.PING_TIME = 15
+        self.PING_TIME = 10
         # Ping in seconds
-        self.MAX_TIMEOUT = 25
+        self.MAX_TIMEOUT = 20
 
         # Not to block server
         # self.server.setblocking(False)
