@@ -59,7 +59,7 @@ int main(int argc, char **argv) {
     try {
         port = stoi(argv[1]);
         num_players = stoi(argv[2]);
-        if (num_players < 2 or num_players > 1000) {
+        if (num_players < 2 or num_players > 100) {
             throw exception();
         }
         if (port < 0 or port > 65535) {
@@ -68,7 +68,7 @@ int main(int argc, char **argv) {
     }
     catch (const exception &exc) {
         cerr << exc.what() << endl;
-        cout << "Port must be in (0, 65535) and Num of players must be (2, 1000)-> Exiting" << endl;
+        cout << "Port must be in (0, 65535) and Num of players must be (2, 100)-> Exiting" << endl;
         exit(0);
     }
 
