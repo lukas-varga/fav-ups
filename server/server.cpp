@@ -59,7 +59,7 @@ int main(int argc, char **argv) {
     try {
         port = stoi(argv[1]);
         num_players = stoi(argv[2]);
-        if (num_players < 2) {
+        if (num_players < 2 or num_players > 1000) {
             throw exception();
         }
         if (port < 0 or port > 65535) {
@@ -68,7 +68,7 @@ int main(int argc, char **argv) {
     }
     catch (const exception &exc) {
         cerr << exc.what() << endl;
-        cout << "Num of players must be >2 and port must be in (0, 65535) -> Exiting" << endl;
+        cout << "Port must be in (0, 65535) and Num of players must be (2, 1000)-> Exiting" << endl;
         exit(0);
     }
 
@@ -122,6 +122,16 @@ int main(int argc, char **argv) {
     my_addr.sin_family = AF_INET;
     my_addr.sin_port = htons(port);
     my_addr.sin_addr.s_addr = INADDR_ANY;
+
+    const int enable = 1;
+    ret_val = setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int));
+    if (ret_val == 0)
+        printf("Address - OK\n");
+    else {
+        free_on_exit(GAME_NUM, game_arr, CLIENT_NUM, player_arr, lobby, client_socks);
+        printf("Address - ERR\n");
+        return -1;
+    }
 
     server_len = sizeof(my_addr);
     ret_val = bind(server_socket, (struct sockaddr *) &my_addr, server_len);
